@@ -29,6 +29,7 @@ noinst_LTLIBRARIES=libsim.la
 
 libsim_la_SOURCES = \
   adcpin.cpp application.cpp at4433.cpp at8515.cpp atmega48.cpp atmega128.cpp \
+  atmega668base.cpp \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp gdbserver.cpp hardware.cpp helper.cpp \
   hwacomp.cpp hwad.cpp hweeprom.cpp hwextirq.cpp hwmega48extirq.cpp \
@@ -47,6 +48,7 @@ libsimulavr_la_LIBADD = $(libsim_la_OBJECTS) -lz \
 
 pkginclude_HEADERS = \
   adcpin.h application.h at4433.h at8515.h atmega48.h atmega128.h avrdevice.h \
+  atmega668base.h atmega88.h atmega168.h \
   avrdevice_impl.h avrerror.h avrfactory.h avrmalloc.h breakpoint.h \
   config_deprecated.h decoder.h externaltype.h flash.h \
   funktor.h hwacomp.h hwad.h hweeprom.h hwextirq.h hwmega48extirq.h \

@@ -29,6 +29,8 @@
 #include "at4433.h"
 #include "at8515.h"
 #include "atmega48.h"
+#include "atmega88.h"
+#include "atmega168.h"
 #include "atmega128.h"
 #include "avrfactory.h"
 
@@ -46,6 +48,10 @@ AvrDevice* AvrFactory::makeDevice(const char *device) {
         return new AvrDevice_at90s8515();
     if (c == "atmega48")
         return new AvrDevice_atmega48();
+    if (c == "atmega88")
+        return new AvrDevice_atmega88();
+    if (c == "atmega168")
+        return new AvrDevice_atmega168();
     if (c == "atmega128")
         return new AvrDevice_atmega128();
     else {
