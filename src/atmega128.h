@@ -41,8 +41,8 @@
 
 #include "ioregs.h" //only for rampz here
 
-//! AVRDevice class for ATMega128
-class AvrDevice_atmega128: public AvrDevice {
+//! AVRDevice class for ATMega64 and ATMega128
+class AvrDevice_atmega128base: public AvrDevice {
     
     public:
         HWPort *porta;                  //!< port A
@@ -81,8 +81,22 @@ class AvrDevice_atmega128: public AvrDevice {
         HWUsart *usart0;                //!< usart 0 unit
         HWUsart *usart1;                //!< usart 1 unit
 
-        AvrDevice_atmega128();
-        ~AvrDevice_atmega128(); 
+        AvrDevice_atmega128base(unsigned flash_bytes, unsigned ee_bytes);
+        ~AvrDevice_atmega128base(); 
+};
+
+//! AVR device class for ATMega64, see AvrDevice_atmega128base.
+class AvrDevice_atmega64: public AvrDevice_atmega128base {
+    public:
+        //! Creates the device for ATMega64, see AvrDevice_atmega128base.
+        AvrDevice_atmega64() : AvrDevice_atmega128base(64 * 1024, 2 * 1024) {}
+};
+
+//! AVR device class for ATMega128, see AvrDevice_atmega128base.
+class AvrDevice_atmega128: public AvrDevice_atmega128base {
+    public:
+        //! Creates the device for ATMega128, see AvrDevice_atmega128base.
+        AvrDevice_atmega128() : AvrDevice_atmega128base(128 * 1024, 4 * 1024) {}
 };
 
 #endif

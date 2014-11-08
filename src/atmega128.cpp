@@ -36,9 +36,10 @@
 
 #include "avrfactory.h"
 
+AVR_REGISTER(atmega64, AvrDevice_atmega64)
 AVR_REGISTER(atmega128, AvrDevice_atmega128)
 
-AvrDevice_atmega128::~AvrDevice_atmega128() {
+AvrDevice_atmega128base::~AvrDevice_atmega128base() {
     delete acomp;
     delete timer3;
     delete inputCapture3;
@@ -64,7 +65,7 @@ AvrDevice_atmega128::~AvrDevice_atmega128() {
     delete aref;
     delete admux;
     delete sfior_reg;
-    delete rampz;
+    if(rampz != NULL) delete rampz;
     delete portg;
     delete portf;
     delete porte;
@@ -79,13 +80,19 @@ AvrDevice_atmega128::~AvrDevice_atmega128() {
     delete irqSystem;
 }
 
-AvrDevice_atmega128::AvrDevice_atmega128():
-    AvrDevice(224, 4096, 0xef00, 256*1024)
+AvrDevice_atmega128base::AvrDevice_atmega128base(unsigned flash_bytes,
+                                                 unsigned ee_bytes):
+    AvrDevice(224, 4096, 0xef00, flash_bytes)
 {
-    flagELPMInstructions = true;
+    // detect ATMega128 configuration
+    bool is_m128 = (flash_bytes == 128 * 1024);
+    if(is_m128)
+        flagELPMInstructions = true;
+    else
+        flagELPMInstructions = false;
     fuses->SetFuseConfiguration(18, 0xfd99e1);
     irqSystem = new HWIrqSystem(this, 4, 35); //4 bytes per vector, 35 vectors
-    eeprom = new HWEeprom( this, irqSystem, 4096, 22); 
+    eeprom = new HWEeprom( this, irqSystem, ee_bytes, 22); 
     stack = new HWStackSram(this, 16);
     xdiv_reg = new XDIVRegister(this, &coreTraceGroup);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V3);
@@ -95,9 +102,12 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     portd = new HWPort(this, "D");
     porte = new HWPort(this, "E");
     portf = new HWPort(this, "F");
-    portg = new HWPort(this, "G");
+    portg = new HWPort(this, "G", false, 5);
 
-    rampz = new AddressExtensionRegister(this, "RAMPZ", 1);
+    if(is_m128)
+        rampz = new AddressExtensionRegister(this, "RAMPZ", 1);
+    else
+        rampz = NULL;
 
     sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
 
@@ -106,7 +116,7 @@ AvrDevice_atmega128::AvrDevice_atmega128():
                                  &portf->GetPin(6), &portf->GetPin(7));
     aref = new HWARef4(this, HWARef4::REFTYPE_NOBG);
     // vector 21 ADConversion Complete
-    ad = new HWAd(this, HWAd::AD_M128, irqSystem, 21, admux, aref);
+    ad = new HWAd(this, (is_m128) ? HWAd::AD_M128 : HWAd::AD_M64, irqSystem, 21, admux, aref);
 
     spi = new HWSpi(this, irqSystem,
             PinAtPort(portb, 2), PinAtPort(portb, 3), PinAtPort(portb, 1),
@@ -208,7 +218,10 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     rw[0x95]= & usart0->ucsrc_reg;
     // 0x94 - 0x91 reserved
     rw[0x90]= & usart0->ubrrhi_reg;
-    // 0x8f - 0x8d reserved
+    // 0x8f reserved
+    if(!is_m128)
+        rw[0x8e]= & ad->adcsrb_reg;
+    // 0x8d reserved
     rw[0x8c]= & timer3->tccrc_reg;
     rw[0x8b]= & timer3->tccra_reg;
     rw[0x8a]= & timer3->tccrb_reg;
@@ -237,7 +250,6 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     rw[0x65]= & portg->port_reg;
     rw[0x64]= & portg->ddr_reg;
     rw[0x63]= & portg->pin_reg;
-    
     rw[0x62]= & portf->port_reg;
     rw[0x61]= & portf->ddr_reg;
     
@@ -245,8 +257,8 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
     rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
     rw[0x5c]= xdiv_reg;
-    rw[0x5b]= & rampz->ext_reg;
-
+    if(is_m128)
+        rw[0x5b]= & rampz->ext_reg;
     rw[0x5a]= eicrb_reg;
     rw[0x59]= eimsk_reg;
     rw[0x58]= eifr_reg;
@@ -278,27 +290,21 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     rw[0x3e]= & eeprom->eearl_reg;
     rw[0x3d]= & eeprom->eedr_reg;
     rw[0x3c]= & eeprom->eecr_reg;
-
     rw[0x3b]= & porta->port_reg;
     rw[0x3a]= & porta->ddr_reg;
     rw[0x39]= & porta->pin_reg;
-
     rw[0x38]= & portb->port_reg;
     rw[0x37]= & portb->ddr_reg;
     rw[0x36]= & portb->pin_reg;
-
     rw[0x35]= & portc->port_reg;
     rw[0x34]= & portc->ddr_reg;
     rw[0x33]= & portc->pin_reg;
-
     rw[0x32]= & portd->port_reg;
     rw[0x31]= & portd->ddr_reg;
     rw[0x30]= & portd->pin_reg;
-
     rw[0x2f]= & spi->spdr_reg;
     rw[0x2e]= & spi->spsr_reg;
     rw[0x2d]= & spi->spcr_reg;
-
     rw[0x2c]= & usart0->udr_reg;
     rw[0x2b]= & usart0->ucsra_reg;
     rw[0x2a]= & usart0->ucsrb_reg;
@@ -308,11 +314,9 @@ AvrDevice_atmega128::AvrDevice_atmega128():
     rw[0x26]= & ad->adcsra_reg;
     rw[0x25]= & ad->adch_reg;
     rw[0x24]= & ad->adcl_reg;
-
     rw[0x23]= & porte->port_reg;
     rw[0x22]= & porte->ddr_reg;
     rw[0x21]= & porte->pin_reg;
-
     rw[0x20]= & portf->pin_reg;
 
     Reset();
