@@ -47,7 +47,7 @@ lib_LTLIBRARIES += libsim.la
 libsim_la_SOURCES = \
   at4433.cpp at8515.cpp atmega668base.cpp atmega128.cpp at90canbase.cpp \
   atmega8.cpp atmega1284abase.cpp atmega2560base.cpp attiny25_45_85.cpp atmega16_32.cpp \
-  attiny2313.cpp adcpin.cpp application.cpp externalirq.cpp \
+  attiny2313.cpp adcpin.cpp application.cpp externalirq.cpp hwusi.cpp \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp flashprog.cpp hardware.cpp helper.cpp cmd/gdbserver.cpp \
   hwacomp.cpp hwad.cpp hweeprom.cpp avrsignature.cpp avrreadelf.cpp cmd/dumpargs.cpp \
@@ -77,7 +77,7 @@ pkginclude_HEADERS = \
   adcpin.h application.h at4433.h at8515.h atmega128.h atmega16_32.h attiny2313.h \
   at90canbase.h atmega8.h attiny25_45_85.h atmega668base.h atmega1284abase.h atmega2560base.h avrdevice.h \
   externalirq.h hardware.h helper.h avrdevice_impl.h avrerror.h avrfactory.h avrmalloc.h \
-  string2.h decoder.h externaltype.h flash.h flashprog.h hwdecls.h \
+  string2.h decoder.h externaltype.h flash.h flashprog.h hwdecls.h hwusi.h \
   funktor.h hwacomp.h hwad.h hweeprom.h string2_template.h hwpinchange.h \
   hwport.h hwspi.h hwsreg.h hwstack.h hwuart.h hwwado.h ioregs.h irqsystem.h \
   memory.h net.h pin.h pinatport.h pinnotify.h pinmon.h printable.h rwmem.h \
@@ -111,12 +111,11 @@ install-vpi:
 
 endif
 
-TCLHEADER = avrdevice.h at8515.h atmega128.h at4433.h cmd/gdb.h hardware.h \
-    ui/keyboard.h ui/lcd.h net.h pin.h ui/extpin.h ui/keyboard.h rwmem.h \
-    ui/scope.h ui/serialrx.h ui/serialtx.h systemclock.h systemclocktypes.h \
+TCLHEADER = \
+    ui/keyboard.h ui/lcd.h ui/extpin.h ui/keyboard.h ui/scope.h ui/serialrx.h ui/serialtx.h \
     ui/ui.h
 
-simulavr_wrap.cxx: simulavr.i $(TCLHEADER)
+simulavr_wrap.cxx: simulavr.i $(pkginclude_HEADERS) $(TCLHEADER)
 	@SWIG@ -o $@ $(srcdir)/simulavr.i
 
 simulavr_wrap.lo: simulavr_wrap.cxx

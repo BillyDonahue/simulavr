@@ -29,16 +29,21 @@
 class HWPort;
 class Pin;
 
+/*! PinAtPort is a wrapper class to get internal access to a dedicated pin on a port
+  and to control especially the alternate functionality for a port pin */
 class PinAtPort {
     protected:
         HWPort *port;
         unsigned char pinNo;
+        int regID;
 
     public:
-        PinAtPort(); //dummy only used by admux !!!!!
         PinAtPort( HWPort *p, unsigned char pn);
         void SetPort(bool val);
         void SetDdr(bool val); 
+
+        void SetAlternatePullup(bool val);
+        void SetUseAlternatePullup(bool val);
 
         void SetAlternateDdr(bool val);
         void SetUseAlternateDdr(bool val);
@@ -50,11 +55,6 @@ class PinAtPort {
 
         bool GetPort();
         bool GetDdr(); 
-        bool GetAlternateDdr();
-        bool GetUseAlterateDdr(); 
-        bool GetAlternatePort(); 
-        bool GetUseAlternatePort(); 
-        bool GetUseAlternatePortIfDdrSet(); 
         Pin& GetPin();
 
         operator bool(); 

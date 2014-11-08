@@ -26,16 +26,11 @@
 #include "pinatport.h"
 #include "hwport.h"
 
-#include <iostream>
-using namespace std;
-PinAtPort::PinAtPort() { 
-    cerr << "Dummy Pin At Port" << endl;
-}
-
 PinAtPort::PinAtPort( HWPort *p, unsigned char pn)
 {
-    port=p;
-    pinNo=pn;
+    port = p;
+    pinNo = pn;
+    regID = port->p[pn].RegisterAlternateUse();
 }
 
 Pin& PinAtPort::GetPin() {
@@ -43,7 +38,7 @@ Pin& PinAtPort::GetPin() {
 }
 
 void PinAtPort::SetPort(bool val) {
-    unsigned char *adr=&port->port;
+    unsigned char *adr = &port->port;
     SetVal(adr, val);
     port->CalcOutputs();
 }
@@ -53,38 +48,43 @@ float PinAtPort::GetAnalogValue(float vcc) {
 }
 
 void PinAtPort::SetDdr(bool val) {
-    unsigned char *adr=&port->ddr;
+    unsigned char *adr = &port->ddr;
     SetVal(adr, val);
+    port->CalcOutputs();
+}
+
+void PinAtPort::SetAlternatePullup(bool val){
+    port->p[pinNo].SetPUOV(val, regID);
+    port->CalcOutputs();
+}
+
+void PinAtPort::SetUseAlternatePullup(bool val) {
+    port->p[pinNo].SetPUOE(val, regID);
     port->CalcOutputs();
 }
 
 void PinAtPort::SetAlternateDdr(bool val){
-    unsigned char *adr=&port->alternateDdr;
-    SetVal(adr, val);
+    port->p[pinNo].SetDDOV(val, regID);
     port->CalcOutputs();
 }
 
 void PinAtPort::SetUseAlternateDdr(bool val) {
-    unsigned char *adr=&port->useAlternateDdr;
-    SetVal(adr, val);
+    port->p[pinNo].SetDDOE(val, regID);
     port->CalcOutputs();
 }
 
 void PinAtPort::SetAlternatePort(bool val) {
-    unsigned char *adr=&port->alternatePort;
-    SetVal(adr, val);
+    port->p[pinNo].SetPVOV(val, regID);
     port->CalcOutputs();
 }
 
 void PinAtPort::SetUseAlternatePort(bool val) {
-    unsigned char *adr=&port->useAlternatePort;
-    SetVal(adr, val);
+    port->p[pinNo].SetPVOE(val, regID);
     port->CalcOutputs();
 }
 
 void PinAtPort::SetUseAlternatePortIfDdrSet(bool val) {
-    unsigned char *adr=&port->useAlternatePortIfDdrSet;
-    SetVal(adr, val);
+    port->p[pinNo].SetPVOE_WithDDR(val, regID);
     port->CalcOutputs();
 }
 
@@ -96,34 +96,16 @@ bool PinAtPort::GetDdr() {
     return (port->ddr >> pinNo) & 1;
 }
 
-bool PinAtPort::GetAlternateDdr(){
-    return (port->alternateDdr >> pinNo) & 1;
-}
-
-bool PinAtPort::GetUseAlterateDdr() {
-    return (port->useAlternateDdr >> pinNo) & 1;
-} 
-
-bool PinAtPort::GetAlternatePort() {
-    return (port->alternatePort >> pinNo) & 1;
-}
-
-bool PinAtPort::GetUseAlternatePort() {
-    return (port->useAlternatePort >> pinNo) & 1;
-}
-
-bool PinAtPort::GetUseAlternatePortIfDdrSet() {
-    return (port->useAlternatePortIfDdrSet >> pinNo) & 1;
-}
-
 PinAtPort::operator bool() {
-    return ((port->GetPin())>>pinNo)&0x01;
+    return ((port->GetPin()) >> pinNo) & 0x01;
 } //we must use GetPin to recalculate the Pin from p[] array
 
 void PinAtPort::SetVal( unsigned char *adr, bool val) {
     if (val) {
-        *adr|=(1<<pinNo);
+        *adr |= (1 << pinNo);
     } else {
-        *adr&=~(1<<pinNo);
+        *adr &= ~(1 << pinNo);
     }
 }
+
+/* EOF*/

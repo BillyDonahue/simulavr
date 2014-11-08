@@ -133,6 +133,12 @@ namespace std {
 }
 
 %include "pinatport.h"
+%extend PinAtPort {
+  bool GetPinInput(void) {
+    return (bool)*$self;
+  }
+}
+
 %include "net.h"
 
 %feature("director") RWMemoryMember;

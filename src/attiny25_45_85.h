@@ -36,6 +36,7 @@
 #include "hwuart.h"
 #include "hwad.h"
 #include "hwacomp.h"
+#include "hwusi.h"
 
 //! AVRDevice class for ATTiny25/45/85
 class AvrDevice_attinyX5: public AvrDevice {
@@ -66,6 +67,7 @@ class AvrDevice_attinyX5: public AvrDevice {
         HWARef            *aref;        //!< adc reference unit
         HWAd              *ad;          //!< adc unit
         HWAcomp           *acomp;       //!< analog compare unit
+        HWUSI_BR          *usi;         //!< usi unit
 
         /*! Creates the device for ATMega48/88/168/328
           @param ram_bytes how much SRAM does the device own

@@ -48,7 +48,8 @@ BasicTimerUnit::BasicTimerUnit(AvrDevice *core,
     premx(p),
     timerOverflow(tov),
     timerCapture(tcap),
-    icapSource(icapsrc)
+    icapSource(icapsrc),
+    eventListener(NULL)
 {
     // check counter size and set limit_max
     if(countersize != 8 && countersize != 16)
@@ -483,6 +484,11 @@ void BasicTimerUnit::WGMfunc_pcpwm(CEtype event) {
         default:
             break;
     }
+}
+
+void BasicTimerUnit::HandleEvent(CEtype event) {
+    (this->*wgmfunc[wgm])(event);
+    if(eventListener != NULL) eventListener->fireEvent(event);
 }
 
 void BasicTimerUnit::WGMfunc_pfcpwm(CEtype event) {
