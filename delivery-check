@@ -37,7 +37,10 @@ PAYLOAD:
 import sys
 import os
 import optparse
-import io
+if sys.version_info[0] == 3:
+  import io
+else:
+  import StringIO as io
 
 def readArgs():
   def _f(flg):
@@ -120,40 +123,11 @@ file."""
   return opts
 
 _text_func_wh = """function writehtml() {
-  # get and save tool versions
-  echo "[versions]" >> %(wa)s/log/log.cfg
-  echo "tools=os bash automake autoconf libtool gcc avrgcc swig python tclsh" >> %(wa)s/log/log.cfg
-  echo "bash=`bash --version | head -1`" >> %(wa)s/log/log.cfg
-  echo "bash-text=Shell (bash)" >> %(wa)s/log/log.cfg
-  echo "os=`uname -srvm`" >> %(wa)s/log/log.cfg
-  echo "os-text=OS" >> %(wa)s/log/log.cfg
-  echo "automake=`automake --version | head -1`" >> %(wa)s/log/log.cfg
-  echo "automake-text=Automake" >> %(wa)s/log/log.cfg
-  echo "autoconf=`autoconf --version | head -1`" >> %(wa)s/log/log.cfg
-  echo "autoconf-text=Autoconf" >> %(wa)s/log/log.cfg
-  if [ "`uname -s`" = "Darwin" -a -n "`which glibtool 2> /dev/null`" ]; then
-    echo "libtool=`glibtool --version | head -1`" >> %(wa)s/log/log.cfg
-    echo "libtool-text=Glibtool (Darwin)" >> %(wa)s/log/log.cfg
-  else
-    echo "libtool=`libtool --version | head -1`" >> %(wa)s/log/log.cfg
-    echo "libtool-text=Libtool" >> %(wa)s/log/log.cfg
-  fi
-  echo "gcc=`gcc --version | head -1`" >> %(wa)s/log/log.cfg
-  echo "gcc-text=GCC" >> %(wa)s/log/log.cfg
-  echo "avrgcc=`avr-gcc --version | head -1`" >> %(wa)s/log/log.cfg
-  echo "avrgcc-text=AVR-GCC" >> %(wa)s/log/log.cfg
-  echo "swig=`swig -version | awk '/.+/{print $0}' | head -3 | tr '\\n' ' '`" >> %(wa)s/log/log.cfg
-  echo "swig-text=SWIG" >> %(wa)s/log/log.cfg
-  echo "python=`python -c 'import sys; print(sys.version)' | tr '\\n' ' '`" >> %(wa)s/log/log.cfg
-  echo "python-text=Python" >> %(wa)s/log/log.cfg
-  echo "tclsh=`echo 'puts $tcl_patchLevel; exit' | tclsh`" >> %(wa)s/log/log.cfg
-  echo "tclsh-text=Tclsh" >> %(wa)s/log/log.cfg
-  echo "" >> %(wa)s/log/log.cfg
-
   # write global data
   echo "[global]" >> %(wa)s/log/log.cfg
   echo "output=%(wa)s/log" >> %(wa)s/log/log.cfg
   echo "repo-work=%(wa)s/repo" >> %(wa)s/log/log.cfg
+  echo "versions=%(wa)s/repo/check-versions.out" >> %(wa)s/log/log.cfg
   echo "repo=%(url)s" >> %(wa)s/log/log.cfg
   echo "branch=%(br)s" >> %(wa)s/log/log.cfg
   echo "start=$LOG_DATE_START" >> %(wa)s/log/log.cfg

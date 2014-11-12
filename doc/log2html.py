@@ -101,16 +101,46 @@ class XMLPage(object):
     if self.cfg.has_option(section, "result"): res = self.cfg.get(section, "result")
     self.add(r, "td", { "class": "tbl-data right-align" }, res)
 
+  def __options2keys(self, opts):
+    res = list()
+    for o in opts:
+      k = o.split(".")[0]
+      if not k in res: res.append(k)
+    return res
+
+  def __options2list(self, cfg, section):
+    res = list()
+    keys = self.__options2keys(cfg.options(section))
+    for k in keys:
+      t = cfg.get(section, k + ".text")
+      v = cfg.get(section, k + ".value")
+      o = k + ".order"
+      if o in cfg.options(section):
+        try:
+          o = int(cfg.get(section, o))
+        except:
+          o = 99
+      else:
+        o = 100
+      res.append((t, v, o))
+    def _s(a, b):
+      a = a[2]
+      b = b[2]
+      if a > b: return 1
+      if a < b: return -1
+      return 0
+    res.sort(_s)
+    return res
+
   def addVersions(self, root, title):
-    if not self.cfg.has_section("versions"): return
-    if not self.cfg.has_option("versions", "tools"): return
-    t = self.addTable(root, title)
-    for item in self.cfg.get("versions", "tools").split():
-      if not self.cfg.has_option("versions", item) or not self.cfg.has_option("versions", item + "-text"):
-        continue
-      ver = self.cfg.get("versions", item)
-      txt = self.cfg.get("versions", item + "-text")
-      self.addOverviewRow(t, txt, ver)
+    p = self.cfg.get("global", "output")
+    c = ConfigParser.ConfigParser()
+    if not len(c.read(os.path.join(p, "versions.cfg"))) == 1: return
+    if not "primary" in c.sections(): return
+    if not "configured" in c.sections(): return
+    tbl = self.addTable(root, title)
+    for t, v, o in self.__options2list(c, "primary"): self.addOverviewRow(tbl, t, v)
+    for t, v, o in self.__options2list(c, "configured"): self.addOverviewRow(tbl, t, v)
 
 def createIndex(cfg):
   p = XMLPage(cfg, "index.html", "Simulavr build check report")
@@ -155,10 +185,13 @@ def createIndex(cfg):
 def copyUtilityFiles(cfg):
   o_path = cfg.get("global", "output")
   r_path = cfg.get("global", "repo-work")
+  v_path = cfg.get("global", "versions")
   src = os.path.join(r_path, "doc", "report.css")
   shutil.copy(src, o_path)
   src = os.path.join(r_path, "doc", "formatcode.js")
   shutil.copy(src, o_path)
+  dst = os.path.join(o_path, "versions.cfg")
+  shutil.copy(v_path, dst)
 
 def createLogPage(cfg, section):
   p = XMLPage(cfg, section + ".html", "Build step: " + section)

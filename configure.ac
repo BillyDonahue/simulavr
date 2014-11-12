@@ -193,6 +193,9 @@ AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_FILES(
   [regress/regress.py],
   [chmod +x regress/regress.py])
+AC_CONFIG_FILES(
+  [check-versions.sh],
+  [chmod +x check-versions.sh])
 AC_CONFIG_FILES([
   Makefile src/Makefile src/hwtimer/Makefile src/cmd/Makefile src/ui/Makefile
   src/python/Makefile src/python/setup.py doc/Makefile doc/conf.py doc/web/Makefile

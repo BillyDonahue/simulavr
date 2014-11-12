@@ -29,3 +29,5 @@ simulavr.sdf
 .pydevproject
 .settings
 delivery-check.conf
+check-versions.out
+check-versions.sh

@@ -8,7 +8,7 @@ if USE_AVR_CROSS
 EXAMPLES = examples
 endif
 
-SUBDIRS = src $(EXAMPLES) doc regress
+SUBDIRS = . src $(EXAMPLES) doc regress
 
 EXTRA_DIST = bootstrap make_tarball README.gdb SUPPORT \
  m4/README m4/avr_tcl.m4 m4/avr_swig.m4
@@ -59,6 +59,11 @@ if USE_VERILOG
 else
 	@echo "install vpi module not available! Sorry."
 endif
+
+check-versions.out: check-versions.sh
+	./check-versions.sh > check-versions.out
+
+all-local: check-versions.out
 
 .PHONY: doxygen-doc sphinx-doc web-html install-doxygen install-vpi
 
