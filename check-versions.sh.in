@@ -4,12 +4,14 @@
 echo "[primary]"
 
 # bash
-echo "bash.text=Shell (@SHELL@)\nbash.order=2"
+echo "bash.text=Shell (@SHELL@)"
+echo "bash.order=2"
 echo -n "bash.value="
 @SHELL@ --version | head -1
 
 # uname
-echo "uname.text=OS\nuname.order=1"
+echo "uname.text=OS"
+echo "uname.order=1"
 echo -n "uname.value="
 uname -srvm
 
@@ -37,13 +39,15 @@ fi
 echo "[configured]"
 
 # python command
-echo "python.text=Python\npython.order=1"
+echo "python.text=Python"
+echo "python.order=1"
 echo -n "python.value="
 @PYTHON_CMD_USE_TRUE@@PYTHON@ -c 'import sys; print(" ".join(sys.version.split()))'
 @PYTHON_CMD_USE_FALSE@echo "n/a"
 
 # available python modules
-echo "pymod.text=Python modules\npymod.order=2"
+echo "pymod.text=Python modules"
+echo "pymod.order=2"
 PMOD=
 @HAVE_PYMOD_rst2pdf_TRUE@PMOD="$PMOD rstpdf"
 @HAVE_PYMOD_sphinx_TRUE@PMOD="$PMOD sphinx"
@@ -52,13 +56,15 @@ PMOD=
 echo "pymod.value=$PMOD"
 
 # tclsh command
-echo "tclsh.text=Tclsh\ntclsh.order=3"
+echo "tclsh.text=Tclsh"
+echo "tclsh.order=3"
 echo -n "tclsh.value="
 @HAVE_TCLSH_TRUE@echo 'puts $tcl_patchLevel; exit' | @TCL_SHELL@
 @HAVE_TCLSH_FALSE@echo "n/a"
 
 # GCC und G++
-echo "gcc.text=GCC\ngcc.order=6"
+echo "gcc.text=GCC"
+echo "gcc.order=6"
 echo -n "gcc.value="
 @CC@ --version | head -1
 
@@ -70,13 +76,15 @@ echo -n "swig.value="
 @USE_SWIG_FALSE@echo "n/a"
 
 # AVRGCC und AVRG++
-echo "avrgcc.text=AVR-GCC\navrgcc.order=8"
+echo "avrgcc.text=AVR-GCC"
+echo "avrgcc.order=8"
 echo -n "avrgcc.value="
 @USE_AVR_CROSS_TRUE@@AVR_GCC@ --version | head -1
 @USE_AVR_CROSS_FALSE@echo "n/a"
 
 # avr-libc
-echo "avrlibc.text=AVR-Libc\navrlibc.order=9"
+echo "avrlibc.text=AVR-Libc"
+echo "avrlibc.order=9"
 echo -n "avrlibc.value="
 @USE_AVR_CROSS_TRUE@CHECK="yes"
 @USE_AVR_CROSS_FALSE@CHECK="no"
