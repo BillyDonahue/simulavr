@@ -76,7 +76,7 @@ if test "x$SWIG_LIB" = "x"; then
   fi
 fi
 SWIG_ENABLE_CXX
-AM_CONDITIONAL([USE_SWIG],[test "x$SWIG" != 'x'])
+AM_CONDITIONAL([USE_SWIG],[test "x$SWIG_LIB" != 'x'])
 
 ####
 # tcl/tk support
