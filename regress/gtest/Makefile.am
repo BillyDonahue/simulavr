@@ -69,6 +69,7 @@ OBJS_TARGET = session_001/avr_code.atmega32.o \
               session_irq_check/tc2.atmega32.o \
               session_irq_check/tc3.atmega32.o \
               session_irq_check/tc4.atmega32.o \
+              session_irq_check/tc5.atmega32.o \
               session_io_pin/tc1.atmega128.o
 
 AM_CXXFLAGS = $(GTEST_CXXFLAGS) $(GTEST_INCLUDE) $(SIMULAVR_INCLUDE) -g
@@ -93,6 +94,10 @@ define build-c-m32
 avr-gcc -mmcu=atmega32 -O2 $< -o $@
 endef
 
+define build-cpp-m32
+avr-g++ -mmcu=atmega32 -O2 $< -o $@
+endef
+
 define build-asm-m128
 avr-gcc -Wa,--gstabs,-D -xassembler-with-cpp -mmcu=atmega128 $< -o $@
 endef
@@ -111,6 +116,12 @@ session_irq_check/tc2.atmega32.o: session_irq_check/tc2.s
 
 session_irq_check/tc3.atmega32.o: session_irq_check/tc3.s
 	@DOLLAR_SIGN@(build-asm-m32)
+
+session_irq_check/tc4.atmega32.o: session_irq_check/tc4.s
+	@DOLLAR_SIGN@(build-asm-m32)
+
+session_irq_check/tc5.atmega32.o: session_irq_check/tc5.cpp
+	@DOLLAR_SIGN@(build-cpp-m32)
 
 session_io_pin/tc1.atmega128.o: session_io_pin/tc1.s
 	@DOLLAR_SIGN@(build-asm-m128)

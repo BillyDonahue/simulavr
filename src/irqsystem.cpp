@@ -200,6 +200,11 @@ HWIrqSystem::HWIrqSystem(AvrDevice* _core, int bytes, int tblsize):
     }
 }
 
+bool HWIrqSystem::IsIrqPending()
+{
+    return ( irqPartnerList.size() != 0); // if any interrupt is in the list, return true
+}
+
 unsigned int HWIrqSystem::GetNewPc(unsigned int &actualVector) {
     unsigned int newPC = 0xffffffff;
 

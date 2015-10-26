@@ -73,3 +73,25 @@ TEST( SESSION_IRQ, TC4)
    EXPECT_EQ( 0x02, (unsigned char)(*(dev1->rw[19]  ))) << "Wrong value in R19" << endl;
    EXPECT_EQ( 0x00, (unsigned char)(*(dev1->rw[20]  ))) << "Wrong value in R20" << endl;
 }
+
+TEST( SESSION_IRQ, TC5)
+{
+   AvrDevice *dev1= new AvrDevice_atmega32;
+   dev1->Load("session_irq_check/tc5.atmega32.o");
+   dev1->SetClockFreq(136);    // 7.3728
+   dev1->RegisterTerminationSymbol("stopsim");
+   dev1->RegisterTerminationSymbol("exit");
+   SystemClock::Instance().Add(dev1);
+   SystemClock::Instance().Endless();
+
+   unsigned int addr_of_vector = 0x62; // TODO: get address of vector from file symbol!
+   EXPECT_EQ( 0x0f, (unsigned char)(*(dev1->rw[addr_of_vector++]))) << "Wrong IRQ Order " << endl;
+   EXPECT_EQ( 0x0e, (unsigned char)(*(dev1->rw[addr_of_vector++]))) << "Wrong IRQ Order " << endl;
+   EXPECT_EQ( 0x0c, (unsigned char)(*(dev1->rw[addr_of_vector++]))) << "Wrong IRQ Order " << endl;
+   EXPECT_EQ( 0x08, (unsigned char)(*(dev1->rw[addr_of_vector++]))) << "Wrong IRQ Order " << endl;
+   EXPECT_EQ( 0x0f, (unsigned char)(*(dev1->rw[addr_of_vector++]))) << "Wrong IRQ Order " << endl;
+   EXPECT_EQ( 0x0d, (unsigned char)(*(dev1->rw[addr_of_vector++]))) << "Wrong IRQ Order " << endl;
+   EXPECT_EQ( 0x0c, (unsigned char)(*(dev1->rw[addr_of_vector++]))) << "Wrong IRQ Order " << endl;
+   EXPECT_EQ( 0x08, (unsigned char)(*(dev1->rw[addr_of_vector++]))) << "Wrong IRQ Order " << endl;
+}
+

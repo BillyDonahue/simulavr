@@ -286,7 +286,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                 return 0;
             }
 
-            if(deferIrq && ( newIrqPc != 0xffffffff )) {
+            if( deferIrq ) {
                 /* Every IRQ is delayed of one cycle. Normally this happens (see datasheet)
                  * only after a SEI instruction or after a RETI. But because of
                  * "pipelining" (first cycle is fetch instruction, second is processing)
@@ -307,27 +307,29 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                  */
                 if ( status->I == 1 )
                 {
-                    if(trace_on)
-                        traceOut << "IRQ DETECTED: VectorAddr: " << newIrqPc ;
+                    newIrqPc = irqSystem->GetNewPc(actualIrqVector);
 
-                    irqSystem->IrqHandlerStarted(actualIrqVector);    //what vector we raise?
-                    Funktor* fkt = new IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector);
-                    stack->SetReturnPoint(stack->GetStackPointer(), fkt);
-                    stack->PushAddr(PC);
-                    cpuCycles = 4; //push needs 4 cycles! (on external RAM +2, this is handled from HWExtRam!)
-                    status->I = 0; //irq started so remove I-Flag from SREG
-                    PC = newIrqPc - 1;   //we add a few lines later 1 so we sub here 1 :-)
+                    if ( newIrqPc != 0xffffffff )
+                    {
+                        if(trace_on)
+                            traceOut << "IRQ DETECTED: VectorAddr: " << newIrqPc ;
+
+                        irqSystem->IrqHandlerStarted(actualIrqVector);    //what vector we raise?
+                        Funktor* fkt = new IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector);
+                        stack->SetReturnPoint(stack->GetStackPointer(), fkt);
+                        stack->PushAddr(PC);
+                        cpuCycles = 4; //push needs 4 cycles! (on external RAM +2, this is handled from HWExtRam!)
+                        status->I = 0; //irq started so remove I-Flag from SREG
+                        PC = newIrqPc - 1;   //we add a few lines later 1 so we sub here 1 :-)
+                    }
                 }
 
             } 
             
             if( (!deferIrq ) && (status->I == 1) ) {
-                newIrqPc = irqSystem->GetNewPc(actualIrqVector);
-
-                if(newIrqPc != 0xffffffff) {
-                   deferIrq = true; // do always one instruction before entering irq vect
-                   if(trace_on)
-                      traceOut << "IRQ prepared for addr " << hex << newIrqPc << dec << endl;
+                if ( irqSystem->IsIrqPending() )
+                {
+                    deferIrq = true; // do always one instruction before entering irq vect
                 }
             }
 

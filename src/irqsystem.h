@@ -132,6 +132,7 @@ class HWIrqSystem: public TraceValueRegister {
     public:
         HWIrqSystem (AvrDevice* _core, int bytes_per_vector, int number_of_vectors);
 
+        bool IsIrqPending();
         /// returns a new PC pointer if interrupt occurred, -1 otherwise.
         unsigned int GetNewPc(unsigned int &vector_index);
         void SetIrqFlag(Hardware *, unsigned int vector_index);
