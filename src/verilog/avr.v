@@ -19,59 +19,92 @@
 
 /* SimulavrXX glue code on the verilog side. */
 
-/* FIXME: Some parts are still unfinished! 
- FIXME: Output-pullups are not implemented yet - find a good way to do that!
- */
+/*
+* Attention: Multiple assignment to a single wire with different strength will
+* work only with up to date iverilog versions. Don't use any version below
+* v10!
+*/
+
+/*
+* FIXME: There are still open issues:
+* simulavr itself runs a calculation on the connected nets on every pin.
+* To fix that topic a new type of "pin" must be created ( verilog_pin ) which
+* can be added to a simulavr "net". In the moment the simulation works
+* only if simulavr drives only in to verilog and no other connected pins
+* to a net inside the simulator itself. Adding multiple assignments in
+* verilog works as expected.
+*/
 
 module avr_pin(conn);
    parameter name="UNSPECIFIED";
    inout conn;
-   wire  out;
+   wire  out_value;
+   wire  is_pulling;
    
    integer val;
    
    wire    output_active;
    assign  output_active = (val<=2);
    
-   assign  conn = output_active ? out : 1'bz;
+   assign                  conn = output_active ? out_value : 1'bz;
+   assign  ( pull1, pull0) conn = is_pulling ? out_value : 1'bz;
 
-   function a2v;
-      input apin;
+   function avr2verilog;
+      input [4:0] apin;
+      begin
       if (apin==0) // low
-	a2v=0;
+	avr2verilog=1'b0;
       else if (apin==1) // high
-	a2v=1;
+	avr2verilog=1'b1;
       else if (apin==2) // shorted
-	a2v=1'bx;
+	avr2verilog=1'bx;
       else if (apin==3) // pull-up
-	a2v=1;
+	avr2verilog=1'b1;
       else if (apin==4) // tristate
-	a2v=1'bz;
-      else if (apin==5) // pull-down
-	a2v=0;
+	avr2verilog=1'bz;
+      else if (apin==5) // pull-down ?? AVR Pin?
+	avr2verilog=1'b0;
       else if (apin==6) // analog
-	a2v=1'bx;
+	avr2verilog=1'bx;
       else if (apin==7) // analog, shorted
-	a2v=1'bx;
-   endfunction // a2v
+	avr2verilog=1'bx;
 
-   function v2a;
+   end
+
+   endfunction // avr2verilog
+
+   function avr_port_is_pulling_only;
+       input [4:0] apin;
+       begin
+       if ( apin==3 ) // pull up
+           avr_port_is_pulling_only=1'b1;
+       else if ( apin==5 ) // pull down ( not used in avr core pins )
+           avr_port_is_pulling_only=1'b1;
+       else 
+           avr_port_is_pulling_only=1'b0;
+
+   end
+   endfunction // avr_port_is_pulling_only
+       
+
+   function verilog2avr;
       input vpin;
       if (vpin==1'bz)
-	v2a=4; // tristate
+	verilog2avr=4; // tristate
       else if (vpin==1'bx)
-	v2a=2; // approximate as shorted
+	verilog2avr=2; // approximate as shorted
       else if (vpin==1)
-	v2a=1; // high
+	verilog2avr=1; // high
       else if (vpin==0)
-	v2a=0; // low
-   endfunction // v2a
+	verilog2avr=0; // low
+   endfunction // verilog2avr
 
-   assign out=a2v(val);
+   assign is_pulling=avr_port_is_pulling_only(val);
+   assign out_value=avr2verilog(val);
 
    always @(posedge core.clk) begin
       val<=$avr_get_pin(core.handle, name);
-      $avr_set_pin(core.handle, name, v2a(conn));
+      $avr_set_pin(core.handle, name, verilog2avr(conn));
    end
    
 endmodule // avr_pin
