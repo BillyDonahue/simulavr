@@ -789,7 +789,41 @@ setup. Tools such as @file{gtkwave} can be used to verify the
 output of a circuit by looking at the waveforms the simulation
 generates.
 
-Simulavr comes with an interface to (Icarus) Verilog. If the
+
+
+Simulavr comes with an interface to (Icarus) Verilog. To get the
+correct behaviour according to pull up level on avr pins, you need to 
+install a Verilog version v10 or higher! Any older version will
+calculate a short circuit if a pullup is driven against a logic low
+level which is simply wrong.
+
+If you want to test the new Verilog version, it is easy to install
+from sources to any place of your system without destroying other
+versions. Remember you also have to rebuild the simulator!
+
+Installing verilog from sources is quite simple:
+@example
+$ tar xf verilog-10.0.tar.gz
+$ ./configure --prefix=/opt/verilog/v10
+$ make
+$ sudo make install
+@end example
+
+You need to configure and recompile simulavr:
+
+@example
+$make clean
+$CPPFLAGS=-I/opt/verilog/v10/include/ ./configure --enable-verilog
+$make
+$sudo make install
+@end example
+
+Attention: If the @command{configure} find an older @file{vpi_user.h} file
+running avr.vpi in verilog will crash!
+
+
+
+If the
 @command{configure} script finds the necessary header file for the
 interface, the so called VPI (Verilog Procedural Interface) to Icarus
 Verilog will be build. The result of this is a file called
@@ -851,11 +885,14 @@ simulation, and the top module @code{test} and the environment
 variable @var{$AVRS} pointing to the right directory.
 
 A set of a few simple examples has been put into the
-@file{verilog/examples} subdirectory of the Simulavr source
+@file{examples/verilog} subdirectory of the Simulavr source
 distribution. This directory also contains a @file{Makefile} which can
 be used as an example of command sequences for compiling
-verilog, running it and producing @file{.vcd} output files to be
+Verilog, running it and producing @file{.vcd} output files to be
 viewed with @file{gtkwave}.
+
+How to run multiple cores, now with pull up functionality enabled, 
+is also added to @file{examples/verilog} subdirectory. Watch out for @file{vst.*}
 
 @section Bugs and particularities 
 @itemize @bullet
