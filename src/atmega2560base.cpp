@@ -151,13 +151,13 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     timerIrq0->registerLine(2, new IRQLine("OCF0B", 22));
 
     timer0 = new HWTimer8_2C(this,
-                             new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 7)), //ctae port d pin 7
+                             new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 7)), //todo correct ? ctae port d pin 7
                              0,
                              timerIrq0->getLine("TOV0"),
                              timerIrq0->getLine("OCF0A"),
-                             new PinAtPort(&portb, 3), //todo ctae check pin
+                             new PinAtPort(&portb, 7), //ctae ok
                              timerIrq0->getLine("OCF0B"),
-                             new PinAtPort(&portb, 4)); //todo ctae check pin
+                             new PinAtPort(&portd, 7)); //ctae input capture T0?
 
     timerIrq1 = new TimerIRQRegister(this, irqSystem, 1);
     timerIrq1->registerLine(0, new IRQLine("TOV1",  20));
@@ -166,15 +166,15 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     timerIrq1->registerLine(3, new IRQLine("OCF1C", 19));
     timerIrq1->registerLine(5, new IRQLine("ICF1",  16)); //todo ctae ICF1 is capture event??
 
-    inputCapture1 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
+    inputCapture1 = new ICaptureSource(PinAtPort(&portd, 4)); //ctae correct?
     timer1 = new HWTimer16_3C(this,
 			      new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 7)), //ctae
 			      1,
 			      timerIrq1->getLine("TOV1"),
 			      timerIrq1->getLine("OCF1A"),
-			      new PinAtPort(&portd, 5), //todo ctae check pin
+			      new PinAtPort(&portb, 5), //ctae ok
 			      timerIrq1->getLine("OCF1B"),
-			      new PinAtPort(&portd, 4), //todo ctae check pin
+			      new PinAtPort(&portb, 6), //ctae ok
 			      timerIrq1->getLine("OCF1C"),
 			      new PinAtPort(&portd, 4), //todo ctae check pin
 			      timerIrq1->getLine("ICF1"),
@@ -190,7 +190,7 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
                              2,
                              timerIrq2->getLine("TOV2"),
                              timerIrq2->getLine("OCF2A"),
-                             new PinAtPort(&portd, 7),
+                             new PinAtPort(&portb, 4), //ctae ok
                              timerIrq2->getLine("OCF2B"),
                              new PinAtPort(&portd, 6));
 
@@ -291,9 +291,9 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
 
     usart1 = new HWUsart(this,
                          irqSystem,
-                         PinAtPort(&portd, 3),    // TXD1
-                         PinAtPort(&portd, 2),    // RXD1
-                         PinAtPort(&portd, 4),    // XCK1
+                         PinAtPort(&portd, 3),    // TXD1  //ctae ok
+                         PinAtPort(&portd, 2),    // RXD1  //ctae ok
+                         PinAtPort(&portd, 5),    // XCK1  //ctae ok
                          36,   // (37) RX complete vector
                          37,   // (38) UDRE vector
                          38,   // (39) TX complete vector
