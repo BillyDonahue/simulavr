@@ -179,9 +179,9 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
 			      inputCapture1);
 
     timerIrq2 = new TimerIRQRegister(this, irqSystem, 2);
-    timerIrq2->registerLine(0, new IRQLine("TOV2",  11));
-    timerIrq2->registerLine(1, new IRQLine("OCF2A", 9));
-    timerIrq2->registerLine(2, new IRQLine("OCF2B", 10));
+    timerIrq2->registerLine(0, new IRQLine("TOV2",  15));
+    timerIrq2->registerLine(1, new IRQLine("OCF2A", 13));
+    timerIrq2->registerLine(2, new IRQLine("OCF2B", 14));
 
     timer2 = new HWTimer8_2C(this,
                              new PrescalerMultiplexer(&prescaler2),
@@ -193,11 +193,11 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
                              new PinAtPort(&portd, 6));
 
     timerIrq3 = new TimerIRQRegister(this, irqSystem, 3);
-    timerIrq3->registerLine(0, new IRQLine("TOV1",  20));
-    timerIrq3->registerLine(1, new IRQLine("OCF1A", 17));
-    timerIrq3->registerLine(2, new IRQLine("OCF1B", 18));
-    timerIrq3->registerLine(3, new IRQLine("OCF1C", 19));
-    timerIrq3->registerLine(5, new IRQLine("ICF1",  16)); //todo ctae ICF1 is capture event??
+    timerIrq3->registerLine(0, new IRQLine("TOV1",  35));
+    timerIrq3->registerLine(1, new IRQLine("OCF1A", 32));
+    timerIrq3->registerLine(2, new IRQLine("OCF1B", 33));
+    timerIrq3->registerLine(3, new IRQLine("OCF1C", 34));
+    timerIrq3->registerLine(5, new IRQLine("ICF1",  31)); //todo ctae ICF1 is capture event??
 
     inputCapture3 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
     timer3 = new HWTimer16_3C(this,
@@ -214,11 +214,11 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
 			      inputCapture3);
 
     timerIrq4 = new TimerIRQRegister(this, irqSystem, 4);
-    timerIrq4->registerLine(0, new IRQLine("TOV1",  20));
-    timerIrq4->registerLine(1, new IRQLine("OCF1A", 17));
-    timerIrq4->registerLine(2, new IRQLine("OCF1B", 18));
-    timerIrq4->registerLine(3, new IRQLine("OCF1C", 19));
-    timerIrq4->registerLine(5, new IRQLine("ICF1",  16)); //todo ctae ICF1 is capture event??
+    timerIrq4->registerLine(0, new IRQLine("TOV1",  45));
+    timerIrq4->registerLine(1, new IRQLine("OCF1A", 42));
+    timerIrq4->registerLine(2, new IRQLine("OCF1B", 43));
+    timerIrq4->registerLine(3, new IRQLine("OCF1C", 44));
+    timerIrq4->registerLine(5, new IRQLine("ICF1",  41)); //todo ctae ICF1 is capture event??
 
     inputCapture4 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
     timer4 = new HWTimer16_3C(this,
@@ -235,11 +235,11 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
 			      inputCapture4);
 
     timerIrq5 = new TimerIRQRegister(this, irqSystem, 5);
-    timerIrq5->registerLine(0, new IRQLine("TOV1",  20));
-    timerIrq5->registerLine(1, new IRQLine("OCF1A", 17));
-    timerIrq5->registerLine(2, new IRQLine("OCF1B", 18));
-    timerIrq5->registerLine(3, new IRQLine("OCF1C", 19));
-    timerIrq5->registerLine(5, new IRQLine("ICF1",  16)); //todo ctae ICF1 is capture event??
+    timerIrq5->registerLine(0, new IRQLine("TOV1",  50));
+    timerIrq5->registerLine(1, new IRQLine("OCF1A", 47));
+    timerIrq5->registerLine(2, new IRQLine("OCF1B", 48));
+    timerIrq5->registerLine(3, new IRQLine("OCF1C", 49));
+    timerIrq5->registerLine(5, new IRQLine("ICF1",  46)); //todo ctae ICF1 is capture event??
 
     inputCapture5 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
     timer5 = new HWTimer16_3C(this,
