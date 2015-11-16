@@ -74,9 +74,12 @@ AvrDevice_atmega2560base::~AvrDevice_atmega2560base() {
 AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
                                                      unsigned flash_bytes,
                                                      unsigned ee_bytes ):
-    AvrDevice(256-32,       // I/O space size (above ALU registers)
+    AvrDevice(0x200 - 0x60, // I/O space size (above ALU registers) //TODO 64 in standard io memory following the registers
+	      //  The first 32 locations address the Register file, the next 64 location the standard
+	      //  I/O Memory, then 416 locations of Extended I/O memory and the next 8,192 locations address the internal data
+	      //  SRAM.
               ram_bytes,    // RAM size
-              0,            // External RAM size
+              0xDE00,       // External RAM size
               flash_bytes), // Flash Size
     porta(this, "A", true),
     portb(this, "B", true),
@@ -285,8 +288,8 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     rw[0x68]= pcicr_reg;
     // 0x67 reserved
     rw[0x66]= osccal_reg;
-    // 0x65 reserved
-    rw[0x64]= new NotSimulatedRegister("MCU register PRR not simulated");
+    rw[0x65]= new NotSimulatedRegister("MCU register PRR1 not simulated");
+    rw[0x64]= new NotSimulatedRegister("MCU register PRR0 not simulated");
     // 0x63 reserved
     // 0x62 reserved
     rw[0x61]= clkpr_reg;
