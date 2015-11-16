@@ -80,18 +80,18 @@ protected:
     HWTimer8_2C*        timer0;      //!< timer 0 unit
     ICaptureSource*     inputCapture1; //!< input capture source for timer 1
     TimerIRQRegister*   timerIrq1;   //!< timer interrupt unit for timer 1
-    HWTimer16_2C3*      timer1;      //!< timer 1 unit
+    HWTimer16_3C*       timer1;      //!< timer 1 unit
     TimerIRQRegister*   timerIrq2;   //!< timer interrupt unit for timer 2
     HWTimer8_2C*        timer2;      //!< timer 2 unit
     ICaptureSource*     inputCapture3; //!< input capture source for timer 3
     TimerIRQRegister*   timerIrq3;   //!< timer interrupt unit for timer 3
-    HWTimer16_2C3*      timer3;      //!< timer 3 unit
+    HWTimer16_3C*       timer3;      //!< timer 3 unit
     ICaptureSource*     inputCapture4; //!< input capture source for timer 4
     TimerIRQRegister*   timerIrq4;   //!< timer interrupt unit for timer 4
-    HWTimer16_2C3*      timer4;      //!< timer 4 unit
+    HWTimer16_3C*       timer4;      //!< timer 4 unit
     ICaptureSource*     inputCapture5; //!< input capture source for timer 5
     TimerIRQRegister*   timerIrq5;   //!< timer interrupt unit for timer 5
-    HWTimer16_2C3*      timer5;      //!< timer 5 unit
+    HWTimer16_3C*       timer5;      //!< timer 5 unit
     GPIORegister*       gpior0_reg;  //!< general purpose IO register
     GPIORegister*       gpior1_reg;  //!< general purpose IO register
     GPIORegister*       gpior2_reg;  //!< general purpose IO register

@@ -165,16 +165,18 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     timerIrq1->registerLine(5, new IRQLine("ICF1",  16)); //todo ctae ICF1 is capture event??
 
     inputCapture1 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
-    timer1 = new HWTimer16_2C3(this,
-                               new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
-                               1,
-                               timerIrq1->getLine("TOV1"),
-                               timerIrq1->getLine("OCF1A"),
-                               new PinAtPort(&portd, 5), //todo ctae check pin
-                               timerIrq1->getLine("OCF1B"),
-                               new PinAtPort(&portd, 4), //todo ctae check pin
-                               timerIrq1->getLine("ICF1"),
-                               inputCapture1);
+    timer1 = new HWTimer16_3C(this,
+			      new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
+			      1,
+			      timerIrq1->getLine("TOV1"),
+			      timerIrq1->getLine("OCF1A"),
+			      new PinAtPort(&portd, 5), //todo ctae check pin
+			      timerIrq1->getLine("OCF1B"),
+			      new PinAtPort(&portd, 4), //todo ctae check pin
+			      timerIrq1->getLine("OCF1C"),
+			      new PinAtPort(&portd, 4), //todo ctae check pin
+			      timerIrq1->getLine("ICF1"),
+			      inputCapture1);
 
     timerIrq2 = new TimerIRQRegister(this, irqSystem, 2);
     timerIrq2->registerLine(0, new IRQLine("TOV2",  11));
@@ -198,16 +200,18 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     timerIrq3->registerLine(5, new IRQLine("ICF1",  16)); //todo ctae ICF1 is capture event??
 
     inputCapture3 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
-    timer3 = new HWTimer16_2C3(this,
-                               new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
-                               1,
-                               timerIrq3->getLine("TOV1"),
-                               timerIrq3->getLine("OCF1A"),
-                               new PinAtPort(&portd, 5), //todo ctae check pin
-                               timerIrq3->getLine("OCF1B"),
-                               new PinAtPort(&portd, 4), //todo ctae check pin
-                               timerIrq3->getLine("ICF1"),
-                               inputCapture3);
+    timer3 = new HWTimer16_3C(this,
+			      new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
+			      3,
+			      timerIrq3->getLine("TOV1"),
+			      timerIrq3->getLine("OCF1A"),
+			      new PinAtPort(&portd, 5), //todo ctae check pin
+			      timerIrq3->getLine("OCF1B"),
+			      new PinAtPort(&portd, 4), //todo ctae check pin
+			      timerIrq3->getLine("OCF1C"),
+			      new PinAtPort(&portd, 4), //todo ctae check pin
+			      timerIrq3->getLine("ICF1"),
+			      inputCapture3);
 
     timerIrq4 = new TimerIRQRegister(this, irqSystem, 4);
     timerIrq4->registerLine(0, new IRQLine("TOV1",  20));
@@ -217,16 +221,18 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     timerIrq4->registerLine(5, new IRQLine("ICF1",  16)); //todo ctae ICF1 is capture event??
 
     inputCapture4 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
-    timer4 = new HWTimer16_2C3(this,
-                               new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
-                               1,
-                               timerIrq4->getLine("TOV1"),
-                               timerIrq4->getLine("OCF1A"),
-                               new PinAtPort(&portd, 5), //todo ctae check pin
-                               timerIrq4->getLine("OCF1B"),
-                               new PinAtPort(&portd, 4), //todo ctae check pin
-                               timerIrq4->getLine("ICF1"),
-                               inputCapture4);
+    timer4 = new HWTimer16_3C(this,
+			      new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
+			      4,
+			      timerIrq4->getLine("TOV1"),
+			      timerIrq4->getLine("OCF1A"),
+			      new PinAtPort(&portd, 5), //todo ctae check pin
+			      timerIrq4->getLine("OCF1B"),
+			      new PinAtPort(&portd, 4), //todo ctae check pin
+			      timerIrq4->getLine("OCF1C"),
+			      new PinAtPort(&portd, 4), //todo ctae check pin
+			      timerIrq4->getLine("ICF1"),
+			      inputCapture4);
 
     timerIrq5 = new TimerIRQRegister(this, irqSystem, 5);
     timerIrq5->registerLine(0, new IRQLine("TOV1",  20));
@@ -236,16 +242,18 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     timerIrq5->registerLine(5, new IRQLine("ICF1",  16)); //todo ctae ICF1 is capture event??
 
     inputCapture5 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
-    timer5 = new HWTimer16_2C3(this,
-                               new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
-                               1,
-                               timerIrq5->getLine("TOV1"),
-                               timerIrq5->getLine("OCF1A"),
-                               new PinAtPort(&portd, 5), //todo ctae check pin
-                               timerIrq5->getLine("OCF1B"),
-                               new PinAtPort(&portd, 4), //todo ctae check pin
-                               timerIrq5->getLine("ICF1"),
-                               inputCapture5);
+    timer5 = new HWTimer16_3C(this,
+			      new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
+			      5,
+			      timerIrq5->getLine("TOV1"),
+			      timerIrq5->getLine("OCF1A"),
+			      new PinAtPort(&portd, 5), //todo ctae check pin
+			      timerIrq5->getLine("OCF1B"),
+			      new PinAtPort(&portd, 4), //todo ctae check pin
+			      timerIrq5->getLine("OCF1C"),
+			      new PinAtPort(&portd, 4), //todo ctae check pin
+			      timerIrq5->getLine("ICF1"),
+			      inputCapture5);
 
     gpior0_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR0");
     gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
