@@ -111,9 +111,9 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     flagELPMInstructions = true;
     fuses->SetFuseConfiguration(19, 0xff9962);
 
-    irqSystem = new HWIrqSystem(this, 4, 31);
+    irqSystem = new HWIrqSystem(this, 4, 57);
 
-    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 25, HWEeprom::DEVMODE_EXTENDED); 
+    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 30, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStackSram(this, 16);
     clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V5);
@@ -126,14 +126,14 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     eimsk_reg = new IOSpecialReg(&coreTraceGroup, "EIMSK");
     eifr_reg = new IOSpecialReg(&coreTraceGroup, "EIFR");
     extirq = new ExternalIRQHandler(this, irqSystem, eimsk_reg, eifr_reg);
-    extirq->registerIrq(1, 0, new ExternalIRQSingle(eicra_reg, 0, 2, GetPin("D2")));
-    extirq->registerIrq(2, 1, new ExternalIRQSingle(eicra_reg, 2, 2, GetPin("D3")));
-    extirq->registerIrq(3, 2, new ExternalIRQSingle(eicra_reg, 4, 2, GetPin("B2")));
-    extirq->registerIrq(4, 3, new ExternalIRQSingle(eicra_reg, 6, 2, GetPin("XX")));
-    extirq->registerIrq(5, 4, new ExternalIRQSingle(eicrb_reg, 0, 2, GetPin("XX")));
-    extirq->registerIrq(6, 5, new ExternalIRQSingle(eicrb_reg, 2, 2, GetPin("XX")));
-    extirq->registerIrq(7, 6, new ExternalIRQSingle(eicrb_reg, 4, 2, GetPin("XX")));
-    extirq->registerIrq(8, 7, new ExternalIRQSingle(eicrb_reg, 6, 2, GetPin("XX")));
+    extirq->registerIrq(1, 0, new ExternalIRQSingle(eicra_reg, 0, 2, GetPin("D0"))); //ctae ok
+    extirq->registerIrq(2, 1, new ExternalIRQSingle(eicra_reg, 2, 2, GetPin("D1"))); //ctae ok
+    extirq->registerIrq(3, 2, new ExternalIRQSingle(eicra_reg, 4, 2, GetPin("D2"))); //ctae ok
+    extirq->registerIrq(4, 3, new ExternalIRQSingle(eicra_reg, 6, 2, GetPin("D3"))); //ctae ok
+    extirq->registerIrq(5, 4, new ExternalIRQSingle(eicrb_reg, 0, 2, GetPin("E4"))); //ctae ok
+    extirq->registerIrq(6, 5, new ExternalIRQSingle(eicrb_reg, 2, 2, GetPin("E5"))); //ctae ok
+    extirq->registerIrq(7, 6, new ExternalIRQSingle(eicrb_reg, 4, 2, GetPin("E6"))); //ctae ok
+    extirq->registerIrq(8, 7, new ExternalIRQSingle(eicrb_reg, 6, 2, GetPin("E7"))); //ctae ok
 
     pcicr_reg = new IOSpecialReg(&coreTraceGroup, "PCICR");
     pcifr_reg = new IOSpecialReg(&coreTraceGroup, "PCIFR");
@@ -141,9 +141,9 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     pcmsk1_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK1");
     pcmsk2_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK2");
     extirqpc = new ExternalIRQHandler(this, irqSystem, pcicr_reg, pcifr_reg);
-    extirqpc->registerIrq(9, 0, new ExternalIRQPort(pcmsk0_reg, &porta)); //TODO ctae is this port based?
-    extirqpc->registerIrq(10, 1, new ExternalIRQPort(pcmsk1_reg, &portb)); //TODO ctae is this port based?
-    extirqpc->registerIrq(11, 2, new ExternalIRQPort(pcmsk2_reg, &portc)); //TODO ctae is this port based?
+    extirqpc->registerIrq(9, 0, new ExternalIRQPort(pcmsk0_reg, &portb)); //ctae ok
+    extirqpc->registerIrq(10, 1, new ExternalIRQPort(pcmsk1_reg, &portc)); //TODO not on one port !!! ctae is this port based?
+    extirqpc->registerIrq(11, 2, new ExternalIRQPort(pcmsk2_reg, &portk)); //ctae ok
 
     timerIrq0 = new TimerIRQRegister(this, irqSystem, 0);
     timerIrq0->registerLine(0, new IRQLine("TOV0",  23));
@@ -151,7 +151,7 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     timerIrq0->registerLine(2, new IRQLine("OCF0B", 22));
 
     timer0 = new HWTimer8_2C(this,
-                             new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 4)), //todo ctae check pin
+                             new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 7)), //ctae port d pin 7
                              0,
                              timerIrq0->getLine("TOV0"),
                              timerIrq0->getLine("OCF0A"),
@@ -168,7 +168,7 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
 
     inputCapture1 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
     timer1 = new HWTimer16_3C(this,
-			      new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
+			      new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 7)), //ctae
 			      1,
 			      timerIrq1->getLine("TOV1"),
 			      timerIrq1->getLine("OCF1A"),
@@ -203,7 +203,7 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
 
     inputCapture3 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
     timer3 = new HWTimer16_3C(this,
-			      new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
+			      new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 7)), //ctae
 			      3,
 			      timerIrq3->getLine("TOV1"),
 			      timerIrq3->getLine("OCF1A"),
@@ -224,7 +224,7 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
 
     inputCapture4 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
     timer4 = new HWTimer16_3C(this,
-			      new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
+			      new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 7)), //ctae
 			      4,
 			      timerIrq4->getLine("TOV1"),
 			      timerIrq4->getLine("OCF1A"),
@@ -245,7 +245,7 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
 
     inputCapture5 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
     timer5 = new HWTimer16_3C(this,
-			      new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
+			      new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 7)), //ctae
 			      5,
 			      timerIrq5->getLine("TOV1"),
 			      timerIrq5->getLine("OCF1A"),
@@ -265,9 +265,9 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
                                  &porta.GetPin(3), &porta.GetPin(4), &porta.GetPin(5),
                                  &porta.GetPin(6), &porta.GetPin(7));
     aref = new HWARef4(this, HWARef4::REFTYPE_BG3);
-    ad = new HWAd(this, HWAd::AD_M164, irqSystem, 24, admux, aref);
+    ad = new HWAd(this, HWAd::AD_M164, irqSystem, 29, admux, aref);
 
-    acomp = new HWAcomp(this, irqSystem, PinAtPort(&portb, 2), PinAtPort(&portb, 3), 23, ad, timer1);
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(&portb, 2), PinAtPort(&portb, 3), 28, ad, timer1);
 
     spi = new HWSpi(this,
                     irqSystem,
