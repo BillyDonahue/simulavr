@@ -46,7 +46,7 @@ lib_LTLIBRARIES += libsim.la
 
 libsim_la_SOURCES = \
   at4433.cpp at8515.cpp atmega668base.cpp atmega128.cpp at90canbase.cpp \
-  atmega8.cpp atmega1284abase.cpp attiny25_45_85.cpp atmega16_32.cpp \
+  atmega8.cpp atmega1284abase.cpp atmega2560base.cpp attiny25_45_85.cpp atmega16_32.cpp \
   attiny2313.cpp adcpin.cpp application.cpp externalirq.cpp \
   avrdevice.cpp avrerror.cpp avrfactory.cpp avrmalloc.cpp decoder.cpp \
   decoder_trace.cpp flash.cpp flashprog.cpp hardware.cpp helper.cpp cmd/gdbserver.cpp \
