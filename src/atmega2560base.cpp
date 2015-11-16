@@ -35,6 +35,8 @@ AVR_REGISTER(atmega1280, AvrDevice_atmega1280)
 AVR_REGISTER(atmega2560, AvrDevice_atmega2560)
 
 AvrDevice_atmega2560base::~AvrDevice_atmega2560base() {
+    delete usart3;
+    delete usart2;
     delete usart1;
     delete usart0;
     delete wado;
@@ -269,11 +271,11 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
 
     spi = new HWSpi(this,
                     irqSystem,
-                    PinAtPort(&portb, 5),   // MOSI
+                    PinAtPort(&portb, 5),   // MOSI //todo ctae check pins
                     PinAtPort(&portb, 6),   // MISO
                     PinAtPort(&portb, 7),   // SCK
                     PinAtPort(&portb, 4),   // /SS
-                    19,                     // irqvec
+                    24,                     // irqvec
                     true);
     
     wado = new HWWado(this);
@@ -283,20 +285,48 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
                          PinAtPort(&portd, 1),    // TXD0
                          PinAtPort(&portd, 0),    // RXD0
                          PinAtPort(&portb, 0),    // XCK0
-                         20,   // (21) RX complete vector
-                         21,   // (22) UDRE vector
-                         22);  // (23) TX complete vector
+                         25,   // (26) RX complete vector
+                         26,   // (27) UDRE vector
+                         27);  // (28) TX complete vector
 
     usart1 = new HWUsart(this,
                          irqSystem,
                          PinAtPort(&portd, 3),    // TXD1
                          PinAtPort(&portd, 2),    // RXD1
                          PinAtPort(&portd, 4),    // XCK1
-                         28,   // (29) RX complete vector
-                         29,   // (30) UDRE vector
-                         30,   // (31) TX complete vector
+                         36,   // (37) RX complete vector
+                         37,   // (38) UDRE vector
+                         38,   // (39) TX complete vector
                          1);   // instance_id for tracking in UI
 
+    usart2 = new HWUsart(this,
+                         irqSystem,
+                         PinAtPort(&portd, 1),    // TXD0
+                         PinAtPort(&portd, 0),    // RXD0
+                         PinAtPort(&portb, 0),    // XCK0
+                         51,   // (52) RX complete vector
+                         52,   // (53) UDRE vector
+                         53,   // (54) TX complete vector
+			 2);   // instance_id for tracking in UI
+
+    usart3 = new HWUsart(this,
+                         irqSystem,
+                         PinAtPort(&portd, 3),    // TXD1
+                         PinAtPort(&portd, 2),    // RXD1
+                         PinAtPort(&portd, 4),    // XCK1
+                         54,   // (55) RX complete vector
+                         55,   // (56) UDRE vector
+                         56,   // (57) TX complete vector
+                         3);   // instance_id for tracking in UI
+
+    rw[0x136]= & usart3->udr_reg;
+    rw[0x135]= & usart3->ubrrhi_reg;
+    rw[0x134]= & usart3->ubrr_reg;
+    // 0x133 reserved
+    rw[0x132]= & usart3->ucsrc_reg;
+    rw[0x131]= & usart3->ucsrb_reg;
+    rw[0x130]= & usart3->ucsra_reg;
+    // 0x12f reserved
     rw[0x12d]= & timer5->ocrc_h_reg;
     rw[0x12c]= & timer5->ocrc_l_reg;
     rw[0x12b]= & timer5->ocrb_h_reg;
@@ -323,8 +353,15 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     rw[0x101]= & porth.ddr_reg;
     rw[0x100]= & porth.pin_reg;
 
-    // 0xCF - 0xFF reserved
-
+    // 0xDF - 0xFF reserved
+    rw[0xD6]= & usart2->udr_reg;
+    rw[0xD5]= & usart2->ubrrhi_reg;
+    rw[0xD4]= & usart2->ubrr_reg;
+    // 0xD3 reserved
+    rw[0xD2]= & usart2->ucsrc_reg;
+    rw[0xD1]= & usart2->ucsrb_reg;
+    rw[0xD0]= & usart2->ucsra_reg;
+    // 0xCF reserved
     rw[0xCE]= & usart1->udr_reg;
     rw[0xCD]= & usart1->ubrrhi_reg;
     rw[0xCC]= & usart1->ubrr_reg;

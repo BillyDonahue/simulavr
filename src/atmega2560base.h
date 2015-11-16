@@ -76,6 +76,8 @@ protected:
     HWSpi*              spi;         //!< spi unit
     HWUsart*            usart0;      //!< usart 0 unit
     HWUsart*            usart1;      //!< usart 1 unit
+    HWUsart*            usart2;      //!< usart 2 unit
+    HWUsart*            usart3;      //!< usart 3 unit
     TimerIRQRegister*   timerIrq0;   //!< timer interrupt unit for timer 0
     HWTimer8_2C*        timer0;      //!< timer 0 unit
     ICaptureSource*     inputCapture1; //!< input capture source for timer 1
