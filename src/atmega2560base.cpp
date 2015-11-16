@@ -106,6 +106,7 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V5);
 
     rampz = new AddressExtensionRegister(this, "RAMPZ", 1);
+    eind = new AddressExtensionRegister(this, "EIND", 1);
 
     eicra_reg = new IOSpecialReg(&coreTraceGroup, "EICRA");
     eimsk_reg = new IOSpecialReg(&coreTraceGroup, "EIMSK");
@@ -293,7 +294,7 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
     rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
-    // 0x5c reserved
+    rw[0x5c]= & eind->ext_reg;
     rw[0x5b]= & rampz->ext_reg;
     // 0x58 - 0x5a reserved
     rw[0x57]= new NotSimulatedRegister("Self-programming register SPMCSR not simulated");
