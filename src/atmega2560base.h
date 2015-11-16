@@ -39,7 +39,7 @@
 
 /*! AvrDevice class for ATmega640/1280/2560.
 \todo This device isn't completely implemented. */
-class AvrDevice_atmega1284Abase: public AvrDevice {
+class AvrDevice_atmega2560base: public AvrDevice {
 
 protected:
     HWPort              porta;       //!< port A
@@ -98,17 +98,17 @@ public:
 
 class AvrDevice_atmega2560: public AvrDevice_atmega2560base {
 public:
-    AvrDevice_atmega2560() : AvrDevice_atmega2560base(16 * 1024, 256 * 1024, 4 * 1024) {}
+    AvrDevice_atmega2560() : AvrDevice_atmega2560base(8 * 1024, 256 * 1024, 4 * 1024) {}
 };
 
 class AvrDevice_atmega1280: public AvrDevice_atmega2560base {
 public:
-    AvrDevice_atmega1280() : AvrDevice_atmega2560base(4 * 1024, 128 * 1024, 2 * 1024) {}
+    AvrDevice_atmega1280() : AvrDevice_atmega2560base(8 * 1024, 128 * 1024, 4 * 1024) {}
 };
 
 class AvrDevice_atmega640: public AvrDevice_atmega2560base {
 public:
-    AvrDevice_atmega640() : AvrDevice_atmega2560base(2 * 1024, 64 * 1024, 1 * 1024) {}
+    AvrDevice_atmega640() : AvrDevice_atmega2560base(8 * 1024, 64 * 1024, 4 * 1024) {}
 };
 
 #endif
