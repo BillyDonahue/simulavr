@@ -50,7 +50,6 @@ protected:
     HWPort              portf;       //!< port F
     HWPort              portg;       //!< port G
     HWPort              porth;       //!< port H
-    HWPort              porti;       //!< port I
     HWPort              portj;       //!< port J
     HWPort              portk;       //!< port K
     HWPort              portl;       //!< port L

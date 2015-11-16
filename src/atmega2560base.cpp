@@ -89,7 +89,6 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     portf(this, "F", true),
     portg(this, "G", true),
     porth(this, "H", true),
-    porti(this, "I", true),
     portj(this, "J", true),
     portk(this, "K", true),
     portl(this, "L", true),
@@ -219,6 +218,19 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
                          30,   // (31) TX complete vector
                          1);   // instance_id for tracking in UI
 
+    rw[0x10B]= & portl.port_reg;
+    rw[0x10A]= & portl.ddr_reg;
+    rw[0x109]= & portl.pin_reg;
+    rw[0x108]= & portk.port_reg;
+    rw[0x107]= & portk.ddr_reg;
+    rw[0x106]= & portk.pin_reg;
+    rw[0x105]= & portj.port_reg;
+    rw[0x104]= & portj.ddr_reg;
+    rw[0x103]= & portj.pin_reg;
+    rw[0x102]= & porth.port_reg;
+    rw[0x101]= & porth.ddr_reg;
+    rw[0x100]= & porth.pin_reg;
+
     // 0xCF - 0xFF reserved
 
     rw[0xCE]= & usart1->udr_reg;
@@ -333,7 +345,15 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     rw[0x37]= & timerIrq2->tifr_reg;
     rw[0x36]= & timerIrq1->tifr_reg;
     rw[0x35]= & timerIrq0->tifr_reg;
-    // 0x2C - 0x34 reserved
+    rw[0x34]= & portg.port_reg;
+    rw[0x33]= & portg.ddr_reg;
+    rw[0x32]= & portg.pin_reg;
+    rw[0x31]= & portf.port_reg;
+    rw[0x30]= & portf.ddr_reg;
+    rw[0x2F]= & portf.pin_reg;
+    rw[0x2E]= & porte.port_reg;
+    rw[0x2D]= & porte.ddr_reg;
+    rw[0x2C]= & porte.pin_reg;
     rw[0x2B]= & portd.port_reg;
     rw[0x2A]= & portd.ddr_reg;
     rw[0x29]= & portd.pin_reg;
