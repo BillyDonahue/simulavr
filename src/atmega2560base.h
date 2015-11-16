@@ -58,8 +58,9 @@ protected:
     IOSpecialReg        assr_reg;    //!< ASSR IO register
     HWPrescaler         prescaler01; //!< prescaler unit for timer 0 and 1
     HWPrescalerAsync    prescaler2;  //!< prescaler unit for timer 2
-    ExternalIRQHandler* extirq012;   //!< external interrupt support for INT0, INT1, INT2
+    ExternalIRQHandler* extirq;      //!< external interrupt support for INT0 to INT7
     IOSpecialReg*       eicra_reg;   //!< EICRA IO register
+    IOSpecialReg*       eicrb_reg;   //!< EICRB IO register
     IOSpecialReg*       eimsk_reg;   //!< EIMSK IO register
     IOSpecialReg*       eifr_reg;    //!< EIFR IO register
     ExternalIRQHandler* extirqpc;    //!< external interrupt support for PCINT[0-2]
@@ -68,7 +69,6 @@ protected:
     IOSpecialReg*       pcmsk0_reg;  //!< PCIMSK0 IO register
     IOSpecialReg*       pcmsk1_reg;  //!< PCIMSK1 IO register
     IOSpecialReg*       pcmsk2_reg;  //!< PCIMSK2 IO register
-    IOSpecialReg*       pcmsk3_reg;  //!< PCIMSK3 IO register
     HWAdmux*            admux;       //!< adc multiplexer unit
     HWARef*             aref;        //!< adc reference unit
     HWAd*               ad;          //!< adc unit
@@ -78,11 +78,20 @@ protected:
     HWUsart*            usart1;      //!< usart 1 unit
     TimerIRQRegister*   timerIrq0;   //!< timer interrupt unit for timer 0
     HWTimer8_2C*        timer0;      //!< timer 0 unit
-    ICaptureSource*     inputCapture1; //!< input capture source for timer1
+    ICaptureSource*     inputCapture1; //!< input capture source for timer 1
     TimerIRQRegister*   timerIrq1;   //!< timer interrupt unit for timer 1
     HWTimer16_2C3*      timer1;      //!< timer 1 unit
     TimerIRQRegister*   timerIrq2;   //!< timer interrupt unit for timer 2
     HWTimer8_2C*        timer2;      //!< timer 2 unit
+    ICaptureSource*     inputCapture3; //!< input capture source for timer 3
+    TimerIRQRegister*   timerIrq3;   //!< timer interrupt unit for timer 3
+    HWTimer16_2C3*      timer3;      //!< timer 3 unit
+    ICaptureSource*     inputCapture4; //!< input capture source for timer 4
+    TimerIRQRegister*   timerIrq4;   //!< timer interrupt unit for timer 4
+    HWTimer16_2C3*      timer4;      //!< timer 4 unit
+    ICaptureSource*     inputCapture5; //!< input capture source for timer 5
+    TimerIRQRegister*   timerIrq5;   //!< timer interrupt unit for timer 5
+    HWTimer16_2C3*      timer5;      //!< timer 5 unit
     GPIORegister*       gpior0_reg;  //!< general purpose IO register
     GPIORegister*       gpior1_reg;  //!< general purpose IO register
     GPIORegister*       gpior2_reg;  //!< general purpose IO register

@@ -46,6 +46,15 @@ AvrDevice_atmega2560base::~AvrDevice_atmega2560base() {
     delete gpior2_reg;
     delete gpior1_reg;
     delete gpior0_reg;
+    delete timer5;
+    delete inputCapture5;
+    delete timerIrq5;
+    delete timer4;
+    delete inputCapture4;
+    delete timerIrq4;
+    delete timer3;
+    delete inputCapture3;
+    delete timerIrq3;
     delete timer2;
     delete timerIrq2;
     delete timer1;
@@ -54,16 +63,16 @@ AvrDevice_atmega2560base::~AvrDevice_atmega2560base() {
     delete timer0;
     delete timerIrq0;
     delete extirqpc;
-    delete pcmsk3_reg;
     delete pcmsk2_reg;
     delete pcmsk1_reg;
     delete pcmsk0_reg;
     delete pcifr_reg;
     delete pcicr_reg;
-    delete extirq012;
+    delete extirq;
     delete eifr_reg;
     delete eimsk_reg;
     delete eicra_reg;
+    delete eicrb_reg;
     delete osccal_reg;
     delete clkpr_reg;
     delete stack;
@@ -111,54 +120,59 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     eind = new AddressExtensionRegister(this, "EIND", 1);
 
     eicra_reg = new IOSpecialReg(&coreTraceGroup, "EICRA");
+    eicrb_reg = new IOSpecialReg(&coreTraceGroup, "EICRB");
     eimsk_reg = new IOSpecialReg(&coreTraceGroup, "EIMSK");
     eifr_reg = new IOSpecialReg(&coreTraceGroup, "EIFR");
-    extirq012 = new ExternalIRQHandler(this, irqSystem, eimsk_reg, eifr_reg);
-    extirq012->registerIrq(1, 0, new ExternalIRQSingle(eicra_reg, 0, 2, GetPin("D2")));
-    extirq012->registerIrq(2, 1, new ExternalIRQSingle(eicra_reg, 2, 2, GetPin("D3")));
-    extirq012->registerIrq(3, 2, new ExternalIRQSingle(eicra_reg, 4, 2, GetPin("B2")));
+    extirq = new ExternalIRQHandler(this, irqSystem, eimsk_reg, eifr_reg);
+    extirq->registerIrq(1, 0, new ExternalIRQSingle(eicra_reg, 0, 2, GetPin("D2")));
+    extirq->registerIrq(2, 1, new ExternalIRQSingle(eicra_reg, 2, 2, GetPin("D3")));
+    extirq->registerIrq(3, 2, new ExternalIRQSingle(eicra_reg, 4, 2, GetPin("B2")));
+    extirq->registerIrq(4, 3, new ExternalIRQSingle(eicra_reg, 6, 2, GetPin("XX")));
+    extirq->registerIrq(5, 4, new ExternalIRQSingle(eicrb_reg, 0, 2, GetPin("XX")));
+    extirq->registerIrq(6, 5, new ExternalIRQSingle(eicrb_reg, 2, 2, GetPin("XX")));
+    extirq->registerIrq(7, 6, new ExternalIRQSingle(eicrb_reg, 4, 2, GetPin("XX")));
+    extirq->registerIrq(8, 7, new ExternalIRQSingle(eicrb_reg, 6, 2, GetPin("XX")));
 
     pcicr_reg = new IOSpecialReg(&coreTraceGroup, "PCICR");
     pcifr_reg = new IOSpecialReg(&coreTraceGroup, "PCIFR");
     pcmsk0_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK0");
     pcmsk1_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK1");
     pcmsk2_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK2");
-    pcmsk3_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK3");
     extirqpc = new ExternalIRQHandler(this, irqSystem, pcicr_reg, pcifr_reg);
-    extirqpc->registerIrq(4, 0, new ExternalIRQPort(pcmsk0_reg, &porta));
-    extirqpc->registerIrq(5, 1, new ExternalIRQPort(pcmsk1_reg, &portb));
-    extirqpc->registerIrq(6, 2, new ExternalIRQPort(pcmsk2_reg, &portc));
-    extirqpc->registerIrq(7, 3, new ExternalIRQPort(pcmsk3_reg, &portd));
+    extirqpc->registerIrq(9, 0, new ExternalIRQPort(pcmsk0_reg, &porta)); //TODO ctae is this port based?
+    extirqpc->registerIrq(10, 1, new ExternalIRQPort(pcmsk1_reg, &portb)); //TODO ctae is this port based?
+    extirqpc->registerIrq(11, 2, new ExternalIRQPort(pcmsk2_reg, &portc)); //TODO ctae is this port based?
 
     timerIrq0 = new TimerIRQRegister(this, irqSystem, 0);
-    timerIrq0->registerLine(0, new IRQLine("TOV0",  18));
-    timerIrq0->registerLine(1, new IRQLine("OCF0A", 16));
-    timerIrq0->registerLine(2, new IRQLine("OCF0B", 17));
+    timerIrq0->registerLine(0, new IRQLine("TOV0",  23));
+    timerIrq0->registerLine(1, new IRQLine("OCF0A", 21));
+    timerIrq0->registerLine(2, new IRQLine("OCF0B", 22));
 
     timer0 = new HWTimer8_2C(this,
-                             new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 4)),
+                             new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 4)), //todo ctae check pin
                              0,
                              timerIrq0->getLine("TOV0"),
                              timerIrq0->getLine("OCF0A"),
-                             new PinAtPort(&portb, 3),
+                             new PinAtPort(&portb, 3), //todo ctae check pin
                              timerIrq0->getLine("OCF0B"),
-                             new PinAtPort(&portb, 4));
+                             new PinAtPort(&portb, 4)); //todo ctae check pin
 
     timerIrq1 = new TimerIRQRegister(this, irqSystem, 1);
-    timerIrq1->registerLine(0, new IRQLine("TOV1",  15));
-    timerIrq1->registerLine(1, new IRQLine("OCF1A", 13));
-    timerIrq1->registerLine(2, new IRQLine("OCF1B", 14));
-    timerIrq1->registerLine(5, new IRQLine("ICF1",  12));
+    timerIrq1->registerLine(0, new IRQLine("TOV1",  20));
+    timerIrq1->registerLine(1, new IRQLine("OCF1A", 17));
+    timerIrq1->registerLine(2, new IRQLine("OCF1B", 18));
+    timerIrq1->registerLine(3, new IRQLine("OCF1C", 19));
+    timerIrq1->registerLine(5, new IRQLine("ICF1",  16)); //todo ctae ICF1 is capture event??
 
-    inputCapture1 = new ICaptureSource(PinAtPort(&portb, 0));
+    inputCapture1 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
     timer1 = new HWTimer16_2C3(this,
-                               new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)),
+                               new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
                                1,
                                timerIrq1->getLine("TOV1"),
                                timerIrq1->getLine("OCF1A"),
-                               new PinAtPort(&portd, 5),
+                               new PinAtPort(&portd, 5), //todo ctae check pin
                                timerIrq1->getLine("OCF1B"),
-                               new PinAtPort(&portd, 4),
+                               new PinAtPort(&portd, 4), //todo ctae check pin
                                timerIrq1->getLine("ICF1"),
                                inputCapture1);
 
@@ -175,6 +189,63 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
                              new PinAtPort(&portd, 7),
                              timerIrq2->getLine("OCF2B"),
                              new PinAtPort(&portd, 6));
+
+    timerIrq3 = new TimerIRQRegister(this, irqSystem, 3);
+    timerIrq3->registerLine(0, new IRQLine("TOV1",  20));
+    timerIrq3->registerLine(1, new IRQLine("OCF1A", 17));
+    timerIrq3->registerLine(2, new IRQLine("OCF1B", 18));
+    timerIrq3->registerLine(3, new IRQLine("OCF1C", 19));
+    timerIrq3->registerLine(5, new IRQLine("ICF1",  16)); //todo ctae ICF1 is capture event??
+
+    inputCapture3 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
+    timer3 = new HWTimer16_2C3(this,
+                               new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
+                               1,
+                               timerIrq3->getLine("TOV1"),
+                               timerIrq3->getLine("OCF1A"),
+                               new PinAtPort(&portd, 5), //todo ctae check pin
+                               timerIrq3->getLine("OCF1B"),
+                               new PinAtPort(&portd, 4), //todo ctae check pin
+                               timerIrq3->getLine("ICF1"),
+                               inputCapture3);
+
+    timerIrq4 = new TimerIRQRegister(this, irqSystem, 4);
+    timerIrq4->registerLine(0, new IRQLine("TOV1",  20));
+    timerIrq4->registerLine(1, new IRQLine("OCF1A", 17));
+    timerIrq4->registerLine(2, new IRQLine("OCF1B", 18));
+    timerIrq4->registerLine(3, new IRQLine("OCF1C", 19));
+    timerIrq4->registerLine(5, new IRQLine("ICF1",  16)); //todo ctae ICF1 is capture event??
+
+    inputCapture4 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
+    timer4 = new HWTimer16_2C3(this,
+                               new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
+                               1,
+                               timerIrq4->getLine("TOV1"),
+                               timerIrq4->getLine("OCF1A"),
+                               new PinAtPort(&portd, 5), //todo ctae check pin
+                               timerIrq4->getLine("OCF1B"),
+                               new PinAtPort(&portd, 4), //todo ctae check pin
+                               timerIrq4->getLine("ICF1"),
+                               inputCapture4);
+
+    timerIrq5 = new TimerIRQRegister(this, irqSystem, 5);
+    timerIrq5->registerLine(0, new IRQLine("TOV1",  20));
+    timerIrq5->registerLine(1, new IRQLine("OCF1A", 17));
+    timerIrq5->registerLine(2, new IRQLine("OCF1B", 18));
+    timerIrq5->registerLine(3, new IRQLine("OCF1C", 19));
+    timerIrq5->registerLine(5, new IRQLine("ICF1",  16)); //todo ctae ICF1 is capture event??
+
+    inputCapture5 = new ICaptureSource(PinAtPort(&portb, 0)); //todo ctae check pin
+    timer5 = new HWTimer16_2C3(this,
+                               new PrescalerMultiplexerExt(&prescaler01, PinAtPort(&portd, 5)), //todo ctae check pin
+                               1,
+                               timerIrq5->getLine("TOV1"),
+                               timerIrq5->getLine("OCF1A"),
+                               new PinAtPort(&portd, 5), //todo ctae check pin
+                               timerIrq5->getLine("OCF1B"),
+                               new PinAtPort(&portd, 4), //todo ctae check pin
+                               timerIrq5->getLine("ICF1"),
+                               inputCapture5);
 
     gpior0_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR0");
     gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
@@ -218,6 +289,19 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
                          30,   // (31) TX complete vector
                          1);   // instance_id for tracking in UI
 
+    rw[0x12d]= & timer5->ocrc_h_reg;
+    rw[0x12c]= & timer5->ocrc_l_reg;
+    rw[0x12b]= & timer5->ocrb_h_reg;
+    rw[0x12a]= & timer5->ocrb_l_reg;
+    rw[0x129]= & timer5->ocra_h_reg;
+    rw[0x128]= & timer5->ocra_l_reg;
+    rw[0x127]= & timer5->icr_h_reg;
+    rw[0x126]= & timer5->icr_l_reg;
+    rw[0x125]= & timer5->tcnt_h_reg;
+    rw[0x124]= & timer5->tcnt_l_reg;
+    rw[0x122]= & timer5->tccrc_reg;
+    rw[0x121]= & timer5->tccrb_reg;
+    rw[0x120]= & timer5->tccra_reg;
     rw[0x10B]= & portl.port_reg;
     rw[0x10A]= & portl.ddr_reg;
     rw[0x109]= & portl.pin_reg;
@@ -265,6 +349,34 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     rw[0xb1]= & timer2->tccrb_reg;
     rw[0xb0]= & timer2->tccra_reg;
     // 0x8c - 0xaf reserved
+    rw[0xad]= & timer4->ocrc_h_reg;
+    rw[0xac]= & timer4->ocrc_l_reg;
+    rw[0xab]= & timer4->ocrb_h_reg;
+    rw[0xaa]= & timer4->ocrb_l_reg;
+    rw[0xa9]= & timer4->ocra_h_reg;
+    rw[0xa8]= & timer4->ocra_l_reg;
+    rw[0xa7]= & timer4->icr_h_reg;
+    rw[0xa6]= & timer4->icr_l_reg;
+    rw[0xa5]= & timer4->tcnt_h_reg;
+    rw[0xa4]= & timer4->tcnt_l_reg;
+    rw[0xa2]= & timer4->tccrc_reg;
+    rw[0xa1]= & timer4->tccrb_reg;
+    rw[0xa0]= & timer4->tccra_reg;
+    rw[0x9d]= & timer3->ocrc_h_reg;
+    rw[0x9c]= & timer3->ocrc_l_reg;
+    rw[0x9b]= & timer3->ocrb_h_reg;
+    rw[0x9a]= & timer3->ocrb_l_reg;
+    rw[0x99]= & timer3->ocra_h_reg;
+    rw[0x98]= & timer3->ocra_l_reg;
+    rw[0x97]= & timer3->icr_h_reg;
+    rw[0x96]= & timer3->icr_l_reg;
+    rw[0x95]= & timer3->tcnt_h_reg;
+    rw[0x94]= & timer3->tcnt_l_reg;
+    rw[0x92]= & timer3->tccrc_reg;
+    rw[0x91]= & timer3->tccrb_reg;
+    rw[0x90]= & timer3->tccra_reg;
+    rw[0x8d]= & timer1->ocrc_h_reg;
+    rw[0x8c]= & timer1->ocrc_l_reg;
     rw[0x8b]= & timer1->ocrb_h_reg;
     rw[0x8a]= & timer1->ocrb_l_reg;
     rw[0x89]= & timer1->ocra_h_reg;
@@ -286,16 +398,16 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     rw[0x79]= & ad->adch_reg;
     rw[0x78]= & ad->adcl_reg;
     // 0x74, 0x75, 0x76, 0x77 reserved
-    rw[0x73]= pcmsk3_reg;
-    // 0x72 reserved
-    // 0x71 reserved
+    rw[0x73]= & timerIrq5->timsk_reg;
+    rw[0x72]= & timerIrq4->timsk_reg;
+    rw[0x71]= & timerIrq3->timsk_reg;
     rw[0x70]= & timerIrq2->timsk_reg;
     rw[0x6F]= & timerIrq1->timsk_reg;
     rw[0x6E]= & timerIrq0->timsk_reg;
     rw[0x6d]= pcmsk2_reg;
     rw[0x6c]= pcmsk1_reg;
     rw[0x6b]= pcmsk0_reg;
-    // 0x6A reserved
+    rw[0x69]= eicrb_reg;
     rw[0x69]= eicra_reg;
     rw[0x68]= pcicr_reg;
     // 0x67 reserved
@@ -341,7 +453,9 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     rw[0x3D]= eimsk_reg;
     rw[0x3C]= eifr_reg;
     rw[0x3b]= pcifr_reg;
-    // 0x38, 0x39, 0x3A reserved
+    rw[0x3A]= & timerIrq5->tifr_reg;
+    rw[0x39]= & timerIrq4->tifr_reg;
+    rw[0x38]= & timerIrq3->tifr_reg;
     rw[0x37]= & timerIrq2->tifr_reg;
     rw[0x36]= & timerIrq1->tifr_reg;
     rw[0x35]= & timerIrq0->tifr_reg;
