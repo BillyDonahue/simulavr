@@ -143,6 +143,7 @@ class ExternalIRQPort: public ExternalIRQ, public HasPinNotifyFunction {
         
     public:
         ExternalIRQPort(IOSpecialReg *ctrl, HWPort *port);
+        ExternalIRQPort(IOSpecialReg *ctrl, Pin* pinList[8]);
         
         // from HasPinNotifyFunction
         void PinStateHasChanged(Pin *pin);

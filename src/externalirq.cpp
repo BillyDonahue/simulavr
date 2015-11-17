@@ -235,6 +235,24 @@ ExternalIRQPort::ExternalIRQPort(IOSpecialReg *ctrl, HWPort *port):
     ResetMode();
 }
 
+ExternalIRQPort::ExternalIRQPort(IOSpecialReg *ctrl, Pin* pinList[8]):
+    ExternalIRQ(ctrl, 0, 8) // TODO ctae order correct?
+{
+    portSize = 8;
+    for(unsigned int idx = 0; idx < 8; idx++) {
+        if(idx < portSize) {
+            Pin *p = pinList[idx];
+            pins[idx] = p;
+            state[idx] = (bool)*p;
+            p->RegisterCallback(this);
+        } else {
+            pins[idx] = NULL;
+            state[idx] = false;
+        }
+    }
+    ResetMode();
+}
+
 void ExternalIRQPort::PinStateHasChanged(Pin *pin) {
     // new state
     bool s = (bool)*pin;
