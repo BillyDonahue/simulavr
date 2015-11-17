@@ -56,7 +56,7 @@ protected:
 
     IOSpecialReg        gtccr_reg;   //!< GTCCR IO register
     IOSpecialReg        assr_reg;    //!< ASSR IO register
-    HWPrescaler         prescaler01; //!< prescaler unit for timer 0 and 1
+    HWPrescaler         prescaler1;  //!< prescaler unit for timer 0, 1, 3, 4 and 5
     HWPrescalerAsync    prescaler2;  //!< prescaler unit for timer 2
     ExternalIRQHandler* extirq;      //!< external interrupt support for INT0 to INT7
     IOSpecialReg*       eicra_reg;   //!< EICRA IO register
