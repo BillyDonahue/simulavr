@@ -87,7 +87,7 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
                                                      unsigned ee_bytes ):
     AvrDevice(0x200 - 0x60, // I/O space size (above ALU registers)
               ram_bytes,    // RAM size
-              0xDE00,       // External RAM size
+              0 /*0xDE00*/,       // External RAM size
               flash_bytes), // Flash Size
     porta(this, "A", true),
     portb(this, "B", true),
@@ -106,6 +106,7 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     prescaler2(this, "2", PinAtPort(&portg, 4), &assr_reg, 5, &gtccr_reg, 1, 7)
 { 
     flagELPMInstructions = true;
+    flagEIJMPInstructions = true;
     fuses->SetFuseConfiguration(19, 0xff9962);
 
     irqSystem = new HWIrqSystem(this, 4, 57);
