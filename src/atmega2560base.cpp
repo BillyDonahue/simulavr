@@ -87,8 +87,9 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
                                                      unsigned ee_bytes ):
     AvrDevice(0x200 - 0x60, // I/O space size (above ALU registers)
               ram_bytes,    // RAM size
-              0 /*0xDE00*/,       // External RAM size
-              flash_bytes), // Flash Size
+              0,            // External RAM size
+              flash_bytes,  // Flash Size
+              3),           // PC size
     porta(this, "A", true),
     portb(this, "B", true),
     portc(this, "C", true),
@@ -112,7 +113,7 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     irqSystem = new HWIrqSystem(this, 4, 57);
 
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, 30, HWEeprom::DEVMODE_EXTENDED); 
-    stack = new HWStackSram(this, 16);
+    stack = new HWStackSram(this, 22);
     clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V5);
 
