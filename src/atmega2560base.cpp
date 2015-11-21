@@ -117,7 +117,7 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V5);
 
-    rampz = new AddressExtensionRegister(this, "RAMPZ", 1);
+    rampz = new AddressExtensionRegister(this, "RAMPZ", 2);
     eind = new AddressExtensionRegister(this, "EIND", 1);
 
     eicra_reg = new IOSpecialReg(&coreTraceGroup, "EICRA");
