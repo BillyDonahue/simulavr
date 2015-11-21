@@ -199,6 +199,18 @@ class opcode_stack_mixin:
 	def analyze_read_from_current_stack(self):
 		return self.target.read_sram(self.SP_val, 1)[0]
 
+class opcode_eind_mixin:
+	"""Mixin Class for testing opcodes that access eind register
+	"""
+
+	eind_register_address = 0x5c
+
+	def read_register_eind(self):
+		return self.target.read_sram(self.eind_register_address, 1)[0]
+
+	def write_register_eind(self, val):
+		return self.target.write_sram(self.eind_register_address, 1, [val])
+
 class opcode_32_test(opcode_32_mixin, opcode_test):
 	pass
 
@@ -208,4 +220,10 @@ class opcode_stack_test(opcode_stack_mixin, opcode_test):
 class opcode_stack_32_test(opcode_32_mixin, opcode_stack_mixin, opcode_test):
 	"""Base Class for testing 32 bit opcodes with stack operations.
 	"""
+	pass
+
+class opcode_eind_stack_test(opcode_eind_mixin, opcode_stack_mixin, opcode_test):
+	pass
+
+class opcode_eind_test(opcode_eind_mixin, opcode_test):
 	pass
