@@ -91,7 +91,7 @@ class test_ST_Z_decr_r%02d_Z%04x_v%02x(base_ST_Z_decr):
 #
 code = ''
 for d in range(0,30):
-	for x in (0x10f, 0x1ff):
+	for x in (0x20f, 0x2ff):
 		for v in (0xaa, 0x55):
 			args = (d,x,v)*4
 			code += template % args

@@ -90,7 +90,7 @@ class test_STD_Z_r%02d_Z%04x_q%02x_v%02x(base_STD_Z):
 #
 code = ''
 for d in range(0,32):
-	for z in (0x10f, 0x1ff):
+	for z in (0x20f, 0x2ff):
 		for q in range(0,64,0x10):
 			for v in (0xaa, 0x55):
 				args = (d,z,q,v)*4

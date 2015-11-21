@@ -87,7 +87,7 @@ class test_LDD_Y_r%02d_Y%04x_q%02x_v%02x(base_LDD_Y):
 #
 code = ''
 for d in range(0,32,4):
-	for y in (0x10f, 0x1ff):
+	for y in (0x20f, 0x2ff):
 		for q in range(0,64,0x10):
 			for v in (0xaa, 0x55):
 				args = (d,y,q,v)*4

@@ -95,7 +95,7 @@ class test_LD_X_decr_r%02d_X%04x_v%02x(base_LD_X_decr):
 #
 code = ''
 for d in range(0,26)+range(28,32):
-	for x in (0x10f, 0x1ff):
+	for x in (0x20f, 0x2ff):
 		for v in (0xaa, 0x55):
 			args = (d,x,v)*4
 			code += template % args

@@ -90,7 +90,7 @@ class test_ST_Y_incr_r%02d_Y%04x_v%02x(base_ST_Y_incr):
 #
 code = ''
 for d in range(0,28)+range(30,32):
-	for x in (0x10f, 0x1ff):
+	for x in (0x20f, 0x2ff):
 		for v in (0xaa, 0x55):
 			args = (d,x,v)*4
 			code += template % args
