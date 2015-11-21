@@ -42,6 +42,7 @@ class AvrTarget(gdb_rsp.GdbRemoteSerialProtocol):
     self.device = device
     self.pc_size = 3 if (device == "atmega2560") else 2
     self.has_eind = True if (device == "atmega2560") else False
+    self.has_rampz = True if (device == "atmega2560") else False
 
   def read_flash(self, addr, _len):
     return self.read_mem( addr+self.offset_flash, _len )

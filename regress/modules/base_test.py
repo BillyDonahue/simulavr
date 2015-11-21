@@ -211,6 +211,19 @@ class opcode_eind_mixin:
 	def write_register_eind(self, val):
 		return self.target.write_sram(self.eind_register_address, 1, [val])
 
+class opcode_rampz_mixin:
+	"""Mixin Class for testing opcodes that access rampz register
+	"""
+
+	rampz_register_address = 0x5b
+
+	def read_register_rampz(self):
+		return self.target.read_sram(self.rampz_register_address, 1)[0]
+
+	def write_register_rampz(self, val):
+		return self.target.write_sram(self.rampz_register_address, 1, [val])
+
+
 class opcode_32_test(opcode_32_mixin, opcode_test):
 	pass
 
@@ -226,4 +239,7 @@ class opcode_eind_stack_test(opcode_eind_mixin, opcode_stack_mixin, opcode_test)
 	pass
 
 class opcode_eind_test(opcode_eind_mixin, opcode_test):
+	pass
+
+class opcode_rampz_test(opcode_rampz_mixin, opcode_test):
 	pass
