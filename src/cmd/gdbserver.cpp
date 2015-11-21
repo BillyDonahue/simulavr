@@ -807,11 +807,9 @@ void GdbServer::gdb_read_memory(const char *pkt) {
             }
         }
     }
-    else if ( (addr & MEM_SPACE_MASK) == FLASH_OFFSET )
+    else if ( (addr & MEM_SPACE_MASK) < SRAM_OFFSET)
     {
         /* addressing flash */
-
-        addr = addr & ~MEM_SPACE_MASK; /* remove the offset bits */
 
         is_odd_addr = addr % 2;
         i = 0;
@@ -912,11 +910,9 @@ void GdbServer::gdb_write_memory(const char *pkt) {
             }
         }
     }
-    else if ( (addr & MEM_SPACE_MASK) == FLASH_OFFSET )
+    else if ( (addr & MEM_SPACE_MASK) < SRAM_OFFSET)
     {
         /* addressing flash */
-
-        addr = addr & ~MEM_SPACE_MASK; /* remove the offset bits */
 
         if (addr % 2)
         {
