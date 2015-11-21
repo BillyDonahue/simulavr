@@ -190,7 +190,11 @@ class opcode_stack_mixin:
 
 	def setup_word_to_stack(self, val):
 		# used by RET, RETI setup, since they pop at least a word
-		self.target.write_sram(self.SP_val+1, 2, [(val & 0xff00)>>8, val & 0xff])
+                if (self.target.pc_size == 2):
+		        mem = [(val & 0xff00)>>8, val & 0xff]
+                else:
+                        mem = [(val & 0xff0000)>>16, (val & 0xff00)>>8, val & 0xff]
+                self.target.write_sram(self.SP_val+1, len(mem), mem)
 
 	def analyze_read_from_current_stack(self):
 		return self.target.read_sram(self.SP_val, 1)[0]
