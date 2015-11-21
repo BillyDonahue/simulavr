@@ -128,7 +128,8 @@ private:
 AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
                      unsigned int IRamSize,
                      unsigned int ERamSize,
-                     unsigned int flashSize):
+                     unsigned int flashSize,
+                     unsigned int pcSize):
     TraceValueRegister(),
     ioSpaceSize(_ioSpaceSize),
     iRamSize(IRamSize),
@@ -150,7 +151,8 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     flagMOVWInstruction(true),
     flagTiny10(false),
     flagTiny1x(false),
-    flagXMega(false)
+    flagXMega(false),
+    PC_size(pcSize)
 {
     dumpManager = DumpManager::Instance();
     dumpManager->registerAvrDevice(this);
@@ -375,7 +377,6 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
 }
 
 void AvrDevice::Reset() {
-    PC_size = 2;
     PC = 0;
 
     vector<Hardware *>::iterator ii;
