@@ -2,7 +2,7 @@
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
-# Copyright (C) 2001, 2002  Theodore A. Roth
+#
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #
 ###############################################################################
 #
-# $Id: test_ELPM.py,v 1.1 2004/07/31 00:59:11 rivetwa Exp $
+#
 #
 
 """Test the ELPM opcode.
@@ -54,7 +54,6 @@ class base_ELPM(base_test.opcode_rampz_test):
 
                 #setup RAMPZ register
                 self.write_register_rampz(self.rampz & 0xff)
-
 
 		# set up the val in memory
 		self.prog_word_write(((self.rampz << 16) + self.Z) & 0xfffffe, 0xaa55 )
