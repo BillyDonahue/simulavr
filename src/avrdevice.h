@@ -90,9 +90,9 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         int trace_on;
         Breakpoints BP;
         Exitpoints EP;
-        word PC;  ///< Next/current instruction index. Multiply by 2 to get an address. This will not be enough for ATmega2560
+        unsigned int PC;  ///< Next/current instruction index. Multiply by 2 to get an address.
         /// When mupti-cycle instruction is "processed" this holds its address, PC holds the next instruction.
-        word cPC;
+        unsigned int cPC;
         const unsigned int PC_size;
         AvrFlash *Flash;
         FlashProgramming *spmRegister;
