@@ -65,7 +65,7 @@ class base_CALL(base_test.opcode_stack_32_test):
 		if expect != got:
 			self.fail('CALL failed: expect=%x, got=%x' % (expect, got))
 
-		sp_expect = self.setup_regs[Reg.SP] - 2 # 16 bit PC
+		sp_expect = self.setup_regs[Reg.SP] - self.target.pc_size
 		sp_got    = self.anal_regs[Reg.SP]
 
 		if sp_got != sp_expect:

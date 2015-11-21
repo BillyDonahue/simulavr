@@ -66,7 +66,7 @@ class base_RCALL(base_test.opcode_stack_test):
     if expect != got:
       self.fail('RCALL failed: expect=%x, got=%x' % (expect, got))
 
-    expect = self.setup_regs[Reg.SP] - 2 # 16 bit PC
+    expect = self.setup_regs[Reg.SP] - self.target.pc_size
     got    = self.anal_regs[Reg.SP]
     
     if got != expect:

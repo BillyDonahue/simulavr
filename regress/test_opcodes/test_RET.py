@@ -55,7 +55,7 @@ class base_RET(base_test.opcode_stack_test):
 		self.reg_changed.extend( [ Reg.SP ] )
 
 		# check that SP changed correctly
-		expect = self.setup_regs[Reg.SP] + 2
+		expect = self.setup_regs[Reg.SP] + self.target.pc_size
 		got    = self.anal_regs[Reg.SP]
 
 		if got != expect:

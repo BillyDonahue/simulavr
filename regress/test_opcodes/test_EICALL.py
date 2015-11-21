@@ -48,6 +48,10 @@ class base_EICALL(base_test.opcode_stack_test):
 	opcode is '1001 0101 0001 1001'
 	"""
 	def setup(self):
+
+                if (not self.target.has_eind):
+                        self.fail('EICALL failed: Not supported by this device %s' % self.target.device)
+
 		# setup PC
 		self.setup_regs[Reg.PC] = 0xff * 2
 
@@ -56,7 +60,8 @@ class base_EICALL(base_test.opcode_stack_test):
 		self.setup_regs[Reg.R31] = self.k >> 8 & 0xff
 
                 #setup EIND register
-                #self.setup_regs[Reg.EIND] = self.eind & 0xff
+                self.eind_register_address = 0x5c
+                self.write_register_eind(self.eind & 0xff)
                 
 		return 0x9519
 
@@ -64,38 +69,49 @@ class base_EICALL(base_test.opcode_stack_test):
 		self.reg_changed.append( Reg.SP )
 		self.is_pc_checked = 1
 
-		expect = self.k
+		expect = self.k + (self.eind << 16)
 
 		got = self.anal_regs[Reg.PC] / 2
-		
+
 		if expect != got:
 			self.fail('EICALL failed: expect=%x, got=%x' % (expect, got))
 
-		expect = self.setup_regs[Reg.SP] - 3 # 22 bit PC
+		expect = self.setup_regs[Reg.SP] - self.target.pc_size
 		got    = self.anal_regs[Reg.SP]
 		
 		if got != expect:
 			self.fail('EICALL stack push failed: expect=%04x, got=%04x' % (
 				expect, got ))
 
+	def read_register_eind(self):
+		return self.target.read_sram(self.eind_register_address, 1)[0]
+
+        def write_register_eind(self, val):
+		return self.target.write_sram(self.eind_register_address, 1, [val])
+
+
 #
 # Template code for test case.
 # The fail method will raise a test specific exception.
 #
 template = """
-class EICALL_%04x_TestFail(EICALL_TestFail): pass
+class EICALL_k%04x_ei%02x_TestFail(EICALL_TestFail): pass
 
-class test_EICALL_%04x(base_EICALL):
+class test_EICALL_k%04x_ei%02x(base_EICALL):
 	k = 0x%x
-	eind = 0x00
+	eind = 0x%x
 	def fail(self,s):
-		raise EICALL_%04x_TestFail, s
+		raise EICALL_k%04x_ei%02x_TestFail, s
 """
 
 #
 # automagically generate the test_EICALL_* class definitions
 #
+
 code = ''
 for k in (0x100,0x3ff):
-	code += template % ((k & 0x3fffff), (k & 0x3fffff), k, (k & 0x3fffff))
+        for eind in (0x00, 0x01):
+                km = k & 0x3fffff
+                args = (km, eind) * 4
+	        code += template % args
 exec code
