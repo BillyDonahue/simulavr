@@ -85,7 +85,7 @@ class test_STS_r%02d_k%04x_v%02x(base_STS):
 #
 code = ''
 for d in range(0,32):
-	for k in (0x10f, 0x1ff):
+	for k in (0x20f, 0x2ff):
 		for v in (0xaa, 0x55):
 			args = (d,k,v)*4
 			code += template % args
