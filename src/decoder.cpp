@@ -512,7 +512,7 @@ int avr_op_EICALL::operator()() {
     core->stack->PushAddr(core->PC + 1);
 
     core->DebugOnJump();
-    core->PC = new_PC;
+    core->PC = new_PC - 1;
 
     return core->flagXMega ? 3 : 4;
 }
