@@ -522,7 +522,7 @@ avr_op_EIJMP::avr_op_EIJMP(word opcode, AvrDevice *c):
 
 int avr_op_EIJMP::operator()() {
     core->DebugOnJump();
-    core->PC = (core->eind->GetRegVal() << 16) + core->GetRegZ();
+    core->PC = (core->eind->GetRegVal() << 16) + core->GetRegZ() - 1;
 
     return 2;
 }
