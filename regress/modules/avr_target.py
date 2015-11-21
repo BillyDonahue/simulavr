@@ -37,8 +37,11 @@ class AvrTarget(gdb_rsp.GdbRemoteSerialProtocol):
   offset_flash = 0x0
   offset_sram  = 0x00800000
   
-  def __init__(self, host='localhost', port=1212, ofile=None):
+  def __init__(self, device, host='localhost', port=1212, ofile=None):
     gdb_rsp.GdbRemoteSerialProtocol.__init__(self,host,port,ofile)
+    self.device = device
+    self.pc_size = 3 if (device == "atmega2560") else 2
+    self.has_eind = True if (device == "atmega2560") else False
 
   def read_flash(self, addr, _len):
     return self.read_mem( addr+self.offset_flash, _len )
@@ -63,7 +66,7 @@ class AvrTarget(gdb_rsp.GdbRemoteSerialProtocol):
 
 if __name__ == '__main__':
   # Open a connection to the target
-  target = AvrTarget(ofile=sys.stderr)
+  target = AvrTarget(device="atmega128", ofile=sys.stderr)
 
   demo = '/home/troth/develop/avr/sav/build-sim-debug/test_c/demo.bin'
   target.load_binary(demo)
