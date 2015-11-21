@@ -26,11 +26,11 @@ done	CPC
 done	CPI
 done	CPSE
 done	DEC
-done	EICALL       --- Only supported by atmega2560
-done	EIJMP        --- Only supported by atmega2560
-	ELPM_Z       --- Do any current devices provide this?
-	ELPM_Z_incr  --- Do any current devices provide this?
-	ELPM         --- Do any current devices provide this?
+done	EICALL       --- Only supported by mcus providing eind register
+done	EIJMP        --- Only supported by mcus providing eind register
+	ELPM_Z       --- Only supported by mcus providing rampz register
+	ELPM_Z_incr  --- Only supported by mcus providing rampz register
+	ELPM         --- Only supported by mcus providing rampz register
 done	EOR  (CLR)
 	ESPM         --- Do any current devices provide this?
 	FMUL         --- I don't even understand how this works yet, anyone know?
