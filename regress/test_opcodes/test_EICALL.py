@@ -31,7 +31,7 @@ from registers import Reg
 
 class EICALL_TestFail(base_test.TestFail): pass
 
-class base_EICALL(base_test.opcode_stack_test):
+class base_EICALL(base_test.opcode_eind_stack_test):
 	"""Generic test case for testing EICALL opcode.
 
 	The derived class must provide the reg member and the fail method.
@@ -60,7 +60,6 @@ class base_EICALL(base_test.opcode_stack_test):
 		self.setup_regs[Reg.R31] = self.k >> 8 & 0xff
 
                 #setup EIND register
-                self.eind_register_address = 0x5c
                 self.write_register_eind(self.eind & 0xff)
                 
 		return 0x9519
@@ -82,12 +81,6 @@ class base_EICALL(base_test.opcode_stack_test):
 		if got != expect:
 			self.fail('EICALL stack push failed: expect=%04x, got=%04x' % (
 				expect, got ))
-
-	def read_register_eind(self):
-		return self.target.read_sram(self.eind_register_address, 1)[0]
-
-        def write_register_eind(self, val):
-		return self.target.write_sram(self.eind_register_address, 1, [val])
 
 
 #
