@@ -26,8 +26,8 @@ done	CPC
 done	CPI
 done	CPSE
 done	DEC
-	EICALL       --- Do any current devices provide this?
-	EIJMP        --- Do any current devices provide this?
+done	EICALL       --- Only supported by atmega2560
+done	EIJMP        --- Only supported by atmega2560
 	ELPM_Z       --- Do any current devices provide this?
 	ELPM_Z_incr  --- Do any current devices provide this?
 	ELPM         --- Do any current devices provide this?
