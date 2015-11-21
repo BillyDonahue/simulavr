@@ -85,7 +85,7 @@ AvrDevice_atmega2560base::~AvrDevice_atmega2560base() {
 AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
                                                      unsigned flash_bytes,
                                                      unsigned ee_bytes ):
-    AvrDevice(0x200 - 0x60, // I/O space size (above ALU registers)
+    AvrDevice(0x200 - 32, // I/O space size (above ALU registers)
               ram_bytes,    // RAM size
               0,            // External RAM size
               flash_bytes,  // Flash Size
