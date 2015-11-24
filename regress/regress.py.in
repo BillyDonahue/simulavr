@@ -182,6 +182,8 @@ Usage: regress.py [options] [[test_]dir] [[test_]module[.py]] [[test_]case]
 
 Options:
   -h, --help      : print this message and exit
+  -d, --dev=<dev> : use the given device for simulation, the defaul value is
+                    "atmega128"
   -s, --sim=<sim> : path to simulavr executable
       --stall     : stall the regression engine when done
 """
@@ -210,16 +212,19 @@ if __name__ == '__main__':
 
   # Parse command line options
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "hs:", ["help", "sim=", "stall"])
+    opts, args = getopt.getopt(sys.argv[1:], "hd:s:", ["help", "dev=", "sim=", "stall"])
   except getopt.GetoptError:
     # print help information and exit:
     usage()
 
+  device = "atmega128"
   stall = 0
 
   for o, a in opts:
     if o in ("-h", "--help"):
       usage()
+    if o in ("-d", "--dev"):
+      device = a
     if o in ("-s", "--sim"):
       sim_path = a
     if o in ("--stall",):
@@ -228,14 +233,13 @@ if __name__ == '__main__':
   if len(args) > 3:
     usage()
 
-  dev = "atmega128"
-  sim_p = run_simulator(sim_path, dev)
+  sim_p = run_simulator(sim_path, device)
 
   # Open a connection to the target
   tries = 5
   while (tries > 0):
     try:
-      target = avr_target.AvrTarget(dev)
+      target = avr_target.AvrTarget(device)
     except socket.error:
       print >> sys.stderr, 'Simulator not responding, wait a second and try again'
       tries -= 1
