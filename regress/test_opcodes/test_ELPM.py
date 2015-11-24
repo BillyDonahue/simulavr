@@ -42,11 +42,12 @@ class base_ELPM(base_test.opcode_rampz_test):
 
 	Only registers PC and R00 should be changed.
 	"""
-	def setup(self):
 
-                if (not self.target.has_rampz):
-                        self.fail('ELPM failed: Not supported by this device %s' % self.target.device)
-                        
+	def ensure_target_supports_opcode(self):
+		if (not self.target.has_rampz):
+			self.opcode_not_supported()
+
+	def setup(self):
                 # Set the register values
 		self.setup_regs[Reg.R00] = 0
 		self.setup_regs[Reg.R30] = (self.Z & 0xff)

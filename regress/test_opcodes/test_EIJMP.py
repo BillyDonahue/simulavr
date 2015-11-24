@@ -43,10 +43,12 @@ class base_EIJMP(base_test.opcode_eind_test):
 
 	opcode is '1001 0100 0001 1001'
 	"""
-	def setup(self):
-                if (not self.target.has_eind):
-                        self.fail('EIJMP failed: Not supported by this device %s' % self.target.device)
 
+	def ensure_target_supports_opcode(self):
+		if (not self.target.has_eind):
+			self.opcode_not_supported()
+
+	def setup(self):
 		self.setup_regs[Reg.PC] = 0xff * 2
 
 		# Load the Z register (reg 31:30) with PC to jump to

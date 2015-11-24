@@ -35,6 +35,12 @@ class TestFail:
 	def __repr__(self):
 		return self.reason
 
+class TestOpcodeNotSupported:
+	def __init__(self, reason):
+		self.reason = reason
+	def __repr__(self):
+		return self.reason
+
 class opcode_test:
 	"""Base Class for testing opcodes.
 	"""
@@ -56,8 +62,10 @@ class opcode_test:
 	def run(self):
 		"""Execute the test.
 
-		If the test fails, an exception will be raised.
+		If the test fails or the target mcu does not support the opcode,
+                an exception will be raised.
 		"""
+                self.ensure_target_supports_opcode()		# check it the target supports the opcode
 		self.common_setup()				# setup the test
 		self.target.step()				# execute the opcode test
 		self.common_analyze_results()	# do the analysis
@@ -127,6 +135,19 @@ class opcode_test:
 			if expect != got:
 				raise TestFail, 'Register %d changed: expect=%x, got=%x' % (i, expect, got)
 
+	def ensure_target_supports_opcode(self):
+		"""Default method to ensure that the target mcu supports the opcode.
+
+		This is automatically called to check if the target mcu supports
+                the tested opcode before running the test. The default does
+                nothing thus if the opcode is only supported by special mcus,
+                the derived class must override this.
+
+                If the mcu does not support the opcode,
+                self.opcode_not_supported() should be called.
+		"""
+		pass
+
 	def setup(self):
 		"""Default setup method.
 
@@ -147,6 +168,15 @@ class opcode_test:
 		string as data.
 		"""
 		raise TestFail, 'Default analyze_results() method used'
+
+       	def opcode_not_supported(self):
+		"""Raises the TestOpcodeNotSupported exception.
+
+                This method should be called by a test if the opcode is not
+                supported by the target mcu.
+		"""
+		raise TestOpcodeNotSupported('Opcode not supported by this device %s' % self.target.device)
+
 
 ##
 ## Big Hairy Note: Mixin's _must_ come beform the base class in multiple

@@ -47,6 +47,11 @@ class base_EICALL(base_test.opcode_eind_stack_test):
 	  
 	opcode is '1001 0101 0001 1001'
 	"""
+
+	def ensure_target_supports_opcode(self):
+		if (not self.target.has_eind):
+			self.opcode_not_supported()
+
 	def setup(self):
 
                 if (not self.target.has_eind):

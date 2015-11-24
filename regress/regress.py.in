@@ -78,9 +78,10 @@ EXIT_STATUS_FAIL = 1
 def run_tests(target, tdir=None, tmodule=None, tname=None):
   result = EXIT_STATUS_PASS
 
-  num_tests  = 0
-  num_passes = 0
-  num_fails  = 0
+  num_tests         = 0
+  num_passes        = 0
+  num_fails         = 0
+  num_not_supported = 0
 
   start_time = sum(os.times()[:2])
 
@@ -143,6 +144,9 @@ def run_tests(target, tdir=None, tmodule=None, tname=None):
           num_fails += 1
           # Could also do a sys.exit(1) here is user wishes
           result = EXIT_STATUS_FAIL
+        except base_test.TestOpcodeNotSupported, reason:
+          print reason
+          num_not_supported += 1
         else:
           num_passes += 1
           print 'passed'
@@ -165,6 +169,7 @@ def run_tests(target, tdir=None, tmodule=None, tname=None):
       (num_tests, elapsed, num_tests/elapsed)
   print '  Number of Passing Tests: %d' %(num_passes)
   print '  Number of Failing Tests: %d' %(num_fails)
+  print '  Number of Skipped Tests: %d (opcode not supported by target)' %(num_not_supported)
   print
   
   return result
@@ -182,7 +187,7 @@ Options:
 """
   sys.exit(1)
 
-def run_simulator(prog, port=1212, dev="atmega128"):
+def run_simulator(prog, dev, port=1212):
   """Attempt to start up a simulator and return pid.
   """
 
@@ -222,14 +227,15 @@ if __name__ == '__main__':
 
   if len(args) > 3:
     usage()
-    
-  sim_p = run_simulator(sim_path)
+
+  dev = "atmega128"
+  sim_p = run_simulator(sim_path, dev)
 
   # Open a connection to the target
   tries = 5
   while (tries > 0):
     try:
-      target = avr_target.AvrTarget()
+      target = avr_target.AvrTarget(dev)
     except socket.error:
       print >> sys.stderr, 'Simulator not responding, wait a second and try again'
       tries -= 1
