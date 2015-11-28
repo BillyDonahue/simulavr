@@ -3,6 +3,7 @@
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
 # Copyright (C) 2001, 2002  Theodore A. Roth
+# Copyright (C) 2015        Christian Taedcke
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,9 +20,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 ###############################################################################
-#
-#
-#
 
 """Test the EICALL opcode.
 """
