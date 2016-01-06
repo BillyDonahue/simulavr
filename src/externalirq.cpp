@@ -236,7 +236,7 @@ ExternalIRQPort::ExternalIRQPort(IOSpecialReg *ctrl, HWPort *port):
 }
 
 ExternalIRQPort::ExternalIRQPort(IOSpecialReg *ctrl, Pin* pinList[8]):
-    ExternalIRQ(ctrl, 0, 8) // TODO ctae order correct?
+    ExternalIRQ(ctrl, 0, 8)
 {
     portSize = 8;
     for(unsigned int idx = 0; idx < 8; idx++) {
