@@ -37,4 +37,7 @@ CONF_SHOW_COMMIT_MAX=20
 # CONF_CXXFLAGS: additional CXX flags, if necessary
 #CONF_CXXFLAGS='-pedantic -Wall -Wextra -Wno-unused-parameter -std=c++11 -g -O2'
 
+# CONF_WITH_BROWSER_RESULT: show result of delivery check in available browser as html, set to "n" if not
+#CONF_WITH_BROWSER_RESULT=n
+
 # EOF

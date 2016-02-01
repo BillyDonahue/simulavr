@@ -15,7 +15,7 @@ if [ -f $CONF ]; then
   . $CONF
   export CONF_REPO_URL CONF_REPO_BRANCH CONF_CHECK_PATH CONF_WITH_DOXYGEN CONF_WITH_TCL
   export CONF_TCL_CONFIG CONF_WITH_VERILOG CONF_SHOW_COMMIT_MAX CONF_EXTRA_LIBS 
-  export CONF_CXXFLAGS CONF_WITH_PYTHON
+  export CONF_CXXFLAGS CONF_WITH_PYTHON CONF_WITH_BROWSER_RESULT
 else
   echo "error: config file not found: $CONF"
   echo "       try $0 -h to get help"
@@ -107,6 +107,9 @@ file."""
   if v is None or v is not "y" or not opts.tclpath: opts.buildtcl = False
   opts.extralibs = os.environ.get("CONF_EXTRA_LIBS", None)
   opts.cxxflags = os.environ.get("CONF_CXXFLAGS", None)
+  opts.display_html = True
+  v = os.environ.get("CONF_WITH_BROWSER_RESULT", None)
+  if v is not None and v is not "y": opts.display_html = False
   opts.fmtdict = dict(
     wa = opts.checkpath,
     maxc = opts.commitmax,
@@ -155,6 +158,12 @@ _text_func_wh = """function writehtml() {
   R=$?
 """
 
+_text_func_wh_nodisp = """  # not displaying created html, do zip results instead
+  echo "create result.tar.gz ..."
+  (cd %(wa)s; tar czf result.tar.gz inst reop log)
+}
+
+"""
 _text_func_wh_linux = """  # if xdg-open exists, open browser
   C=`which xdg-open`
   if [ ! -z "$C" -a $R == 0 ]; then
@@ -353,12 +362,15 @@ if __name__ == "__main__":
   # create script
   s = TXT(opts)
   s.writeText(_text_func_wh)
-  if sys.platform in ("win32", "cygwin"):
-    s.writeText(_text_func_wh_msys)
-  elif sys.platform == "darwin":
-    s.writeText(_text_func_wh_darwin)
+  if opts.display_html:
+    if sys.platform in ("win32", "cygwin"):
+      s.writeText(_text_func_wh_msys)
+    elif sys.platform == "darwin":
+      s.writeText(_text_func_wh_darwin)
+    else:
+      s.writeText(_text_func_wh_linux)
   else:
-    s.writeText(_text_func_wh_linux)
+    s.writeText(_text_func_wh_nodisp)
   if opts.delworkarea:
     s.writeText(_text_del_wa_1)
   else:
