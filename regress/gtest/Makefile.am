@@ -60,6 +60,8 @@ OBJS_SRC = session_001/avr_code.s \
            session_irq_check/tc1.s \
            session_irq_check/tc2.s \
            session_irq_check/tc3.s \
+           session_irq_check/tc4.s \
+           session_irq_check/tc5.cpp \
            session_io_pin/tc1.s
 
 # target objects (needed for test), if you change this list, you have to change OBJS_SRC too!
