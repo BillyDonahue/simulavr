@@ -160,7 +160,7 @@ _text_func_wh = """function writehtml() {
 
 _text_func_wh_nodisp = """  # not displaying created html, do zip results instead
   echo "create result.tar.gz ..."
-  (cd %(wa)s; tar czf result.tar.gz inst reop log)
+  (cd %(wa)s; tar czf result.tar.gz inst repo log)
 }
 
 """
