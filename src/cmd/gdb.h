@@ -139,7 +139,7 @@ class GdbServer: public SimulationMember {
         int m_gdb_thread_id;  ///< For queries by GDB. First thread ID is 1. See http://sources.redhat.com/gdb/current/onlinedocs/gdb/Packets.html#thread-id
 
 
-        word avr_core_flash_read(int addr) ;
+        bool avr_core_flash_read(int addr, word& val) ;
         void avr_core_flash_write(int addr, word val) ;
         void avr_core_flash_write_hi8( int addr, byte val) ;
         void avr_core_flash_write_lo8( int addr, byte val) ;

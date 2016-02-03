@@ -270,7 +270,7 @@ bool GdbServerSocketUnix::Connect(void) {
 
         /* If we got this far, we now have a client connected and can start 
         processing. */
-        fprintf(stderr, "Connection opened by host %s, port %hd.\n",
+        fprintf(stderr, "Connection opened by host %s, port %hu.\n",
                 inet_ntoa(address->sin_addr), ntohs(address->sin_port));
 
         return true;
@@ -316,9 +316,14 @@ GdbServer::~GdbServer() {
     delete server;
 }
 
-word GdbServer::avr_core_flash_read(int addr) {
-    assert(0 <= addr && (unsigned) addr+1 < core->Flash->GetSize());
-    return core->Flash->ReadMemRawWord(addr);
+bool GdbServer::avr_core_flash_read(int addr, word& val ) {
+    if ( (0 <= addr) && ( (unsigned) addr+1 < core->Flash->GetSize()) )
+    {
+        val = core->Flash->ReadMemRawWord(addr);
+        return true;
+    }
+
+    return false;
 }
 
 void GdbServer::avr_core_flash_write(int addr, word val) {
@@ -757,8 +762,6 @@ void GdbServer::gdb_read_memory(const char *pkt) {
     unsigned int addr = 0;
     int   len  = 0;
     byte *buf;
-    byte  bval;
-    word  wval;
     int   i;
     int   is_odd_addr;
 
@@ -774,7 +777,7 @@ void GdbServer::gdb_read_memory(const char *pkt) {
 
         for ( i=0; i<len; i++ )
         {
-            bval = core->eeprom->ReadFromAddress( addr+i );
+            uint8_t bval = core->eeprom->ReadFromAddress( addr+i );
             buf[i*2]   = HEX_DIGIT[bval >> 4];
             buf[i*2+1] = HEX_DIGIT[bval & 0xf];
         }
@@ -801,7 +804,7 @@ void GdbServer::gdb_read_memory(const char *pkt) {
         {
             for ( i=0; i<len; i++ )
             {
-                bval = core->GetRWMem(addr + i);
+                uint8_t bval = core->GetRWMem(addr + i);
                 buf[i*2]   = HEX_DIGIT[bval >> 4];
                 buf[i*2+1] = HEX_DIGIT[bval & 0xf];
             }
@@ -816,47 +819,84 @@ void GdbServer::gdb_read_memory(const char *pkt) {
 
         if (is_odd_addr)
         {
-            bval = avr_core_flash_read( addr ) >> 8;
-            buf[i++] = HEX_DIGIT[bval >> 4];
-            buf[i++] = HEX_DIGIT[bval & 0xf];
-            addr++;
-            len--;
+            word val;
+
+            if ( avr_core_flash_read( addr, val ) )
+            {
+                val >>=8;
+                buf[i++] = HEX_DIGIT[val >> 4];
+                buf[i++] = HEX_DIGIT[val & 0xf];
+                addr++;
+                len--;
+            }
+            else
+            {
+                len = 0; // if avr_core_flash_read fails once, it fails ever
+            }
         }
 
         while (len > 1)
         {
-            wval = avr_core_flash_read( addr );
+            word val;
 
-            bval = wval & 0xff;
-            buf[i++] = HEX_DIGIT[bval >> 4];
-            buf[i++] = HEX_DIGIT[bval & 0xf];
+            if ( avr_core_flash_read( addr, val ))
+            {
+                byte bval;
+                bval = val & 0xff;
+                buf[i++] = HEX_DIGIT[bval >> 4];
+                buf[i++] = HEX_DIGIT[bval & 0xf];
 
-            bval = wval >> 8;
-            buf[i++] = HEX_DIGIT[bval >> 4];
-            buf[i++] = HEX_DIGIT[bval & 0xf];
+                bval = val >> 8;
+                buf[i++] = HEX_DIGIT[bval >> 4];
+                buf[i++] = HEX_DIGIT[bval & 0xf];
+                addr += 2;
+                len -= 2;
+            }
+            else
+            {
+                len = 0; // if avr_core_flash_read fails once, it fails ever
+            }
 
-            len -= 2;
-            addr += 2;
         }
 
         if (len == 1)
         {
-            bval = avr_core_flash_read( addr ) & 0xff;
-            buf[i++] = HEX_DIGIT[bval >> 4];
-            buf[i++] = HEX_DIGIT[bval & 0xf];
+            word val;
+
+            if ( avr_core_flash_read( addr, val ))
+            {
+                byte bval;
+
+                bval &= 0xff;
+                buf[i++] = HEX_DIGIT[bval >> 4];
+                buf[i++] = HEX_DIGIT[bval & 0xf];
+            }
         }
     }
-    else
+
+    // if nothing was written to the buffer "buf" i ist still '0'. 
+    // thi scan happen if gdb tries to read from wrong address range or offsets
+    // simply return gdb error
+    if ( !i ) 
     {
         /* gdb asked for memory space which doesn't exist */
         avr_warning( "Invalid memory address: 0x%x.\n", addr );
-        snprintf( (char*)buf, len*2, "E%02x", EIO );
+
+        /* we have maybe read a wrong packet from gdb and size for the buffer 
+           is to small to send complete error package, so we use a local
+           error_buf instead
+         */
+        static const size_t BUF_LEN = 10; // 10 is enough I hope :-)
+        byte* error_buf = avr_new0( byte, BUF_LEN ); 
+        snprintf( (char*)error_buf, BUF_LEN, "E%02x", EIO );
+        gdb_send_reply( (char*)error_buf );
+        avr_free( error_buf );
+    } 
+    else
+    {
+        gdb_send_reply( (char*)buf );
+        avr_free( buf );
     }
-
-
-    gdb_send_reply( (char*)buf );
-
-    avr_free( buf );
 }
 
 void GdbServer::gdb_write_memory(const char *pkt) {
