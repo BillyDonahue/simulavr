@@ -895,8 +895,9 @@ void GdbServer::gdb_read_memory(const char *pkt) {
     else
     {
         gdb_send_reply( (char*)buf );
-        avr_free( buf );
     }
+
+    avr_free( buf );
 }
 
 void GdbServer::gdb_write_memory(const char *pkt) {
