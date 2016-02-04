@@ -14,7 +14,7 @@ endif
 
 endif
 
-AM_CXXFLAGS=-Ielfio -g -O2 -Icmd -Iui -Ihwtimer
+AM_CXXFLAGS=-Ielfio -g -O2 -fPIC -Icmd -Iui -Ihwtimer
 
 bin_PROGRAMS    = simulavr
 @MAINT@ noinst_PROGRAMS = kbdgentables
