@@ -34,7 +34,7 @@ class SimulavrAdapter(object):
   def getAllRegisteredTraceValues(self):
     os = pysimulavr.ostringstream()
     pysimulavr.DumpManager.Instance().save(os)
-    return filter(None, [i.strip() for i in os.str().split("\n")])
+    return [_f for _f in [i.strip() for i in os.str().split("\n")] if _f]
 
   def dmanSingleDeviceApplication(self):
     pysimulavr.DumpManager.Instance().SetSingleDeviceApp()

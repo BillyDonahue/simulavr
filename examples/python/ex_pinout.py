@@ -13,7 +13,7 @@ class XPin(pysimulavr.Pin):
     
   def SetInState(self, pin):
     pysimulavr.Pin.SetInState(self, pin)
-    print "%s set to '%s' (t=%dns)" % (self.name, pin.toChar(), sim.getCurrentTime())
+    print("%s set to '%s' (t=%dns)" % (self.name, pin.toChar(), sim.getCurrentTime()))
 
 if __name__ == "__main__":
 
@@ -27,11 +27,11 @@ if __name__ == "__main__":
   #dev.SetClockFreq(100)
   
   if doVCD:
-    print "all registrered trace values:\n ",
-    print "\n  ".join(sim.getAllRegisteredTraceValues())
+    print("all registrered trace values:\n ", end=' ')
+    print("\n  ".join(sim.getAllRegisteredTraceValues()))
     sigs = ("IRQ.VECTOR9", "PORTA.PORT")
     sim.setVCDDump(splitext(basename(argv[0]))[0] + ".vcd", sigs)
-    print "-" * 20
+    print("-" * 20)
     
   xpin = XPin("port A.0")
   # watch out, that this Net instance will not be deleted until simulation is
@@ -43,11 +43,11 @@ if __name__ == "__main__":
     
   sim.dmanStart()
   
-  print "simulation start: (t=%dns)" % sim.getCurrentTime()
+  print("simulation start: (t=%dns)" % sim.getCurrentTime())
   sim.doRun(15000000)
-  print "simulation end: (t=%dns)" % sim.getCurrentTime()
+  print("simulation end: (t=%dns)" % sim.getCurrentTime())
 
-  print "value 'timer2_ticks'=%d" % sim.getWordByName(dev, "timer2_ticks")
+  print("value 'timer2_ticks'=%d" % sim.getWordByName(dev, "timer2_ticks"))
   
   sim.dmanStop()
   del dev

@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 # Python test script as demonstration of using pysimulavr in unit tests
 from unittest import TestSuite, TextTestRunner, TestCase, defaultTestLoader
 from sys import argv
@@ -35,11 +35,11 @@ class TestBaseClass(TestCase, SimulavrAdapter):
     self.assertEqual(self.device.PC_size, 2)
     self.doStep()
     self.doStep()
-    self.assertEqual(self.device.PC, 0x8c / 2)
+    self.assertEqual(self.device.PC, 0x8c // 2)
     
   def test_04(self):
     "check flash and data symbols"
-    self.assertEqual(self.device.Flash.GetAddressAtSymbol("main"), 0xfc / 2)
+    self.assertEqual(self.device.Flash.GetAddressAtSymbol("main"), 0xfc // 2)
     self.assertEqual(self.device.data.GetAddressAtSymbol("timer2_ticks"), 0x100)
     
   def addr2word(self, addr):
@@ -90,7 +90,7 @@ class TestBaseClass(TestCase, SimulavrAdapter):
     bpaddr = self.device.Flash.GetAddressAtSymbol("main")
     self.device.BP.AddBreakpoint(bpaddr)
     self.doRun(10000)
-    self.assertEqual(self.device.PC, 0xc2 / 2)
+    self.assertEqual(self.device.PC, 0xc2 // 2)
     self.doStep(4) # call to main
     self.assertEqual(self.device.PC, bpaddr)
     self.doStep(4) # 4 steps more, do nothing because of breakpoint
