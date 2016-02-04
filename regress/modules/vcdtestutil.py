@@ -17,7 +17,7 @@ def getVCD(name):
   return __vcds[name]
 
 def loadVCDFromName(name):
-  print >> stderr, "load %s ... " % name,
+  print("load %s ... " % name, end=' ', file=stderr)
   try:
     return VCD(name)
   except VCDError:

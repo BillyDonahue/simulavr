@@ -1,6 +1,5 @@
 # Modul zum Einlesen von VCD-Dateien
 from re import compile
-from types import FloatType
 
 class VCDError(Exception): pass
 
@@ -55,9 +54,9 @@ class VCDEdge(object):
 
   def bit(self, bitnum, width = 1):
     if bitnum >= self.__size:
-      raise VCDInternalError, "invalid bit number, max is %d" % self.__size - 1
+      raise VCDInternalError("invalid bit number, max is %d" % self.__size - 1)
     if (bitnum + width) > self.__size:
-      raise VCDInternalError, "invalid width, bitnum + width exeeded size, max is %d" % self.__size
+      raise VCDInternalError("invalid width, bitnum + width exeeded size, max is %d" % self.__size)
     l = list(self.__value)
     l.reverse()
     l = l[bitnum:bitnum + width]
@@ -72,7 +71,7 @@ class VCDEdge(object):
     try:
       return int(self.__value, 2)
     except ValueError:
-      raise VCDError, "can't convert value to integer"
+      raise VCDError("can't convert value to integer")
       
   @property
   def hasUnknown(self): return "x" in self.__value
@@ -101,7 +100,7 @@ class VCDEdge(object):
   def analyseWire(self, bitnum):
     def checkBit(e):
       if e.bit(bitnum) not in ("0", "1"):
-        raise VCDError, "bit value isn't valid to analyse it"
+        raise VCDError("bit value isn't valid to analyse it")
     result = VCDResult()
     checkBit(self)
     c = self.__var.vcdInstance.conv2sec
@@ -152,25 +151,25 @@ class VCDVar(object):
   @property
   def initedge(self):
     if len(self.__edges) < 1:
-      raise VCDError, "no init edge available"
+      raise VCDError("no init edge available")
     return self.__edges[0]
   
   @property
   def firstedge(self):
     if len(self.__edges) < 2:
-      raise VCDError, "no edges available"
+      raise VCDError("no edges available")
     return self.__edges[1]
   
   @property
   def lastedge(self):
     if len(self.__edges) < 2:
-      raise VCDError, "no edges available"
+      raise VCDError("no edges available")
     return self.__edges[-1]
   
   def getEdges(self, starttime = None, endtime = None):
-    if not starttime == None and type(starttime) == FloatType:
+    if not starttime == None and isinstance(starttime, float):
       starttime = self.__vcd.conv2intern(starttime)
-    if not endtime == None and type(endtime) == FloatType:
+    if not endtime == None and isinstance(endtime, float):
       endtime = self.__vcd.conv2intern(endtime)
     for e in self.__edges:
       if starttime is not None and e.internalTime < starttime: continue
@@ -182,15 +181,15 @@ class VCDVar(object):
       # edge-Mode
       idx = self.__edges.index(timeOrEdge)
       if idx < 2:
-        raise VCDError, "edge hasn't previous edge"
+        raise VCDError("edge hasn't previous edge")
       return self.__edges[idx - 1]
-    elif type(timeOrEdge) == FloatType:
+    elif isinstance(timeOrEdge, float):
       time = self.__vcd.conv2intern(timeOrEdge)
     else:
       time = timeOrEdge
     e0 = self.__edges[0]
     if e0.internalTime > time:
-      raise VCDError, "no previous edge found, because start time is higher"
+      raise VCDError("no previous edge found, because start time is higher")
     for e in self.__edges[1:]:
       if e.internalTime >= time:
         return e0
@@ -202,16 +201,16 @@ class VCDVar(object):
       # edge-Mode
       idx = self.__edges.index(timeOrEdge)
       if idx >= (len(self.__edges) - 1):
-        raise VCDError, "edge hasn't next edge"
+        raise VCDError("edge hasn't next edge")
       return self.__edges[idx + 1]
-    elif type(timeOrEdge) == FloatType:
+    elif isinstance(timeOrEdge, float):
       time = self.__vcd.conv2intern(timeOrEdge)
     else:
       time = timeOrEdge
     for e in self.__edges[:-1]:
       if e.internalTime >= time:
         return e
-    raise VCDError, "no next edge found, because end time to low"
+    raise VCDError("no next edge found, because end time to low")
   
 class VCD(object):
   
@@ -243,8 +242,8 @@ class VCD(object):
     self.__filename = filename
     try:
       stream = open(filename, "r")
-    except IOError, e:
-      raise VCDError, str(e)
+    except IOError as e:
+      raise VCDError(str(e))
     in_definition = False
     line = ""
     self.__lineno = 0
@@ -269,7 +268,7 @@ class VCD(object):
             line = raw
         elif raw[0] == "#":
           try:
-            t = long(raw[1:].strip())
+            t = int(raw[1:].strip())
           except ValueError:
             raise VCDParserError(self, "can't read timeslot, wrong time format")
           if self.__time == None:
@@ -328,7 +327,7 @@ class VCD(object):
     if not m:
       raise VCDParserError(self, "parser error on timescale setting: '%s'" % value)
     n, u = m.groups()
-    self.__conv = self.__timeunitmap[u] * long(n)
+    self.__conv = self.__timeunitmap[u] * int(n)
     
   def __parse_var(self, value):
     l = value.split()
@@ -352,7 +351,7 @@ class VCD(object):
       raise VCDParserError(self, "format error in change line: '%s': size exceeded, expected <= %d, found = %d" % (value, var.size, len(v)))
     try:
       e = VCDEdge(var, self.__time, v, isDump)
-    except VCDInternalError, e:
+    except VCDInternalError as e:
       raise VCDParserError(self, str(e))
     self.__time.add(e)
     var.add(e)
@@ -385,18 +384,18 @@ class VCD(object):
   @property
   def conv2intern(self):
     def _s2t(stime):
-      return long(stime / self.__conv)
+      return int(stime / self.__conv)
     return _s2t
     
   @property
   def variables(self):
-    result = self.__namemap.values()
+    result = list(self.__namemap.values())
     result.sort(None, lambda x: x.name)
     return result
     
   def getVariable(self, name):
-    for v in self.__namemap.values():
+    for v in list(self.__namemap.values()):
       if v.name == name: return v
-    raise VCDError, "variable '%s' not found" % name
+    raise VCDError("variable '%s' not found" % name)
     
 # EOF
