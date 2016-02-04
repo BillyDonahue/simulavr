@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -86,7 +86,7 @@ class test_ELPM_Z_r%02d_Z%04x_RZ%02x(base_ELPM_Z):
 	Z = 0x%x
 	rampz = 0x%x
 	def fail(self,s):
-		raise ELPM_Z_r%02d_Z%04x_RZ%02x_TestFail, s
+		raise ELPM_Z_r%02d_Z%04x_RZ%02x_TestFail(s)
 """
 
 #
@@ -98,4 +98,4 @@ for d in range(32):
 		for rampz in (0x00, 0x01, 0x02):
 			args = (d, z, rampz) * 4
 			code += template % args
-exec code
+exec(code)

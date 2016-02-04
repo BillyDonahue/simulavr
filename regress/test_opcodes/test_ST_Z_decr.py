@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -81,7 +81,7 @@ class test_ST_Z_decr_r%02d_Z%04x_v%02x(base_ST_Z_decr):
 	Z = 0x%x
 	Vd = 0x%x
 	def fail(self,s):
-		raise ST_Z_decr_r%02d_Z%04x_v%02x_TestFail, s
+		raise ST_Z_decr_r%02d_Z%04x_v%02x_TestFail(s)
 """
 
 #
@@ -95,4 +95,4 @@ for d in range(0,30):
 		for v in (0xaa, 0x55):
 			args = (d,x,v)*4
 			code += template % args
-exec code
+exec(code)

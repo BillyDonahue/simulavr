@@ -29,13 +29,13 @@ from registers import Reg, Addr
 """This module provides base classes for regression test cases.
 """
 
-class TestFail:
+class TestFail(BaseException):
 	def __init__(self, reason):
 		self.reason = reason
 	def __repr__(self):
 		return self.reason
 
-class TestOpcodeNotSupported:
+class TestOpcodeNotSupported(BaseException):
 	def __init__(self, reason):
 		self.reason = reason
 	def __repr__(self):
@@ -65,7 +65,7 @@ class opcode_test:
 		If the test fails or the target mcu does not support the opcode,
                 an exception will be raised.
 		"""
-                self.ensure_target_supports_opcode()		# check it the target supports the opcode
+		self.ensure_target_supports_opcode()		# check it the target supports the opcode
 		self.common_setup()				# setup the test
 		self.target.step()				# execute the opcode test
 		self.common_analyze_results()	# do the analysis
@@ -124,7 +124,7 @@ class opcode_test:
 			expect = self.setup_regs[Reg.PC] + 2
 			got = self.anal_regs[Reg.PC]
 			if expect != got:
-				raise TestFail, 'PC not incremented: expect=%x, got=%x' % (expect, got)
+				raise TestFail('PC not incremented: expect=%x, got=%x' % (expect, got))
 
 		# compare all regs except PC and those in reg_changed list
 		for i in range(Reg.PC):
@@ -133,7 +133,7 @@ class opcode_test:
 			expect = self.setup_regs[i]
 			got = self.anal_regs[i]
 			if expect != got:
-				raise TestFail, 'Register %d changed: expect=%x, got=%x' % (i, expect, got)
+				raise TestFail('Register %d changed: expect=%x, got=%x' % (i, expect, got))
 
 	def ensure_target_supports_opcode(self):
 		"""Default method to ensure that the target mcu supports the opcode.
@@ -155,7 +155,7 @@ class opcode_test:
 		before running the test. The default does nothing thus if
 		preconditions are required, the derived class must override this.
 		"""
-		raise TestFail, 'Default setup() method used'
+		raise TestFail('Default setup() method used')
 
 	def analyze_result(self):
 		"""Analyze the results of the execute() method.
@@ -167,9 +167,9 @@ class opcode_test:
 		Raise a TestFail exception if a test fails with a reason for failure
 		string as data.
 		"""
-		raise TestFail, 'Default analyze_results() method used'
+		raise TestFail('Default analyze_results() method used')
 
-       	def opcode_not_supported(self):
+	def opcode_not_supported(self):
 		"""Raises the TestOpcodeNotSupported exception.
 
                 This method should be called by a test if the opcode is not
@@ -220,11 +220,11 @@ class opcode_stack_mixin:
 
 	def setup_word_to_stack(self, val):
 		# used by RET, RETI setup, since they pop at least a word
-                if (self.target.pc_size == 2):
-		        mem = [(val & 0xff00)>>8, val & 0xff]
-                else:
-                        mem = [(val & 0xff0000)>>16, (val & 0xff00)>>8, val & 0xff]
-                self.target.write_sram(self.SP_val+1, len(mem), mem)
+		if (self.target.pc_size == 2):
+			mem = [(val & 0xff00)>>8, val & 0xff]
+		else:
+			mem = [(val & 0xff0000)>>16, (val & 0xff00)>>8, val & 0xff]
+		self.target.write_sram(self.SP_val+1, len(mem), mem)
 
 	def analyze_read_from_current_stack(self):
 		return self.target.read_sram(self.SP_val, 1)[0]

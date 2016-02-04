@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -52,8 +52,8 @@ class base_EICALL(base_test.opcode_eind_stack_test):
 
 	def setup(self):
 
-                if (not self.target.has_eind):
-                        self.fail('EICALL failed: Not supported by this device %s' % self.target.device)
+		if (not self.target.has_eind):
+			self.fail('EICALL failed: Not supported by this device %s' % self.target.device)
 
 		# setup PC
 		self.setup_regs[Reg.PC] = 0xff * 2
@@ -62,9 +62,9 @@ class base_EICALL(base_test.opcode_eind_stack_test):
 		self.setup_regs[Reg.R30] = self.k & 0xff
 		self.setup_regs[Reg.R31] = self.k >> 8 & 0xff
 
-                #setup EIND register
-                self.write_register_eind(self.eind & 0xff)
-                
+		#setup EIND register
+		self.write_register_eind(self.eind & 0xff)
+		
 		return 0x9519
 
 	def analyze_results(self):
@@ -97,7 +97,7 @@ class test_EICALL_k%04x_ei%02x(base_EICALL):
 	k = 0x%x
 	eind = 0x%x
 	def fail(self,s):
-		raise EICALL_k%04x_ei%02x_TestFail, s
+		raise EICALL_k%04x_ei%02x_TestFail(s)
 """
 
 #
@@ -109,5 +109,5 @@ for k in (0x100,0x3ff):
         for eind in (0x00, 0x01):
                 km = k & 0x3fffff
                 args = (km, eind) * 4
-	        code += template % args
-exec code
+                code += template % args
+exec(code)

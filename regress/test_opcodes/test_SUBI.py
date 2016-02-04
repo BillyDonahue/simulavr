@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -95,7 +95,7 @@ class test_SUBI_r%02d_v%02x_k%02x(base_SUBI):
 	Vd = 0x%x
 	Vk = 0x%x
 	def fail(self,s):
-		raise SUBI_r%02d_v%02x_k%02x_TestFail, s
+		raise SUBI_r%02d_v%02x_k%02x_TestFail(s)
 """
 
 #
@@ -120,4 +120,4 @@ for d in range(16,32):
 		args = (d,vd,vk)*4
 		code += template % args
 
-exec code
+exec(code)

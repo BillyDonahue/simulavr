@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -106,7 +106,7 @@ def run_tests(target, tdir=None, tmodule=None, tname=None):
         tmodule += '.py'
       test_modules = [tmodule]
 
-    print '='*8 + ' running tests in %s directory' % (test_dir)
+    print('='*8 + ' running tests in %s directory' % (test_dir))
     # add tests dir to module search patch
     sys.path.append(test_dir)
 
@@ -118,7 +118,7 @@ def run_tests(target, tdir=None, tmodule=None, tname=None):
 
       # get test module name by stripping off .py from file name
       test_module_name = file[:-3]
-      print '-'*4 + ' loading tests from %s module' %(test_module_name)
+      print('-'*4 + ' loading tests from %s module' %(test_module_name))
       test_module = __import__(test_module_name)
 
       if tname is None:
@@ -136,20 +136,20 @@ def run_tests(target, tdir=None, tmodule=None, tname=None):
 
         try:
           # Create an instance of the test case object and run it
-          test = apply( getattr(test_module,test_name), (target,) )
-          print '%-30s  ->  ' %(test_name),
+          test = getattr(test_module,test_name)(*(target,))
+          print('%-30s  ->  ' %(test_name), end=' ')
           test.run()
-        except base_test.TestFail, reason:
-          print 'FAILED: %s' %(reason)
+        except base_test.TestFail as reason:
+          print('FAILED: %s' %(reason))
           num_fails += 1
           # Could also do a sys.exit(1) here is user wishes
           result = EXIT_STATUS_FAIL
-        except base_test.TestOpcodeNotSupported, reason:
-          print reason
+        except base_test.TestOpcodeNotSupported as reason:
+          print(reason)
           num_not_supported += 1
         else:
           num_passes += 1
-          print 'passed'
+          print('passed')
 
         num_tests += 1
 
@@ -164,18 +164,18 @@ def run_tests(target, tdir=None, tmodule=None, tname=None):
 
   elapsed = sum(os.times()[:2]) - start_time
 
-  print 
-  print 'Ran %d tests in %.3f seconds [%0.3f tests/second].' % \
-      (num_tests, elapsed, num_tests/elapsed)
-  print '  Number of Passing Tests: %d' %(num_passes)
-  print '  Number of Failing Tests: %d' %(num_fails)
-  print '  Number of Skipped Tests: %d (opcode not supported by target)' %(num_not_supported)
-  print
+  print() 
+  print('Ran %d tests in %.3f seconds [%0.3f tests/second].' % \
+      (num_tests, elapsed, num_tests/elapsed))
+  print('  Number of Passing Tests: %d' %(num_passes))
+  print('  Number of Failing Tests: %d' %(num_fails))
+  print('  Number of Skipped Tests: %d (opcode not supported by target)' %(num_not_supported))
+  print()
   
   return result
 
 def usage():
-  print >> sys.stderr, """
+  print("""
 Usage: regress.py [options] [[test_]dir] [[test_]module[.py]] [[test_]case]
   The 'test_' prefix on all args is optional.
   The '.py' extension on the test_module arg is also optional.
@@ -186,7 +186,7 @@ Options:
                     "atmega128"
   -s, --sim=<sim> : path to simulavr executable
       --stall     : stall the regression engine when done
-"""
+""", file=sys.stderr)
   sys.exit(1)
 
 def run_simulator(prog, dev, port=1212):
@@ -195,11 +195,11 @@ def run_simulator(prog, dev, port=1212):
 
   # Check if prog file exists
   if not os.path.isfile(prog):
-    print >> sys.stderr, '%s does not exist' %(prog)
+    print('%s does not exist' %(prog), file=sys.stderr)
     sys.exit(1)
 
-  out = os.open(regressdir+'/sim.out', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0644)
-  err = os.open(regressdir+'/sim.err', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0644)
+  out = os.open(regressdir+'/sim.out', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
+  err = os.open(regressdir+'/sim.err', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
   p = subprocess.Popen((prog, '-g', '-G', '-d', dev, '-p', str(port)),
                        shell = False,
                        stdout = out,
@@ -241,24 +241,24 @@ if __name__ == '__main__':
     try:
       target = avr_target.AvrTarget(device)
     except socket.error:
-      print >> sys.stderr, 'Simulator not responding, wait a second and try again'
+      print('Simulator not responding, wait a second and try again', file=sys.stderr)
       tries -= 1
       time.sleep(1)
     else:
       break
   if tries == 0:
-    print >> sys.stderr, 'Fatal error: simulator did not start'
+    print('Fatal error: simulator did not start', file=sys.stderr)
     sys.exit(1)
 
   # run the tests
   try:
-    status = apply(run_tests, [target]+args)
+    status = run_tests(*[target]+args)
   finally:
     # We always want to shut down the simulator
     target.close()
 
     if stall:
-      raw_input('hit enter to quit...')
+      input('hit enter to quit...')
 
     # make sure that the simulator has quit
     sim_p.wait()

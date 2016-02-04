@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -66,7 +66,7 @@ class BCLR_bit%d_TestFail(BCLR_TestFail): pass
 class test_BCLR_bit%d(base_BCLR):
 	bit = %d
 	def fail(self,s):
-		raise BCLR_bit%d_TestFail, s
+		raise BCLR_bit%d_TestFail(s)
 """
 
 #
@@ -75,4 +75,4 @@ class test_BCLR_bit%d(base_BCLR):
 code = ''
 for b in range(8):
 	code += template % (b,b,b,b)
-exec code
+exec(code)

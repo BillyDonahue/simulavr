@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -42,7 +42,7 @@ class base_SBC(base_test.opcode_test):
 	def setup(self):
 		# Set SREG to zero or (Z and/or C flag set)
 		self.setup_regs[Reg.SREG] = (self.C << SREG.C) | (self.Z << SREG.Z)
-                self.setup_regs[Reg.PC] = 0x0100
+		self.setup_regs[Reg.PC] = 0x0100
 
 		# Set the register values
 		self.setup_regs[self.Rd] = self.Vd
@@ -102,7 +102,7 @@ class test_SBC_rd%02d_vd%02x_rr%02d_vr%02x_C%d_Z%d(base_SBC):
 	C  = %d
 	Z  = %d
 	def fail(self,s):
-		raise SBC_rd%02d_vd%02x_rr%02d_vr%02x_C%d_Z%d_TestFail, s
+		raise SBC_rd%02d_vd%02x_rr%02d_vr%02x_C%d_Z%d_TestFail(s)
 """
 
 #
@@ -136,4 +136,4 @@ for c,z in ((0,0), (1,0), (0,1), (1,1)):
 		for vd,vr in vals:
 			args = (d,vd,d,vd,c,z)*4
 			code += template % args
-exec code
+exec(code)

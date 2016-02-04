@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -48,7 +48,7 @@ class base_ADIW(base_test.opcode_test):
 		self.setup_regs[self.Rd+1] = (self.vd >> 8)
 
 		# Return the raw opcode
-		return 0x9600 | (((self.Rd/2)-12) << 4) | ((self.vk & 0x30) << 2) | (self.vk & 0xf)
+		return 0x9600 | (((self.Rd//2)-12) << 4) | ((self.vk & 0x30) << 2) | (self.vk & 0xf)
 
 	def analyze_results(self):
 		self.reg_changed.extend( [self.Rd, self.Rd+1, Reg.SREG] )
@@ -92,7 +92,7 @@ class test_ADIW_r%02d_v%04x_k%02x(base_ADIW):
 	vd = 0x%x
 	vk = 0x%x
 	def fail(self,s):
-		raise ADIW_r%02d_v%04x_k%02x_TestFail, s
+		raise ADIW_r%02d_v%04x_k%02x_TestFail(s)
 """
 
 # reg val, k val (0x00 <= k <= 0x3f)
@@ -116,4 +116,4 @@ for d in range(24,32,2):
 	for vd,vk in vals:
 		args = (d,vd,vk)*4
 		code += template % args
-exec code
+exec(code)

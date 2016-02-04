@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -82,7 +82,7 @@ class CALL_%06x_TestFail(CALL_TestFail): pass
 class test_CALL_%06x(base_CALL):
 	k = 0x%x
 	def fail(self,s):
-		raise CALL_%06x_TestFail, s
+		raise CALL_%06x_TestFail(s)
 """
 
 #
@@ -95,4 +95,4 @@ class test_CALL_%06x(base_CALL):
 code = ''
 for k in (0x100, 0x3ff):
 	code += template % ((k & 0xffffff), (k & 0xffffff), k, (k & 0xffffff))
-exec code
+exec(code)

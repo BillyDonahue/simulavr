@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -53,8 +53,8 @@ class base_EIJMP(base_test.opcode_eind_test):
 		self.setup_regs[Reg.R31] = (self.k >> 8) & 0xff
 		self.setup_regs[Reg.R30] = (self.k & 0xff)
 
-                #setup EIND register
-                self.write_register_eind(self.eind & 0xff)
+		#setup EIND register
+		self.write_register_eind(self.eind & 0xff)
 
 		return 0x9419
 
@@ -79,7 +79,7 @@ class test_EIJMP_k%06x_ei%02x(base_EIJMP):
 	k = 0x%x
 	eind = 0x%x
 	def fail(self,s):
-		raise EIJMP_k%06x_ei%02x_TestFail, s
+		raise EIJMP_k%06x_ei%02x_TestFail(s)
 """
 
 #
@@ -89,5 +89,5 @@ code = ''
 for k in (0x36, 0x100, 0x3ff):
         for eind in (0x00, 0x01):
                 args = (k, eind) * 4
-	        code += template % args
-exec code
+                code += template % args
+exec(code)

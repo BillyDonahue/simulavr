@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -80,7 +80,7 @@ class test_ST_Y_incr_r%02d_Y%04x_v%02x(base_ST_Y_incr):
 	Y = 0x%x
 	Vd = 0x%x
 	def fail(self,s):
-		raise ST_Y_incr_r%02d_Y%04x_v%02x_TestFail, s
+		raise ST_Y_incr_r%02d_Y%04x_v%02x_TestFail(s)
 """
 
 #
@@ -89,9 +89,9 @@ class test_ST_Y_incr_r%02d_Y%04x_v%02x(base_ST_Y_incr):
 # Operation is undefined for d = 28 and d = 29.
 #
 code = ''
-for d in range(0,28)+range(30,32):
+for d in list(range(0,28))+list(range(30,32)):
 	for x in (0x20f, 0x2ff):
 		for v in (0xaa, 0x55):
 			args = (d,x,v)*4
 			code += template % args
-exec code
+exec(code)

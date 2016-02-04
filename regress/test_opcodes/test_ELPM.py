@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -51,8 +51,8 @@ class base_ELPM(base_test.opcode_rampz_test):
 		self.setup_regs[Reg.R30] = (self.Z & 0xff)
 		self.setup_regs[Reg.R31] = (self.Z >> 8)
 
-                #setup RAMPZ register
-                self.write_register_rampz(self.rampz & 0xff)
+		#setup RAMPZ register
+		self.write_register_rampz(self.rampz & 0xff)
 
 		# set up the val in memory
 		self.prog_word_write(((self.rampz << 16) + self.Z) & 0xfffffe, 0xaa55 )
@@ -83,9 +83,9 @@ class ELPM_Z%04x_RZ%02x_TestFail(ELPM_TestFail): pass
 
 class test_ELPM_Z%04x_RZ%02x(base_ELPM):
 	Z = 0x%x
-        rampz = 0x%x
+	rampz = 0x%x
 	def fail(self,s):
-		raise ELPM_Z%04x_RZ%02x_TestFail, s
+		raise ELPM_Z%04x_RZ%02x_TestFail(s)
 """
 
 #
@@ -94,6 +94,6 @@ class test_ELPM_Z%04x_RZ%02x(base_ELPM):
 code = ''
 for z in (0x10, 0x11, 0x100, 0x101):
         for rampz in (0x00, 0x01, 0x02):
-	        args = (z, rampz) * 4
-	        code += template % args
-exec code
+                args = (z, rampz) * 4
+                code += template % args
+exec(code)

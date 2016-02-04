@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -76,7 +76,7 @@ class base_ELPM_Z_incr(base_test.opcode_rampz_test):
 
 		# check that Z was incremented
 		expect = ((self.rampz << 16) + self.Z) + 1
-                actual_rampz = self.read_register_rampz()
+		actual_rampz = self.read_register_rampz()
 		got = (self.anal_regs[Reg.R30] & 0xff) | ((self.anal_regs[Reg.R31] << 8) & 0xff00) | ((actual_rampz << 16) & 0xff0000)
 
 		if expect != got:
@@ -92,9 +92,9 @@ class ELPM_Z_incr_r%02d_Z%04x_RZ%02x_TestFail(ELPM_Z_incr_TestFail): pass
 class test_ELPM_Z_incr_r%02d_Z%04x_RZ%02x(base_ELPM_Z_incr):
 	Rd = %d
 	Z = 0x%x
-        rampz = 0x%x
+	rampz = 0x%x
 	def fail(self,s):
-		raise ELPM_Z_incr_r%02d_Z%04x_RZ%02x_TestFail, s
+		raise ELPM_Z_incr_r%02d_Z%04x_RZ%02x_TestFail(s)
 """
 
 #
@@ -104,8 +104,8 @@ class test_ELPM_Z_incr_r%02d_Z%04x_RZ%02x(base_ELPM_Z_incr):
 #
 code = ''
 for d in range(30):
-	for z in (0x10, 0x11, 0x100, 0x101, 0xFFFF):
+        for z in (0x10, 0x11, 0x100, 0x101, 0xFFFF):
                 for rampz in (0x00, 0x01, 0x02):
-		        args = (d, z, rampz) * 4
-		        code += template % args
-exec code
+                        args = (d, z, rampz) * 4
+                        code += template % args
+exec(code)

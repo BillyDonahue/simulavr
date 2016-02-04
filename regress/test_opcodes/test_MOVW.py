@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -45,7 +45,7 @@ class base_MOVW(base_test.opcode_test):
 		self.setup_regs[self.Rr+1] = 0x5a
 
 		# opcode is '0000 0001 dddd rrrr' where d and r are Rd/2 and Rr/2
-		return 0x0100 | ((self.Rd/2) << 4) | ((self.Rr/2) & 0xf)
+		return 0x0100 | ((self.Rd//2) << 4) | ((self.Rr//2) & 0xf)
 
 	def analyze_results(self):
 		self.reg_changed.extend( [self.Rd,self.Rd+1] )
@@ -64,7 +64,7 @@ class test_MOVW_r%02d_r%02d(base_MOVW):
 	Rd = %d
 	Rr = %d
 	def fail(self,s):
-		raise MOVW_r%02d_r%02d_TestFail, s
+		raise MOVW_r%02d_r%02d_TestFail(s)
 """
 
 #
@@ -75,4 +75,4 @@ for d in range(0,32,4):
 	for r in range(2,32,4):
 		args = (d,r)*4
 		code += template % args
-exec code
+exec(code)

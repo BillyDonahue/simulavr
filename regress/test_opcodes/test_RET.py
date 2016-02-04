@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -80,7 +80,7 @@ class test_RET_old_%06x_new_%06x(base_RET):
 	old_pc = %d
 	new_pc = %d
 	def fail(self,s):
-		raise RET_new_%06x_old_%06x_TestFail, s
+		raise RET_new_%06x_old_%06x_TestFail(s)
 """
 
 #
@@ -92,7 +92,7 @@ for old_pc in (0,255,256,(8*1024/2-1)):
 	for new_pc in (0,1,2,3,255,256,(8*1024/2-1)):
 		args = (old_pc,new_pc)*4
 		code += template % args
-exec code
+exec(code)
 
 
 

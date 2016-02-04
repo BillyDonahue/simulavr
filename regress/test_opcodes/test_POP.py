@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -83,7 +83,7 @@ class test_POP_r%02d_%02x(base_POP):
 	Rd = %d
 	k = 0x%x
 	def fail(self,s):
-		raise POP_r%02d_%02x_TestFail, s
+		raise POP_r%02d_%02x_TestFail(s)
 """
 
 #
@@ -94,4 +94,4 @@ for rd in range(32):
 	for k in (0x55,0xaa):
 		args = (rd,k)*4
 		code += template % args
-exec code
+exec(code)

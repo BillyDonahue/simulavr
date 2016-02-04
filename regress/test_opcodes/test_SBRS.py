@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -84,7 +84,7 @@ class test_SRBS_r%02d_b%d_v%02x_ni%d(base_SRBS):
 	v = %d
 	ni = %d
 	def fail(self,s):
-		raise SRBS_r%02d_b%d_v%02x_ni%d_TestFail, s
+		raise SRBS_r%02d_b%d_v%02x_ni%d_TestFail(s)
 """
 
 #
@@ -97,4 +97,4 @@ for d in range(32):
 			for ni in (16,32): # is next insn 16 or 32 bits
 				args = (d,b,v,ni)*4
 				code += template % args
-exec code
+exec(code)

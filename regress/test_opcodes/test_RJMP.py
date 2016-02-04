@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -68,7 +68,7 @@ class RJMP_%03x_TestFail(RJMP_TestFail): pass
 class test_RJMP_%03x(base_RJMP):
   k = 0x%x
   def fail(self,s):
-    raise RJMP_%03x_TestFail, s
+    raise RJMP_%03x_TestFail(s)
 """
 
 #
@@ -81,4 +81,4 @@ class test_RJMP_%03x(base_RJMP):
 code = ''
 for k in (-100,100):
   code += template % ((k & 0xfff), (k & 0xfff), (k & 0xfff), (k & 0xfff))
-exec code
+exec(code)
