@@ -89,15 +89,30 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
 { 
     flagJMPInstructions = (flash_bytes > 8U * 1024U) ? true : false;
     if(flash_bytes > 4U * 1024U) {
-        if(flash_bytes > 16U * 1024U)
+        if(flash_bytes > 16U * 1024U) {
             // atmega328
             fuses->SetFuseConfiguration(19, 0xffd962);
-        else
+            fuses->SetBootloaderConfig(0x3800, 0x800, 9, 8);
+            spmRegister = new FlashProgramming(this, 64, 0x3800, FlashProgramming::SPM_MEGA_MODE);
+
+        } else {
             // atmega88, atmega168
             fuses->SetFuseConfiguration(19, 0xf9df62);
-    } else
+            if(flash_bytes > 8U * 1024U) {
+                // atmega168
+                fuses->SetBootloaderConfig(0x1c00, 0x400, 17, 16);
+                spmRegister = new FlashProgramming(this, 64, 0x1c00, FlashProgramming::SPM_MEGA_MODE);
+            } else {
+                // atmega88
+                fuses->SetBootloaderConfig(0x0c00, 0x400, 17, 16);
+                spmRegister = new FlashProgramming(this, 32, 0x0c00, FlashProgramming::SPM_MEGA_MODE);
+            }
+        }
+    } else {
         // atmega48
         fuses->SetFuseConfiguration(17, 0xffdf62);
+        spmRegister = new FlashProgramming(this, 32, 0x0000, FlashProgramming::SPM_MEGA_MODE);
+    }
     irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 26);
     
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, 22, HWEeprom::DEVMODE_EXTENDED);
@@ -280,7 +295,7 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
     rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
     // 0x58 - 0x5C reserved
-    rw[0x57]= new NotSimulatedRegister("Self-programming register SPMCSR not simulated");
+    rw[0x57]= & spmRegister->spmcr_reg;
     // 0x56 reserved
     rw[0x55]= new NotSimulatedRegister("MCU register MCUCR not simulated");
     rw[0x54]= new NotSimulatedRegister("MCU register MCUSR not simulated");

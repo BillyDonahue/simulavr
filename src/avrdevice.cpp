@@ -377,13 +377,12 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
 }
 
 void AvrDevice::Reset() {
-    PC = 0;
+    cPC = PC = fuses->GetResetAddr();
 
     vector<Hardware *>::iterator ii;
     for(ii= hwResetList.begin(); ii != hwResetList.end(); ii++)
         (*ii)->Reset();
 
-    PC = 0; cPC=0;
     *status = 0;
 
     // init the old static vars from Step()
