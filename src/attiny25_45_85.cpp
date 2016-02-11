@@ -42,12 +42,22 @@ AVR_REGISTER(attiny85, AvrDevice_attiny85)
 
 AvrDevice_attinyX5::~AvrDevice_attinyX5() {
     // destroy subsystems in reverse order, you've created it in constructor
+    delete usi;
+    delete acomp;
+    delete ad;
+    delete aref;
+    delete admux;
     delete timer1;
     delete pllcsr_reg;
     delete timer0;
     delete timer01irq;
     delete prescaler0;
     delete gtccr_reg;
+    delete extirq;
+    delete pcmsk_reg;
+    delete mcucr_reg;
+    delete gifr_reg;
+    delete gimsk_reg;
     delete gpior2_reg;
     delete gpior1_reg;
     delete gpior0_reg;
@@ -82,6 +92,14 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
     gpior2_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR2");
     
+    gimsk_reg = new IOSpecialReg(&coreTraceGroup, "GIMSK");
+    gifr_reg = new IOSpecialReg(&coreTraceGroup, "GIFR");
+    mcucr_reg = new IOSpecialReg(&coreTraceGroup, "MCUCR");
+    pcmsk_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK");
+    extirq = new ExternalIRQHandler(this, irqSystem, gimsk_reg, gifr_reg);
+    extirq->registerIrq(1, 6, new ExternalIRQSingle(mcucr_reg, 0, 2, GetPin("B2")));
+    extirq->registerIrq(2, 5, new ExternalIRQPort(pcmsk_reg, portb));
+
     // GTCCR register and timer 0
     gtccr_reg = new IOSpecialReg(&coreTraceGroup, "GTCCR");
     prescaler0 = new HWPrescaler(this, "0", gtccr_reg, 0, 7);
@@ -124,18 +142,22 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     // Analog comparator
     acomp = new HWAcomp(this, irqSystem, PinAtPort(portb, 0), PinAtPort(portb, 1), 7, ad, NULL);
 
+    // USI
+    usi = new HWUSI_BR(this, irqSystem, PinAtPort(portb, 0), PinAtPort(portb, 1), PinAtPort(portb, 2), 13, 14);
+    timer0->SetTimerEventListener(usi);
+
     // IO register set
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
     rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
     //rw[0x5c] reserved
-    //rw[0x5b] reserved
-    //rw[0x5a] reserved
+    rw[0x5b]= gimsk_reg;
+    rw[0x5a]= gifr_reg;
     rw[0x59]= & timer01irq->timsk_reg;
     rw[0x58]= & timer01irq->tifr_reg;
     //rw[0x57] reserved
     //rw[0x56] reserved
-    //rw[0x55] reserved
+    rw[0x55]= mcucr_reg;
     //rw[0x54] reserved
     rw[0x53]= & timer0->tccrb_reg;
     rw[0x52]= & timer0->tcnt_reg;
@@ -169,16 +191,16 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     rw[0x38]= & portb->port_reg;
     rw[0x37]= & portb->ddr_reg;
     rw[0x36]= & portb->pin_reg;
-    //rw[0x35] reserved
+    rw[0x35]= pcmsk_reg;
     //rw[0x34] reserved
     rw[0x33]= gpior2_reg;
     rw[0x32]= gpior1_reg;
     rw[0x31]= gpior0_reg;
-    rw[0x30]= new NotSimulatedRegister("USI register USIBR not simulated");
+    rw[0x30]= &usi->usibr_reg;
 
-    rw[0x2f]= new NotSimulatedRegister("USI register USIDR not simulated");
-    rw[0x2e]= new NotSimulatedRegister("USI register USISR not simulated");
-    rw[0x2d]= new NotSimulatedRegister("USI register USICR not simulated");
+    rw[0x2f]= &usi->usidr_reg;
+    rw[0x2e]= &usi->usisr_reg;
+    rw[0x2d]= &usi->usicr_reg;
     //rw[0x2c] reserved
     //rw[0x2b] reserved
     //rw[0x2a] reserved

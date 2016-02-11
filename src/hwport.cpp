@@ -24,7 +24,7 @@
  */
 
 #include <iostream>
-using namespace std;
+using namespace std; // used for string class
 
 #include "hwport.h"
 #include "avrdevice.h"
@@ -35,6 +35,7 @@ HWPort::HWPort(AvrDevice *core, const string &name, bool portToggle, int size):
     Hardware(core),
     TraceValueRegister(core, "PORT" + name),
     myName(name),
+    portSize(size),
     portToggleFeature(portToggle),
     port_reg(this, "PORT",
              this, &HWPort::GetPort, &HWPort::SetPort),
@@ -43,10 +44,8 @@ HWPort::HWPort(AvrDevice *core, const string &name, bool portToggle, int size):
     ddr_reg(this, "DDR",
             this, &HWPort::GetDdr, &HWPort::SetDdr)
 {
-    if(size > 8 || size < 1)
-        size = 8;
-    portSize = size;
-    portMask = (unsigned char)((1 << size) - 1);
+    assert((portSize >= 1) && (portSize <= sizeof(p)/sizeof(p[0])));
+    portMask = (unsigned char)((1 << portSize) - 1);
 
     for(unsigned int tt = 0; tt < portSize; tt++) {
         // register pin to give access to pin by name
@@ -77,79 +76,34 @@ void HWPort::Reset(void) {
     pin = 0;
     ddr = 0;
 
-    alternateDdr = 0;
-    useAlternateDdr = 0;
-
-    alternatePort = 0;
-    useAlternatePort = 0;
-
-    useAlternatePortIfDdrSet = 0;
-    
+    for(int tt = portSize - 1; tt >= 0; tt--)
+        p[tt].ResetOverride();
     CalcOutputs();
 }
 
 Pin& HWPort::GetPin(unsigned char pinNo) {
+    assert(pinNo < sizeof(p)/sizeof(p[0]));
     return p[pinNo];
 }
 
-void HWPort::CalcPin(void) {
-    // calculating the value for register "pin" from the Pin p[] array
-    pin = 0;
-    for(unsigned int tt = 0; tt < portSize; tt++) {
-        if(p[tt].CalcPin()) pin |= (1 << tt);
-    }
-}
-
 void HWPort::CalcOutputs(void) { // Calculate the new output value to be transmitted to the environment
+    unsigned char tmpPin = 0;
+
     for(unsigned int actualBitNo = 0; actualBitNo < portSize; actualBitNo++) {
         unsigned char actualBit = 1 << actualBitNo;
-        unsigned char workingPort = 0;
-        unsigned char workingDdr = 0;
+        bool regPort = (bool)(port & actualBit);
+        bool regDDR = (bool)(ddr & actualBit);
 
-        if(useAlternatePortIfDdrSet & actualBit) {
-            if(ddr & actualBit) {
-                workingPort |= alternatePort & actualBit;
-                workingDdr |= actualBit;
-            } else
-                workingPort |= port & actualBit;
-        } else {
-            if(useAlternateDdr & actualBit)
-                workingDdr |= alternateDdr & actualBit;
-            else
-                workingDdr |= ddr & actualBit;
-
-            if(useAlternatePort & actualBit)
-                workingPort |= alternatePort & actualBit;
-            else
-                workingPort |= port & actualBit;
-        }
-
-        if(workingDdr & actualBit) { // DDR is set to output (1)
-            if(workingPort & actualBit) { // Port is High
-                p[actualBitNo].outState = Pin::HIGH;
-                pintrace[actualBitNo]->change(Pin::HIGH);
-            } else {
-                p[actualBitNo].outState = Pin::LOW;
-                pintrace[actualBitNo]->change(Pin::LOW);
-            }
-        } else { // DDR is input (0)
-            if(workingPort & actualBit) {
-                p[actualBitNo].outState = Pin::PULLUP;
-                pintrace[actualBitNo]->change(Pin::PULLUP);
-            } else {
-                p[actualBitNo].outState = Pin::TRISTATE;
-                pintrace[actualBitNo]->change(Pin::TRISTATE);
-            }
-        }
+        if(p[actualBitNo].CalcPinOverride(regDDR, regPort, false))
+            tmpPin |= actualBit;
+        pintrace[actualBitNo]->change(p[actualBitNo].outState);
     }
-    
-    CalcPin(); // now transfer the result also to all HWPort::pin instances
+    pin = tmpPin;
 }
 
 string HWPort::GetPortString(void) {
     string dummy;
     dummy.resize(portSize);
-    assert(portSize < sizeof(p)/sizeof(p[0]));
     for(unsigned int tt = 0; tt < portSize; tt++)
         dummy[portSize - 1 - tt] = p[tt];  // calls Pin::operator char()
 
@@ -165,3 +119,4 @@ void HWPort::SetPin(unsigned char val) {
         avr_warning("Writing of 'PORT%s.PIN' (with %d) is not supported.", myName.c_str(), val);
 }
 
+/* EOF */

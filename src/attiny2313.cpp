@@ -39,6 +39,7 @@
 AVR_REGISTER(attiny2313, AvrDevice_attiny2313)
 
 AvrDevice_attiny2313::~AvrDevice_attiny2313() {
+    delete usi;
     delete acomp;
     delete timer1;
     delete inputCapture1;
@@ -139,6 +140,9 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     
     acomp = new HWAcomp(this, irqSystem, PinAtPort(portb, 0), PinAtPort(portb, 1), 10, NULL, timer1);
 
+    // USI
+    usi = new HWUSI(this, irqSystem, PinAtPort(portb, 0), PinAtPort(portb, 1), PinAtPort(portb, 2), 15, 16);
+
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
     rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
@@ -187,9 +191,9 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     rw[0x32]= & portd->port_reg;
     rw[0x31]= & portd->ddr_reg;
     rw[0x30]= & portd->pin_reg;
-    //rw[0x2f] USIDR
-    //rw[0x2e] USISR
-    //rw[0x2d] USICR
+    rw[0x2f]= & usi->usidr_reg;
+    rw[0x2e]= & usi->usisr_reg;
+    rw[0x2d]= & usi->usicr_reg;
     rw[0x2c]= & usart->udr_reg;
     rw[0x2b]= & usart->ucsra_reg;
     rw[0x2a]= & usart->ucsrb_reg;

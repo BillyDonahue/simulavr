@@ -40,6 +40,7 @@ clean-local:
 regression:
 if PYTHON_CMD_USE
 	@PYTHON@ ./regress.py 2> regress.err | tee regress.out
+	@PYTHON@ ./regress.py -d atmega2560 2> regress_atmega2560.err | tee regress_atmega2560.out
 else
 	@echo "  Configure could not find python on your system so regression"
 	@echo "  tests can not be automated."

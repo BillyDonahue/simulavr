@@ -35,6 +35,7 @@
 #include "externalirq.h"
 #include "hwuart.h"
 #include "hwacomp.h"
+#include "hwusi.h"
 
 //! AVRDevice class for ATTiny2313
 class AvrDevice_attiny2313: public AvrDevice {
@@ -64,6 +65,7 @@ class AvrDevice_attiny2313: public AvrDevice {
         TimerIRQRegister* timer01irq;   //!< timer interrupt unit for timer 0 and 1
         HWUsart *usart;                 //!< usart unit
         HWAcomp *acomp;                 //!< analog compare unit
+        HWUSI *usi;                     //!< usi unit
 
         AvrDevice_attiny2313();
         ~AvrDevice_attiny2313(); 

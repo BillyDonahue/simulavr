@@ -36,6 +36,7 @@
 #include "hwuart.h"
 #include "hwad.h"
 #include "hwacomp.h"
+#include "hwusi.h"
 
 //! AVRDevice class for ATTiny25/45/85
 class AvrDevice_attinyX5: public AvrDevice {
@@ -46,6 +47,11 @@ class AvrDevice_attinyX5: public AvrDevice {
         GPIORegister *gpior0_reg;       //!< GPIOR0 Register
         GPIORegister *gpior1_reg;       //!< GPIOR1 Register
         GPIORegister *gpior2_reg;       //!< GPIOR2 Register
+        ExternalIRQHandler *extirq;     //!< external interrupt support
+        IOSpecialReg *gimsk_reg;        //!< GIMSK IO register
+        IOSpecialReg *gifr_reg;         //!< GIFR IO register
+        IOSpecialReg *mcucr_reg;        //!< MCUCR IO register
+        IOSpecialReg *pcmsk_reg;        //!< PCMSK IO register
         CLKPRRegister *clkpr_reg;       //!< CLKPR IO register
         OSCCALRegister *osccal_reg;     //!< OSCCAL IO register
 
@@ -61,6 +67,7 @@ class AvrDevice_attinyX5: public AvrDevice {
         HWARef            *aref;        //!< adc reference unit
         HWAd              *ad;          //!< adc unit
         HWAcomp           *acomp;       //!< analog compare unit
+        HWUSI_BR          *usi;         //!< usi unit
 
         /*! Creates the device for ATMega48/88/168/328
           @param ram_bytes how much SRAM does the device own

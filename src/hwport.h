@@ -42,9 +42,6 @@
   connected to pin if ddr is set to output! */
 class HWPort: public Hardware, public TraceValueRegister {
     
-    private:
-        void CalcPin(void); //!< calculating the value for register "pin" from the Pin p[] array
-        
     protected:
         std::string myName; //!< the "name" of the port
 
@@ -52,17 +49,7 @@ class HWPort: public Hardware, public TraceValueRegister {
         unsigned char pin;  //!< port input register
         unsigned char ddr;  //!< data direction register
 
-        unsigned char alternateDdr; //!< data direction register for special functions
-        unsigned char useAlternateDdr; //!< bit mask, which bit in alternateDdr is used
-
-        unsigned char alternatePort; //!< output register for special functions
-        unsigned char useAlternatePort; //!< bit mask, which bit in alternatePort is used
-
-        /*! special case for the ocr1a&b is selected on pin, which only be send
-          to pin if ddr is set to output */
-        unsigned char useAlternatePortIfDdrSet; 
-        
-        Pin p[8]; //!< the port pins, e.g. the final IO stages
+        PortPin p[8]; //!< the port pins, e.g. the final IO stages
         TraceValue* pintrace[8]; //!< trace channel to trace output driver state
         unsigned int portSize; //!< how much bits does this port have [1..8]
         unsigned char portMask; //!< mask out unused bits, if necessary

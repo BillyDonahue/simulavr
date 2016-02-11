@@ -34,6 +34,13 @@
 #include "traceval.h"
 #include "icapturesrc.h"
 
+class TimerEventListener {
+    public:
+        virtual void fireEvent(int event) = 0;
+
+        virtual ~TimerEventListener() {}
+};
+
 //! Basic timer unit
 /*! Provides basic timer/counter functionality. Counting clock will be taken
   from a prescaler unit. It provides further at max 3 compare values and
@@ -46,7 +53,43 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
         bool captureInputState; //!< saved state for input capture
         int icapNCcounter; //!< counter for input capture noise canceler
         bool icapNCstate; //!< state for input capture noise canceler
+        TimerEventListener* eventListener; //!< event listener for timer events
+
+    public:
+        //! event types for timer/counter
+        enum CEtype {
+            EVT_TOP_REACHED = 0,  //!< TOP reached for one count cycle
+            EVT_MAX_REACHED,      //!< an counter overflow occured
+            EVT_BOTTOM_REACHED,   //!< BOTTOM reached for one count cycle
+            EVT_COMPARE_1,        //!< compare[0] value reached for one count cycle
+            EVT_COMPARE_2,        //!< compare[1] value reached for one count cycle
+            EVT_COMPARE_3,        //!< compare[2] value reached for one count cycle
+        };
+
+        //! Create a basic Timer/Counter unit
+        BasicTimerUnit(AvrDevice *core,
+                       PrescalerMultiplexer *p,
+                       int unit,
+                       IRQLine* tov,
+                       IRQLine* tcap,
+                       ICaptureSource* icapsrc,
+                       int countersize = 8);
+        ~BasicTimerUnit();
+        //! Perform a reset of this unit
+        void Reset();
         
+        //! Process timer/counter unit operations by CPU cycle
+        virtual unsigned int CpuCycle();
+
+        //! register analog comparator unit for input capture source
+        void RegisterACompForICapture(HWAcomp *acomp);
+
+        //! reflect ACIC flag to input capture source
+        void SetACIC(bool acic) { if(icapSource != NULL) icapSource->SetACIC(acic); }
+
+        //! Set event listener
+        void SetTimerEventListener(TimerEventListener *listener) { eventListener = listener; }
+
     protected:
         //! types of waveform generation modes
         enum WGMtype {
@@ -74,15 +117,6 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
           COM_TOGGLE,
           COM_CLEAR,
           COM_SET
-        };
-        //! event types for timer/counter
-        enum CEtype {
-            EVT_TOP_REACHED = 0,  //!< TOP reached for one count cycle
-            EVT_MAX_REACHED,      //!< an counter overflow occured
-            EVT_BOTTOM_REACHED,   //!< BOTTOM reached for one count cycle
-            EVT_COMPARE_1,        //!< compare[0] value reached for one count cycle
-            EVT_COMPARE_2,        //!< compare[1] value reached for one count cycle
-            EVT_COMPARE_3,        //!< compare[2] value reached for one count cycle
         };
         //! indices for OC units
         enum OCRIDXtype {
@@ -133,7 +167,7 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
           (updown_counting) and generate events, if special count values are reached
           for at least one counting cycle. It can happen, that more than one event
           could occur in the same count cycle! */
-        void HandleEvent(CEtype event) { (this->*wgmfunc[wgm])(event); }
+        void HandleEvent(CEtype event);
         //! Set clock mode
         void SetClockMode(int _cs);
         //! Set the counter itself
@@ -162,27 +196,6 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
         //! WGM function for phase and frequency correct pwm mode (unique for all different timers)
         void WGMfunc_pfcpwm(CEtype event);
         
-    public:
-        //! Create a basic Timer/Counter unit
-        BasicTimerUnit(AvrDevice *core,
-                       PrescalerMultiplexer *p,
-                       int unit,
-                       IRQLine* tov,
-                       IRQLine* tcap,
-                       ICaptureSource* icapsrc,
-                       int countersize = 8);
-        ~BasicTimerUnit();
-        //! Perform a reset of this unit
-        void Reset();
-        
-        //! Process timer/counter unit operations by CPU cycle
-        virtual unsigned int CpuCycle();
-
-        //! register analog comparator unit for input capture source
-        void RegisterACompForICapture(HWAcomp *acomp);
-
-        //! reflect ACIC flag to input capture source
-        void SetACIC(bool acic) { if(icapSource != NULL) icapSource->SetACIC(acic); }
 };
 
 //! Extends BasicTimerUnit to provide common support to all types of 8Bit timer units

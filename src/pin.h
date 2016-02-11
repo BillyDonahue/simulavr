@@ -126,7 +126,7 @@ class Pin {
         Pin(void); //!< common constructor, initial output state is tristate
         Pin(const Pin& p); //!< copy constructor, copy values but no refs to Net or HWPort
         Pin(T_Pinstate ps); //!< copy constructor from pin state
-        Pin(unsigned char *parentPin, unsigned char mask); //!< constructor for a port pin
+        Pin(unsigned char *parentPin, unsigned char mask); //!< constructor for a port pin, only used in UI part!
         Pin(float analog); //!< constructor for analog pin
         virtual ~Pin(); //!< pin destructor, breaks save connection to other pins, if necessary
         
@@ -160,6 +160,45 @@ class Pin {
         friend class HWPort;
         friend class Net;
 
+};
+
+//! Pin class for HWPort, a special pin with override functionality for output stage
+class PortPin: public Pin {
+
+    private:
+        int regCount; //!< register counter
+
+    protected:
+        unsigned char DDOE;
+        unsigned char DDOV;
+        unsigned char PVOE;
+        unsigned char PVOV;
+        unsigned char PVOEwDDR;
+        unsigned char PUOE;
+        unsigned char PUOV;
+
+    public:
+        PortPin(void); //!< common constructor, initial output state is tristate
+        virtual ~PortPin(); //!< pin destructor, breaks save connection to other pins, if necessary
+        void ResetOverride(void); //!< reset override states
+
+        // override interface, index is the registered index for multiple alternate pin functions
+        void SetDDOV(bool val, int index = 0); //!< set data direction override value
+        void SetDDOE(bool val, int index = 0); //!< set data direction override enable
+        void SetPVOV(bool val, int index = 0); //!< set port override value
+        void SetPVOE(bool val, int index = 0); //!< set port override enable
+        void SetPVOE_WithDDR(bool val, int index = 0); //!< set port override enable, if DDR is set
+        void SetPUOV(bool val, int index = 0); //!< set pullup override value
+        void SetPUOE(bool val, int index = 0); //!< set pullup override enable
+
+        // register interface for PinAtPort to support multiple alternate functionality
+        int RegisterAlternateUse(void); //!< register an alternate function to pin
+
+        // calculate outState with override
+        bool CalcPinOverride(bool ddr, bool port, bool pud); //!< calculate pin outState with override functionality
+
+        friend class HWPort;
+        friend class Net;
 };
 
 //! Open drain Pin class, a special pin with open drain behavior

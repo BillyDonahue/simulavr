@@ -24,6 +24,7 @@
  */
 
 #include <limits.h> // for INT_MAX
+#include <assert.h>
 
 #include "pin.h"
 #include "net.h"
@@ -342,3 +343,101 @@ Pin OpenDrain::GetPin() {
 OpenDrain::OpenDrain(Pin *p) {
     pin = p;
 }
+
+PortPin::PortPin() {
+    regCount = 0;
+    outState = TRISTATE;
+
+    ResetOverride();
+}
+
+PortPin::~PortPin() {
+    // unregister myself on Net instance
+    UnRegisterNet(connectedTo);
+}
+
+void PortPin::ResetOverride(void) {
+    DDOE = DDOV = 0;
+    PVOE = PVOV = PVOEwDDR = 0;
+    PUOE = PUOV = 0;
+}
+
+int PortPin::RegisterAlternateUse(void) {
+    assert(regCount < (sizeof(DDOV) * 8)); // bit count is used!
+    return regCount++;
+}
+
+void PortPin::SetDDOV(bool val, int index) {
+    if(val)
+        DDOV |= 1 << index;
+    else
+        DDOV &= ~(1 << index);
+}
+
+void PortPin::SetDDOE(bool val, int index) {
+    if(val)
+        DDOE |= 1 << index;
+    else
+        DDOE &= ~(1 << index);
+}
+
+void PortPin::SetPVOV(bool val, int index) {
+    if(val)
+        PVOV |= 1 << index;
+    else
+        PVOV &= ~(1 << index);
+}
+
+void PortPin::SetPVOE(bool val, int index) {
+    if(val)
+        PVOE |= 1 << index;
+    else
+        PVOE &= ~(1 << index);
+}
+
+void PortPin::SetPVOE_WithDDR(bool val, int index) {
+    if(val)
+        PVOEwDDR |= 1 << index;
+    else
+        PVOEwDDR &= ~(1 << index);
+}
+
+void PortPin::SetPUOV(bool val, int index) {
+    if(val)
+        PUOV |= 1 << index;
+    else
+        PUOV &= ~(1 << index);
+}
+
+void PortPin::SetPUOE(bool val, int index) {
+    if(val)
+        PUOE |= 1 << index;
+    else
+        PUOE &= ~(1 << index);
+}
+
+bool PortPin::CalcPinOverride(bool ddr, bool port, bool pud) {
+    unsigned char ddov = DDOE & DDOV; // masking values
+    unsigned char pvov = PVOE & PVOV;
+    unsigned char pvovwddr = PVOEwDDR & PVOV;
+    bool resultingDDR = (!DDOE && ddr) || (DDOE && ddov);
+    bool resultingPort = (!(PVOE || PVOEwDDR) && port) || (PVOE && pvov) || (PVOEwDDR && pvovwddr && ddr);
+    bool pu = !pud && !ddr && port;
+    bool resultingPU = (!PUOE && pu) || (PUOE && PUOV);
+
+    if(resultingDDR) {
+        if(resultingPort)
+            outState = Pin::HIGH;
+        else
+            outState = Pin::LOW;
+    } else {
+        if(resultingPU)
+            outState = Pin::PULLUP;
+        else
+            outState = Pin::TRISTATE;
+    }
+
+    return CalcPin();
+}
+
+/* EOF */
