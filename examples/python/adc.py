@@ -32,12 +32,12 @@ if __name__ == "__main__":
   aref = XPin(dev, "AREF", 'a')
   
   INT_MAX = 2**31 - 1
-  aref.SetAnalog(INT_MAX)
+  aref.SetAnalogValue(INT_MAX)
   # hwad.cpp: adSample= (int)((float)adSample/(float)adref*INT_MAX);
   
   sim.dmanStart()
   print("simulation start: (t=%dns)" % sim.getCurrentTime())
-  a0.SetAnalog(123)
+  a0.SetAnalogValue(123)
   
   print("run till main function ...")
   bpaddr = dev.Flash.GetAddressAtSymbol("main")

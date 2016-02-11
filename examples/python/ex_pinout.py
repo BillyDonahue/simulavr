@@ -1,4 +1,5 @@
 # Python Script
+from __future__ import print_function
 from sys import argv
 from os.path import splitext, basename
 
