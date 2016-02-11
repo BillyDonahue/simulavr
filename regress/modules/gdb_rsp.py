@@ -23,6 +23,7 @@
 # $Id: gdb_rsp.py,v 1.1 2004/07/31 00:59:32 rivetwa Exp $
 #
 
+from __future__ import print_function
 import socket, struct, array, sys
 
 from registers import Reg
@@ -87,7 +88,7 @@ class GdbRemoteSerialProtocol:
 	def cksum(self,pkt):
 		sum = 0
 		for c in pkt:
-			sum += c
+			sum += ord(c)
 
 		return sum & 0xff
 

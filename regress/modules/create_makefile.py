@@ -23,6 +23,7 @@
 #
 # $Id: $
 #
+from __future__ import print_function
 from optparse import OptionParser
 from configparser import ConfigParser
 from os.path import exists

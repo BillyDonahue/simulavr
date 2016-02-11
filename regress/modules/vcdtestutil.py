@@ -1,3 +1,4 @@
+from __future__ import print_function
 from os.path import basename, splitext
 from unittest import TestCase, TestLoader
 from sys import stderr

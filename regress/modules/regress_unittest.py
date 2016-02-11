@@ -1,3 +1,4 @@
+from __future__ import print_function
 from unittest import TextTestRunner, TestSuite
 from sys import argv, stderr, exit
 
