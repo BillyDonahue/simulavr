@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
