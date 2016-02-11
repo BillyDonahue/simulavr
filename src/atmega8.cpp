@@ -44,6 +44,7 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
     adc7()
 {
     fuses->SetFuseConfiguration(16, 0xd9e1);
+    fuses->SetBootloaderConfig(0xc00, 0x400, 9, 8);
     irqSystem = new HWIrqSystem(this, 2, 19); //2 bytes per vector, 19 vectors
     eeprom = new HWEeprom(this, irqSystem, 512, 15);
     HWStackSram * stack_ram = new HWStackSram(this, 11); // Stack Pointer data space used 11 Bit wide.
@@ -53,10 +54,10 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
     portc = new HWPort(this, "C", false, 7);
     portd = new HWPort(this, "D");
 
-    spmRegister = new FlashProgramming(this, // defined device
+    spmRegister = new FlashProgramming(this,
             32, // 32 words per page * 2 bytes per page * 128 pages = 8192 Bytes
-            0xC000, // No Read-While-Write section starts at 0xC00
-            FlashProgramming::SPM_MEGA_MODE); //
+            0xC00, // No Read-While-Write section starts at 0xC00
+            FlashProgramming::SPM_MEGA_MODE);
 
     sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
 

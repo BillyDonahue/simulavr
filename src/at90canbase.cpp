@@ -67,6 +67,7 @@ AvrDevice_at90canbase::~AvrDevice_at90canbase() {
     delete stack;
     delete eeprom;
     delete irqSystem;
+    delete spmRegister;
 }
 
 AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
@@ -89,7 +90,19 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
     prescaler2(this, "2", PinAtPort(&portc, 7), &assr_reg, 5, &gtccr_reg, 1, 7) {
     flagELPMInstructions = true;
     fuses->SetFuseConfiguration(20, 0xff9962);
-    irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 37);
+    if(flash_bytes > 64U * 1024U) {
+        fuses->SetBootloaderConfig(0xf000, 0x1000, 9, 8);
+        spmRegister = new FlashProgramming(this, 128, 0xf000, FlashProgramming::SPM_MEGA_MODE);
+    } else {
+        if(flash_bytes > 32U * 1024U) {
+            fuses->SetBootloaderConfig(0x7000, 0x1000, 9, 8);
+            spmRegister = new FlashProgramming(this, 128, 0x7000, FlashProgramming::SPM_MEGA_MODE);
+        } else {
+            fuses->SetBootloaderConfig(0x3000, 0x1000, 9, 8);
+            spmRegister = new FlashProgramming(this, 128, 0x3000, FlashProgramming::SPM_MEGA_MODE);
+        }
+    }
+    irqSystem = new HWIrqSystem(this, 4, 37);
 
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, 26, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStackSram(this, 16);
@@ -307,7 +320,7 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
     /* 0x5c reserved */
     rw[0x5b]= & rampz->ext_reg;
     /* 0x58-0x5A Reserved */
-    /* 0x57 SPMCSR TODO?? */
+    rw[0x57]= & spmRegister->spmcr_reg;
     /* 0x56 Reserved */
     /* 0x55 MCUCR -- Memory control TODO */
     /* 0x54 MCUSR -- Memory control TODO */

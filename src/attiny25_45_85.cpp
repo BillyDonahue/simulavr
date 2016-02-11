@@ -67,6 +67,7 @@ AvrDevice_attinyX5::~AvrDevice_attinyX5() {
     delete stack;
     delete eeprom;
     delete irqSystem;
+    delete spmRegister;
 }
 
 AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
@@ -80,6 +81,10 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     flagJMPInstructions = false;
     flagMULInstructions = false;
     fuses->SetFuseConfiguration(17, 0xffdf62);
+    if(flash_bytes > 2U * 1024U)
+        spmRegister = new FlashProgramming(this, 32, 0x0000, FlashProgramming::SPM_TINY_MODE);
+    else
+        spmRegister = new FlashProgramming(this, 16, 0x0000, FlashProgramming::SPM_TINY_MODE);
     irqSystem = new HWIrqSystem(this, 2, 15); // 2 bytes per vector, 15 vectors
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, 6, HWEeprom::DEVMODE_EXTENDED); 
     stack = new HWStackSram(this, 12);
@@ -155,7 +160,7 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     rw[0x5a]= gifr_reg;
     rw[0x59]= & timer01irq->timsk_reg;
     rw[0x58]= & timer01irq->tifr_reg;
-    //rw[0x57] reserved
+    rw[0x57]= & spmRegister->spmcr_reg;
     //rw[0x56] reserved
     rw[0x55]= mcucr_reg;
     //rw[0x54] reserved

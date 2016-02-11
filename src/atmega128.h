@@ -81,7 +81,7 @@ class AvrDevice_atmega128base: public AvrDevice {
         HWUsart *usart0;                //!< usart 0 unit
         HWUsart *usart1;                //!< usart 1 unit
 
-        AvrDevice_atmega128base(unsigned flash_bytes, unsigned ee_bytes);
+        AvrDevice_atmega128base(unsigned flash_bytes, unsigned ee_bytes, unsigned ext_bytes, unsigned nrww_start);
         ~AvrDevice_atmega128base(); 
 };
 
@@ -89,14 +89,14 @@ class AvrDevice_atmega128base: public AvrDevice {
 class AvrDevice_atmega64: public AvrDevice_atmega128base {
     public:
         //! Creates the device for ATMega64, see AvrDevice_atmega128base.
-        AvrDevice_atmega64() : AvrDevice_atmega128base(64 * 1024, 2 * 1024) {}
+        AvrDevice_atmega64() : AvrDevice_atmega128base(64 * 1024, 2 * 1024, 0, 0x7000) {}
 };
 
 //! AVR device class for ATMega128, see AvrDevice_atmega128base.
 class AvrDevice_atmega128: public AvrDevice_atmega128base {
     public:
         //! Creates the device for ATMega128, see AvrDevice_atmega128base.
-        AvrDevice_atmega128() : AvrDevice_atmega128base(128 * 1024, 4 * 1024) {}
+        AvrDevice_atmega128() : AvrDevice_atmega128base(128 * 1024, 4 * 1024, 0xef00, 0xf000) {}
 };
 
 #endif

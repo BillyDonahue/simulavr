@@ -78,11 +78,14 @@ AvrDevice_atmega128base::~AvrDevice_atmega128base() {
     delete stack;
     delete eeprom;
     delete irqSystem;
+    delete spmRegister;
 }
 
 AvrDevice_atmega128base::AvrDevice_atmega128base(unsigned flash_bytes,
-                                                 unsigned ee_bytes):
-    AvrDevice(224, 4096, 0xef00, flash_bytes)
+                                                 unsigned ee_bytes,
+                                                 unsigned ext_bytes,
+                                                 unsigned nrww_start):
+    AvrDevice(224, 4096, ext_bytes, flash_bytes)
 {
     // detect ATMega128 configuration
     bool is_m128 = (flash_bytes == 128 * 1024);
@@ -91,6 +94,8 @@ AvrDevice_atmega128base::AvrDevice_atmega128base(unsigned flash_bytes,
     else
         flagELPMInstructions = false;
     fuses->SetFuseConfiguration(18, 0xfd99e1);
+    fuses->SetBootloaderConfig(nrww_start, 0x1000, 9, 8);
+    spmRegister = new FlashProgramming(this, 128, nrww_start, FlashProgramming::SPM_MEGA_MODE);
     irqSystem = new HWIrqSystem(this, 4, 35); //4 bytes per vector, 35 vectors
     eeprom = new HWEeprom( this, irqSystem, ee_bytes, 22); 
     stack = new HWStackSram(this, 16);
@@ -246,6 +251,7 @@ AvrDevice_atmega128base::AvrDevice_atmega128base(unsigned flash_bytes,
     rw[0x6f]= osccal_reg;
 
     rw[0x6a]= eicra_reg;
+    rw[0x68]= & spmRegister->spmcr_reg;
     
     rw[0x65]= & portg->port_reg;
     rw[0x64]= & portg->ddr_reg;

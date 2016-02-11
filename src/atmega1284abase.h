@@ -85,28 +85,28 @@ protected:
 
 public:
     AvrDevice_atmega1284Abase(unsigned ram_bytes, unsigned flash_bytes,
-                              unsigned ee_bytes );
+                              unsigned ee_bytes, unsigned nrww_start);
     ~AvrDevice_atmega1284Abase();
 };
 
 class AvrDevice_atmega1284A: public AvrDevice_atmega1284Abase {
 public:
-    AvrDevice_atmega1284A() : AvrDevice_atmega1284Abase(16 * 1024, 128 * 1024, 4 * 1024) {}
+    AvrDevice_atmega1284A() : AvrDevice_atmega1284Abase(16 * 1024, 128 * 1024, 4 * 1024, 0xf000) {}
 };
 
 class AvrDevice_atmega644A: public AvrDevice_atmega1284Abase {
 public:
-    AvrDevice_atmega644A() : AvrDevice_atmega1284Abase(4 * 1024, 64 * 1024, 2 * 1024) {}
+    AvrDevice_atmega644A() : AvrDevice_atmega1284Abase(4 * 1024, 64 * 1024, 2 * 1024, 0x7000) {}
 };
 
 class AvrDevice_atmega324A: public AvrDevice_atmega1284Abase {
 public:
-    AvrDevice_atmega324A() : AvrDevice_atmega1284Abase(2 * 1024, 32 * 1024, 1 * 1024) {}
+    AvrDevice_atmega324A() : AvrDevice_atmega1284Abase(2 * 1024, 32 * 1024, 1 * 1024, 0x3800) {}
 };
 
 class AvrDevice_atmega164A: public AvrDevice_atmega1284Abase {
 public:
-    AvrDevice_atmega164A() : AvrDevice_atmega1284Abase(1 * 1024, 16 * 1024,    512  ) {}
+    AvrDevice_atmega164A() : AvrDevice_atmega1284Abase(1 * 1024, 16 * 1024, 512, 0x1c00) {}
 };
 
 #endif

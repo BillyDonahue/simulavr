@@ -68,6 +68,7 @@ AvrDevice_atmega668base::~AvrDevice_atmega668base() {
     delete stack;
     delete eeprom;
     delete irqSystem;
+    delete spmRegister;
 }
 
 AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,

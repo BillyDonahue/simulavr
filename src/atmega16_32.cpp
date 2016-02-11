@@ -83,6 +83,7 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
               flash_bytes)  // Flash Size
 {
     fuses->SetFuseConfiguration(16, 0x99e1);
+    fuses->SetBootloaderConfig(nrww_start, (flash_bytes >> 1) - nrww_start, 9, 8);
     irqSystem = new HWIrqSystem(this, 4, 21); //4 bytes per vector, 21 vectors
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, atmega16 ? 15 : 17);
     stack = new HWStackSram(this, atmega16 ? 11 : 12);
@@ -91,7 +92,6 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     portb = new HWPort(this, "B");
     portc = new HWPort(this, "C");
     portd = new HWPort(this, "D");
-
     spmRegister = new FlashProgramming(this, 64, nrww_start, FlashProgramming::SPM_MEGA_MODE);
 
     // TWI/I2C not implemented yet, vectors 17/19

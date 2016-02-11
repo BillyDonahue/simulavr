@@ -81,11 +81,13 @@ AvrDevice_atmega2560base::~AvrDevice_atmega2560base() {
     delete stack;
     delete eeprom;
     delete irqSystem;
+    delete spmRegister;
 }
 
 AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
                                                      unsigned flash_bytes,
-                                                     unsigned ee_bytes ):
+                                                     unsigned ee_bytes,
+                                                     unsigned nrww_start):
     AvrDevice(0x200 - 32, // I/O space size (above ALU registers)
               ram_bytes,    // RAM size
               0,            // External RAM size
@@ -110,6 +112,8 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     flagELPMInstructions = true;
     flagEIJMPInstructions = true;
     fuses->SetFuseConfiguration(19, 0xff9962);
+    fuses->SetBootloaderConfig(nrww_start, 0x1000, 9, 8);
+    spmRegister = new FlashProgramming(this, 128, nrww_start, FlashProgramming::SPM_MEGA_MODE);
 
     irqSystem = new HWIrqSystem(this, 4, 57);
 
@@ -488,7 +492,7 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     rw[0x5C]= & eind->ext_reg;
     rw[0x5B]= & rampz->ext_reg;
     // 0x58 - 0x5A reserved
-    rw[0x57]= new NotSimulatedRegister("Self-programming register SPMCSR not simulated");
+    rw[0x57]= & spmRegister->spmcr_reg;
     // 0x56 reserved
     rw[0x55]= new NotSimulatedRegister("MCU register MCUCR not simulated");
     rw[0x54]= new NotSimulatedRegister("MCU register MCUSR not simulated");
