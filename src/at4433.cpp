@@ -94,7 +94,7 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
     extirq->registerIrq(2, 7, new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3")));
 
     rw[0x5f]= statusRegister;
-    rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
+    rw[0x5e]= & ((HWStackSram *)stack)->sph_reg; // TODO datasheet: doesn't exist!
     rw[0x5d]= & ((HWStackSram *)stack)->spl_reg;
     
     rw[0x5b]= gimsk_reg;

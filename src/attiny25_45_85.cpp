@@ -86,8 +86,16 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     else
         spmRegister = new FlashProgramming(this, 16, 0x0000, FlashProgramming::SPM_TINY_MODE);
     irqSystem = new HWIrqSystem(this, 2, 15); // 2 bytes per vector, 15 vectors
-    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 6, HWEeprom::DEVMODE_EXTENDED); 
-    stack = new HWStackSram(this, 12);
+    eeprom = new HWEeprom(this, irqSystem, ee_bytes, 6, HWEeprom::DEVMODE_EXTENDED);
+    //initialize stack: size=8,9,10 bit and init to RAMEND 
+    int stack_size = 8;
+    if(ram_bytes > 128U) {
+        if(ram_bytes > 256U)
+            stack_size = 10;
+        else
+            stack_size = 9;
+    }
+    stack = new HWStackSram(this, stack_size, true);
     clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V5);
     

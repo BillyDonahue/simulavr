@@ -117,7 +117,15 @@ AvrDevice_atmega668base::AvrDevice_atmega668base(unsigned ram_bytes,
     irqSystem = new HWIrqSystem(this, (flash_bytes > 8U * 1024U) ? 4 : 2, 26);
     
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, 22, HWEeprom::DEVMODE_EXTENDED);
-    stack = new HWStackSram(this, 16);
+    // initialize stack: size=10,11,11,12 bit and init to RAMEND
+    int stack_size = 10;
+    if(ram_bytes >= 1U * 1024U) {
+        if(ram_bytes > 1U * 1024U)
+            stack_size = 12;
+        else
+            stack_size = 11;
+    }
+    stack = new HWStackSram(this, stack_size, true);
     clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V5);
 

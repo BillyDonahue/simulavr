@@ -77,7 +77,7 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     fuses->SetFuseConfiguration(17, 0xffdf64);
     irqSystem = new HWIrqSystem(this, 2, 19); //2 bytes per vector, 19 vectors
     eeprom = new HWEeprom(this, irqSystem, 128, 17, HWEeprom::DEVMODE_EXTENDED); 
-    stack = new HWStackSram(this, 8);
+    stack = new HWStackSram(this, 8, true);
     clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V4);
     porta = new HWPort(this, "A", true, 3);

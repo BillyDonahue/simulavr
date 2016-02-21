@@ -118,7 +118,7 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     irqSystem = new HWIrqSystem(this, 4, 57);
 
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, 30, HWEeprom::DEVMODE_EXTENDED); 
-    stack = new HWStackSram(this, 22);
+    stack = new HWStackSram(this, 16, true);
     clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V5);
 
