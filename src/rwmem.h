@@ -253,6 +253,8 @@ class IOReg: public RWMemoryMember {
     public:
         typedef unsigned char(P::*getter_t)();
         typedef void (P::*setter_t)(unsigned char);
+        typedef unsigned char(P::*getter_bit_t)(unsigned int);
+        typedef void (P::*setter_bit_t)(bool,unsigned int);
         /*! Creates an IO control register for controlling hardware units
           \param _p: pointer to object this will be part of
           \param _g: pointer to get method
@@ -261,11 +263,15 @@ class IOReg: public RWMemoryMember {
               const std::string &tracename,
               P *_p,
               getter_t _g=0,
-              setter_t _s=0):
+              setter_t _s=0,
+              getter_bit_t _gb=0,
+              setter_bit_t _sb=0):
             RWMemoryMember(registry, tracename),
             p(_p),
             g(_g),
-            s(_s)
+            s(_s),
+            gb(_gb),
+            sb(_sb)
         {
             // 'undefined state' doesn't really make sense for IO registers 
             if (tv)
@@ -283,7 +289,39 @@ class IOReg: public RWMemoryMember {
                 tv = NULL;
             }
         }
-        
+
+        /*! bitwise access to IOReg from SBI
+          */
+        void set_bit( unsigned int bitaddr ) override {
+            if (sb) {
+                (p->*sb)( 1, bitaddr);
+            } else { // default to byte access
+                if (g && s) {
+                    unsigned char val = (p->*g)();
+                    val|= 1<<bitaddr;
+                    (p->*s)(val);
+                } else {
+                    avr_warning("Bitwise access of '%s' is not supported.", tv->name().c_str());
+                }
+            }
+        }
+
+        /*! bitwise access to IOReg from CBI
+          */
+        void clear_bit( unsigned int bitaddr ) override {
+            if (sb) {
+                (p->*sb)( 0, bitaddr);
+            } else { // default to byte access
+                if (g && s) {
+                    unsigned char val = (p->*g)();
+                    val|= 1<<bitaddr;
+                    (p->*s)(val);
+                } else {
+                    avr_warning("Bitwise access of '%s' is not supported.", tv->name().c_str());
+                }
+            }
+        }
+
     protected:
         unsigned char get() const {
             if (g)
@@ -305,6 +343,8 @@ class IOReg: public RWMemoryMember {
         P *p;
         getter_t g;
         setter_t s;
+        getter_bit_t gb;
+        setter_bit_t sb;
 };
 
 class IOSpecialReg;
