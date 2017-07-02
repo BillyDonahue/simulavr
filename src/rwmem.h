@@ -63,6 +63,26 @@ class RWMemoryMember {
         //! Write access on memory
         unsigned char operator=(const RWMemoryMember &mm);
 #endif
+        /*! Set only a single bit in register, required by SBI instruction 
+          Registers with secial behavior on single bit access must override
+          this method */
+        virtual void set_bit( unsigned int bitaddr ) {
+            // default as before SBI instruction rework
+            unsigned char val = this->get();
+            val |= 1 << bitaddr;
+            this->set(val);
+        }
+
+        /*! Clear only a single bit in register, required by CBI instruction
+          Registers with secial behavior on single bit access must override
+          this method */
+        virtual void clear_bit( unsigned int bitaddr ) {
+            // default as before rework of CBI instruction
+            unsigned char val = this->get();
+            val &= ~(1 << bitaddr);
+            this->set(val);
+        }
+
         virtual ~RWMemoryMember();
         const std::string &GetTraceName(void) { return tracename; }
         bool IsInvalid(void) const { return isInvalid; } 
