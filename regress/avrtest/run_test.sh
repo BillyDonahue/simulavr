@@ -27,7 +27,7 @@ else
 fi
 
 # write report
-echo "${TARGET} `tail -n 2 ${REPORT_FILE}.stderr | head -1 | cut "-d " -f 2`" > ${REPORT_FILE}
+echo "`basename ${TARGET}` `tail -n 2 ${REPORT_FILE}.stderr | head -1 | cut "-d " -f 2`" > ${REPORT_FILE}
 
 # write output
 echo "stdout:" > $OUTPUT_FILE

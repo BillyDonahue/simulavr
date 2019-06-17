@@ -1,4 +1,0 @@
-regress.py
-*.err
-*.out
-*.pyc

@@ -103,7 +103,7 @@ class SimTestCase(TestCase):
   
   def __init__(self, methodName, elfName):
     TestCase.__init__(self, methodName)
-    self.elfName = elfName
+    self.elfName = basename(elfName)
     self.processorName = splitext(basename(elfName))[0].split("_")[-1]
     
   def shortDescription(self):

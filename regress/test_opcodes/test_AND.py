@@ -90,7 +90,7 @@ class test_AND_rd%02d_vd%02x_rr%02d_vr%02x(base_AND):
 	Rr = %d
 	Vr = 0x%x
 	def fail(self,s):
-		raise AND_rd%02d_vd%02x_rr%02d_vr%02x_TestFail, s
+		raise AND_rd%02d_vd%02x_rr%02d_vr%02x_TestFail(s)
 """
 
 #
@@ -125,4 +125,4 @@ for d in range(0,32,4):
 		args = (d,vd,d,vd)*4
 		code += template % args
 
-exec code
+exec(code)

@@ -76,7 +76,7 @@ class test_BST_r%02d_bit%d_T%d(base_BST):
 	bit = %d
 	T   = %d
 	def fail(self,s):
-		raise BST_r%02d_bit%d_T%d_TestFail, s
+		raise BST_r%02d_bit%d_T%d_TestFail(s)
 """
 
 #
@@ -87,4 +87,4 @@ for t in (0,1):
 	for r in range(32):
 		for b in range(8):
 			code += template % (r,b,t, r,b,t, r,b,t, r,b,t)
-exec code
+exec(code)

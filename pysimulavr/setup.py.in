@@ -1,0 +1,36 @@
+# -*- coding: UTF-8 -*-
+try:
+  from setuptools import setup
+except:
+  from distutils.core import setup
+from distutils.core import Extension
+
+extension = Extension("_pysimulavr",
+                      ["pysimulavr.i"],
+                      define_macros = [("HAVE_CONFIG_H", None)])
+
+setup(name = "pysimulavr",
+      version = "@VERSION@",
+      author = "Klaus Rudolph & others",
+      author_email = "<simulavr-devel@nongnu.org>",
+      url = "http://www.nongnu.org/simulavr/",
+      license = "GPL",
+      description = "Python modul for simulavr",
+      long_description = "Python modul for simulavr",
+      classifiers = [
+          # see https://pypi.python.org/pypi?%3Aaction=list_classifiers
+          "Development Status :: 4 - Beta",
+          "Development Status :: 5 - Production/Stable",
+          "Environment :: Console",
+          "Intended Audience :: Science/Research",
+          "Intended Audience :: Developers",
+          "License :: OSI Approved :: GNU General Public License (GPL)",
+          "Operating System :: POSIX",
+          "Programming Language :: Python",
+          "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+          "Topic :: Software Development :: Embedded Systems",
+          "Topic :: Software Development :: Testing"],
+      py_modules = ["pysimulavr"],
+      ext_modules = [extension])
+
+# EOF

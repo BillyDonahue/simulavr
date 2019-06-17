@@ -85,7 +85,7 @@ class test_LD_Z_incr_r%02d_Z%04x_v%02x(base_LD_Z_incr):
 	Z = 0x%x
 	Vd = 0x%x
 	def fail(self,s):
-		raise LD_Z_incr_r%02d_Z%04x_v%02x_TestFail, s
+		raise LD_Z_incr_r%02d_Z%04x_v%02x_TestFail(s)
 """
 
 #
@@ -99,4 +99,4 @@ for d in range(0,30):
 		for v in (0xaa, 0x55):
 			args = (d,z,v)*4
 			code += template % args
-exec code
+exec(code)

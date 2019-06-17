@@ -34,7 +34,7 @@ class TestCase(PyTestCase):
     elif type(init) in (IntType, FloatType):
       p = XPin(init)
     else:
-      raise Exception, "Pin: parameter type not allowed"
+      raise Exception("Pin: parameter type not allowed")
     self.net.Add(p)
     return p
 

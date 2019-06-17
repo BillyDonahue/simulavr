@@ -1,33 +1,9 @@
+# ignore backup files
 *~
-*.o
-*.lo
-avr.vpi
-Makefile.in
-Debug/
-Release/
-simulavr-*.tar.gz
-aclocal.m4
-autom4te.cache
-configure
-Makefile
-config.guess
-config.log
-config.status
-config.sub
-depcomp
-install-sh
-libtool
-compile
-ar-lib
-ltmain.sh
-missing
-py-compile
-simulavr.ncb
-simulavr.sdf
-.project
-.cproject
-.pydevproject
-.settings
-delivery-check.conf
-check-versions.out
-check-versions.sh
+# git ignore build directory
+build/
+# include/config.h is built by cmake
+include/config.h
+# no *.pyc files
+*.pyc
+# EOF

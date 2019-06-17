@@ -90,7 +90,7 @@ class test_EOR_r%02d_v%02x_r%02d_v%02x(base_EOR):
 	Rr = %d
 	Vr = 0x%x
 	def fail(self,s):
-		raise EOR_r%02d_v%02x_r%02d_v%02x_TestFail, s
+		raise EOR_r%02d_v%02x_r%02d_v%02x_TestFail(s)
 """
 
 #
@@ -117,4 +117,4 @@ for d in range(0,32,4):
 			args = (d,vd,r,vr)*4
 			code += template % args
 
-exec code
+exec(code)

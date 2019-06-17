@@ -23,36 +23,27 @@
 # $Id: regress.py.in,v 1.1 2004/07/31 00:58:05 rivetwa Exp $
 #
 
-# # @configure_input@
-
-import os, os.path, sys, fnmatch, glob
-import subprocess
-
-# Check the python version
-_v = sys.version_info
-_ver = (int(_v[0]) << 16) + (int(_v[1]) << 8) + int(_v[2])
-if _ver < 0x020101:
-  sys.write('You need python >= 2.1.1 to run this program.\n')
-  sys.write('Your python version is:\n%s\n' %(sys.version))
-  sys.exit(1)
+from __future__ import print_function
+import os, os.path, sys
 
 # This should let you run the regress.py.in script directly for testing.
-# Remember that configure will replace '@<something>@'.
-if '@srcdir@' == '@'+'srcdir'+'@':
+if len('${CMAKE_CURRENT_SOURCE_DIR}') == 0:
   srcdir = '.'
 else:
-  srcdir = '@srcdir@'
+  srcdir = '${CMAKE_CURRENT_SOURCE_DIR}'
 
 regressdir = os.getcwd()
 
 # Change dir to srcdir so that building in other dir works
 os.chdir(srcdir)
 
-# default path to simulator
-sim_path = regressdir + '/../src/simulavr' + os.path.splitext(sys.executable)[1]
-
 # Add modules dir to module search path
-sys.path.append('modules')
+sys.path.append(os.path.join(srcdir, "modules"))
+
+import fnmatch, glob
+import time, socket, signal
+import subprocess
+import argparse
 
 import avr_target, base_test
 
@@ -72,10 +63,39 @@ There can be many matches are each level.
 
 """
 
+def read_args():
+  p = argparse.ArgumentParser(description = "Run simulavr code regression test")
+  p.add_argument("-d", "--dev", help = "device name", default = "atmega128")
+  p.add_argument("-s", "--sim", help = "path to simulavr executable", required = True)
+  p.add_argument("-o", "--out", help = "test result output file")
+  p.add_argument("targs", help = "test arguments: [directory [module [name]]]", nargs = argparse.REMAINDER)
+  res = p.parse_args()
+  if len(res.targs) > 3: p.error("max 3 targs possible")
+  return res
+
+class OutputStream(object):
+
+  def __init__(self, outname):
+    self.__hdl = None
+    if outname is not None: self.__hdl = open(outname, "w")
+    
+  def write(self, s):
+    print(s, end = " ")
+    if self.__hdl is not None: self.__hdl.write(s)
+    
+  def writeln(self, s):
+    print(s)
+    if self.__hdl is not None:
+      self.__hdl.write(s)
+      self.__hdl.write("\n")
+    
+  def close(self):
+    if self.__hdl is not None: self.__hdl.close()
+
 EXIT_STATUS_PASS = 0
 EXIT_STATUS_FAIL = 1
 
-def run_tests(target, tdir=None, tmodule=None, tname=None):
+def run_tests(ostream, target, tdir = None, tmodule = None, tname = None):
   result = EXIT_STATUS_PASS
 
   num_tests         = 0
@@ -86,7 +106,7 @@ def run_tests(target, tdir=None, tmodule=None, tname=None):
   start_time = sum(os.times()[:2])
 
   if tdir is None:
-    test_dirs = glob.glob('test_*')
+    test_dirs = glob.glob("test_*")
   else:
     if tdir[:5] != 'test_':
       tdir = 'test_'+tdir
@@ -106,7 +126,7 @@ def run_tests(target, tdir=None, tmodule=None, tname=None):
         tmodule += '.py'
       test_modules = [tmodule]
 
-    print '='*8 + ' running tests in %s directory' % (test_dir)
+    ostream.writeln('='*8 + ' running tests in %s directory' % (test_dir))
     # add tests dir to module search patch
     sys.path.append(test_dir)
 
@@ -118,7 +138,7 @@ def run_tests(target, tdir=None, tmodule=None, tname=None):
 
       # get test module name by stripping off .py from file name
       test_module_name = file[:-3]
-      print '-'*4 + ' loading tests from %s module' %(test_module_name)
+      ostream.writeln('-'*4 + ' loading tests from %s module' % (test_module_name))
       test_module = __import__(test_module_name)
 
       if tname is None:
@@ -136,20 +156,20 @@ def run_tests(target, tdir=None, tmodule=None, tname=None):
 
         try:
           # Create an instance of the test case object and run it
-          test = apply( getattr(test_module,test_name), (target,) )
-          print '%-30s  ->  ' %(test_name),
+          test = getattr(test_module,test_name)(*(target,))
+          ostream.write('%-30s  ->  ' % (test_name))
           test.run()
-        except base_test.TestFail, reason:
-          print 'FAILED: %s' %(reason)
+        except base_test.TestFail as reason:
+          ostream.writeln('FAILED: {}'.format(reason))
           num_fails += 1
           # Could also do a sys.exit(1) here is user wishes
           result = EXIT_STATUS_FAIL
-        except base_test.TestOpcodeNotSupported, reason:
-          print reason
+        except base_test.TestOpcodeNotSupported as reason:
+          ostream.writeln("{}".format(reason))
           num_not_supported += 1
         else:
           num_passes += 1
-          print 'passed'
+          ostream.writeln('passed')
 
         num_tests += 1
 
@@ -164,30 +184,14 @@ def run_tests(target, tdir=None, tmodule=None, tname=None):
 
   elapsed = sum(os.times()[:2]) - start_time
 
-  print 
-  print 'Ran %d tests in %.3f seconds [%0.3f tests/second].' % \
-      (num_tests, elapsed, num_tests/elapsed)
-  print '  Number of Passing Tests: %d' %(num_passes)
-  print '  Number of Failing Tests: %d' %(num_fails)
-  print '  Number of Skipped Tests: %d (opcode not supported by target)' %(num_not_supported)
-  print
+  ostream.writeln("") 
+  ostream.writeln('Ran %d tests in %.3f seconds [%0.3f tests/second].' % (num_tests, elapsed, num_tests/elapsed))
+  ostream.writeln('  Number of Passing Tests: %d' % (num_passes))
+  ostream.writeln('  Number of Failing Tests: %d' % (num_fails))
+  ostream.writeln('  Number of Skipped Tests: %d (opcode not supported by target)' % (num_not_supported))
+  ostream.writeln("")
   
   return result
-
-def usage():
-  print >> sys.stderr, """
-Usage: regress.py [options] [[test_]dir] [[test_]module[.py]] [[test_]case]
-  The 'test_' prefix on all args is optional.
-  The '.py' extension on the test_module arg is also optional.
-
-Options:
-  -h, --help      : print this message and exit
-  -d, --dev=<dev> : use the given device for simulation, the defaul value is
-                    "atmega128"
-  -s, --sim=<sim> : path to simulavr executable
-      --stall     : stall the regression engine when done
-"""
-  sys.exit(1)
 
 def run_simulator(prog, dev, port=1212):
   """Attempt to start up a simulator and return pid.
@@ -195,11 +199,11 @@ def run_simulator(prog, dev, port=1212):
 
   # Check if prog file exists
   if not os.path.isfile(prog):
-    print >> sys.stderr, '%s does not exist' %(prog)
-    sys.exit(1)
+    sys.stderr.write('%s does not exist\n' % (prog))
+    sys.exit(EXIT_STATUS_FAIL)
 
-  out = os.open(regressdir+'/sim.out', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0644)
-  err = os.open(regressdir+'/sim.err', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0644)
+  out = os.open(regressdir+'/sim.out', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
+  err = os.open(regressdir+'/sim.err', os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
   p = subprocess.Popen((prog, '-g', '-G', '-d', dev, '-p', str(port)),
                        shell = False,
                        stdout = out,
@@ -208,59 +212,45 @@ def run_simulator(prog, dev, port=1212):
   return p
   
 if __name__ == '__main__':
-  import getopt, time, socket, signal
 
-  # Parse command line options
-  try:
-    opts, args = getopt.getopt(sys.argv[1:], "hd:s:", ["help", "dev=", "sim=", "stall"])
-  except getopt.GetoptError:
-    # print help information and exit:
-    usage()
+  # parse command line options
+  cargs = read_args()
 
-  device = "atmega128"
-  stall = 0
+  # start simulavr
+  sim_p = run_simulator(cargs.sim, cargs.dev)
 
-  for o, a in opts:
-    if o in ("-h", "--help"):
-      usage()
-    if o in ("-d", "--dev"):
-      device = a
-    if o in ("-s", "--sim"):
-      sim_path = a
-    if o in ("--stall",):
-      stall = 1
-
-  if len(args) > 3:
-    usage()
-
-  sim_p = run_simulator(sim_path, device)
-
-  # Open a connection to the target
+  # open a connection to the target
   tries = 5
   while (tries > 0):
     try:
-      target = avr_target.AvrTarget(device)
+      target = avr_target.AvrTarget(cargs.dev)
     except socket.error:
-      print >> sys.stderr, 'Simulator not responding, wait a second and try again'
+      sys.stderr.write('Simulator not responding, wait a second and try again\n')
       tries -= 1
       time.sleep(1)
     else:
       break
   if tries == 0:
-    print >> sys.stderr, 'Fatal error: simulator did not start'
-    sys.exit(1)
+    sys.stderr.write('Fatal error: simulator did not start\n')
+    sys.exit(EXIT_STATUS_FAIL)
 
   # run the tests
   try:
-    status = apply(run_tests, [target]+args)
+    ostream = OutputStream(cargs.out)
+    status = run_tests(*[ostream, target]+cargs.targs)
+  except Exception as e:
+    sys.stderr.write("Exception occured while run tests: %s\n" % str(e))
   finally:
     # We always want to shut down the simulator
     target.close()
-
-    if stall:
-      raw_input('hit enter to quit...')
-
+    ostream.close()
+    
     # make sure that the simulator has quit
     sim_p.wait()
-    
-  sys.exit( status )
+
+  if status == EXIT_STATUS_PASS:
+     fhdl = open(cargs.out + ".success", "w")
+     fhdl.write("success")
+     fhdl.close()
+
+  sys.exit(status)

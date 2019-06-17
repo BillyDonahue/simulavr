@@ -95,7 +95,7 @@ class test_MULSU_rd%02d_vd%02x_rr%02d_vr%02x(base_MULSU):
 	Rr = %d
 	Vr = %d
 	def fail(self,s):
-		raise MULSU_rd%02d_vd%02x_rr%02d_vr%02x_TestFail, s
+		raise MULSU_rd%02d_vd%02x_rr%02d_vr%02x_TestFail(s)
 """
 
 #
@@ -135,4 +135,4 @@ for d in range(16,24,step):
 	for vd,vr in vals:
 		args = (d, vd, d, vd)*4
 		code += template % args
-exec code
+exec(code)

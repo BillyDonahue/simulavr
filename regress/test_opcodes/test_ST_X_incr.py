@@ -80,7 +80,7 @@ class test_ST_X_incr_r%02d_X%04x_v%02x(base_ST_X_incr):
 	X = 0x%x
 	Vd = 0x%x
 	def fail(self,s):
-		raise ST_X_incr_r%02d_X%04x_v%02x_TestFail, s
+		raise ST_X_incr_r%02d_X%04x_v%02x_TestFail(s)
 """
 
 #
@@ -89,9 +89,9 @@ class test_ST_X_incr_r%02d_X%04x_v%02x(base_ST_X_incr):
 # Operation is undefined for d = 26 and d = 27.
 #
 code = ''
-for d in range(0,26)+range(28,32):
+for d in list(range(0,26))+list(range(28,32)):
 	for x in (0x20f, 0x2ff):
 		for v in (0xaa, 0x55):
 			args = (d,x,v)*4
 			code += template % args
-exec code
+exec(code)

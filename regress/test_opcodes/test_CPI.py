@@ -88,7 +88,7 @@ class test_CPI_r%02d_v%02x_k%02x(base_CPI):
 	Vd = 0x%x
 	Vk = 0x%x
 	def fail(self,s):
-		raise CPI_r%02d_v%02x_k%02x_TestFail, s
+		raise CPI_r%02d_v%02x_k%02x_TestFail(s)
 """
 
 #
@@ -114,4 +114,4 @@ for d in range(16,32):
 		args = (d,vd,vk)*4
 		code += template % args
 
-exec code
+exec(code)

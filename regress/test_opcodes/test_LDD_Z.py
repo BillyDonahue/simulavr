@@ -79,7 +79,7 @@ class test_LDD_Z_r%02d_Z%04x_q%02x_v%02x(base_LDD_Z):
 	q = 0x%x
 	Vd = 0x%x
 	def fail(self,s):
-		raise LDD_Z_r%02d_Z%04x_q%02x_v%02x_TestFail, s
+		raise LDD_Z_r%02d_Z%04x_q%02x_v%02x_TestFail(s)
 """
 
 #
@@ -92,4 +92,4 @@ for d in range(0,32,4):
 			for v in (0xaa, 0x55):
 				args = (d,z,q,v)*4
 				code += template % args
-exec code
+exec(code)

@@ -7,6 +7,11 @@
 @settitle SimulAVR Documentation @value{VERSION}
 @c %**end of header
 
+@dircategory Software development
+@direntry
+* simulavr: (simulavr).  SimulAVR - an AVR simulation framework
+@end direntry
+
 @copying
 This file documents the simulavr program.
 

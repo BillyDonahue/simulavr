@@ -1,0 +1,3 @@
+/* just a dummy file */
+#define VERSION "@PACKAGE_VERSION@"
+/* EOF */

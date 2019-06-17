@@ -78,7 +78,7 @@ class LPM_Z%04x_TestFail(LPM_TestFail): pass
 class test_LPM_Z%04x(base_LPM):
 	Z = 0x%x
 	def fail(self,s):
-		raise LPM_Z%04x_TestFail, s
+		raise LPM_Z%04x_TestFail(s)
 """
 
 #
@@ -88,4 +88,4 @@ code = ''
 for z in (0x10, 0x11, 0x100, 0x101):
 	args = (z,)*4
 	code += template % args
-exec code
+exec(code)

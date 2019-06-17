@@ -1,0 +1,6 @@
+[build_ext]
+library_dirs = ../libsim
+include_dirs = ../../include
+libraries = sim_static
+swig_opts = -c++ -I../../include
+# EOF

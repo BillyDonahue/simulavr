@@ -88,7 +88,7 @@ class test_INC_r%02d_v%02x(base_INC):
 	Rd = %d
 	Vd = 0x%x
 	def fail(self,s):
-		raise INC_r%02d_v%02x_TestFail, s
+		raise INC_r%02d_v%02x_TestFail(s)
 """
 
 #
@@ -113,4 +113,4 @@ for d in range(32):
 		args = (d,vd)*4
 		code += template % args
 
-exec code
+exec(code)

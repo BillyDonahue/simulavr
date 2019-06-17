@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+IPATH=/@PYTHON_MODULE_PATH@
+PYTHON=@PYTHON_EXECUTABLE@
+test "$1" != "configure" && exit 0
+if [ -z "$(cat /etc/python/debian_config | grep -v '#' | grep byte-compile | grep standard)" ]; then
+  (cd ${IPATH}; ${PYTHON} -OO -m compileall pysimulavr.py)
+else
+  (cd ${IPATH}; ${PYTHON} -m compileall pysimulavr.py)
+fi
+exit 0
+# EOF

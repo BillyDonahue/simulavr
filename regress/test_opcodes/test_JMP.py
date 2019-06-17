@@ -66,7 +66,7 @@ class JMP_%06x_TestFail(JMP_TestFail): pass
 class test_JMP_%06x(base_JMP):
 	k = 0x%x
 	def fail(self,s):
-		raise JMP_%06x_TestFail, s
+		raise JMP_%06x_TestFail(s)
 """
 
 #
@@ -75,4 +75,4 @@ class test_JMP_%06x(base_JMP):
 code = ''
 for k in (0x100, 0x3ff):
 	code += template % (k, k, k, k)
-exec code
+exec(code)

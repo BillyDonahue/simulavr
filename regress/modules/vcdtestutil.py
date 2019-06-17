@@ -1,3 +1,4 @@
+from __future__ import print_function
 from os.path import basename, splitext
 from unittest import TestCase, TestLoader
 from sys import stderr
@@ -17,7 +18,7 @@ def getVCD(name):
   return __vcds[name]
 
 def loadVCDFromName(name):
-  print >> stderr, "load %s ... " % name,
+  #print("load %s ... " % name, end=' ', file=stderr)
   try:
     return VCD(name)
   except VCDError:
@@ -57,7 +58,7 @@ class VCDTestCase(TestCase):
   def shortDescription(self):
     md = TestCase.shortDescription(self)
     if md is None: md = self._testMethodName
-    d = self.vcdName.split(".")[0]
+    d = basename(self.vcdName).split(".")[0]
     return d + "::" + md
     
   def setClock(self, freq):
