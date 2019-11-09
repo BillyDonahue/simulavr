@@ -58,7 +58,7 @@ if(AVR_CC)
   include_directories(${CMAKE_SOURCE_DIR}/include gtest-1.6.0/include gtest-1.6.0 gtest-1.6.0/include/gtest)
 
   add_executable(dut ${dut_sources})
-  set_target_properties(dut PROPERTIES COMPILE_FLAGS "-Dprivate=public -Dprotected=public")
+  #set_target_properties(dut PROPERTIES COMPILE_FLAGS "-Dprivate=public -Dprotected=public")
   target_link_libraries(dut sim pthread)
 
   set(gtest_timestamp ${CMAKE_CURRENT_BINARY_DIR}/timestamp)
@@ -70,5 +70,6 @@ if(AVR_CC)
                                         
   add_custom_target(check-gtest COMMENT "gtest result:"
                                 DEPENDS ${gtest_timestamp})
-  
+  add_dependencies(check check-gtest)
+
 endif(AVR_CC)
