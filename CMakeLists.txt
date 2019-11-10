@@ -74,12 +74,12 @@ endif()
 if(BUILD_PYTHON)
   add_subdirectory(pysimulavr)
 endif()
-add_subdirectory(regress)
 add_subdirectory(doc)
 add_subdirectory(kbdgentables)
 
 # check targets
 add_custom_target(check COMMENT "run all regression tests")
+add_subdirectory(regress)
 add_dependencies(check check-regress)
 if(BUILD_PYTHON)
   add_dependencies(check check-extinttest check-modtest check-timertest)
