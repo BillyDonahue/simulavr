@@ -34,12 +34,35 @@ if(AVR_CC)
                      SOURCES "session_irq_check/tc5.cpp"
                      CCOPTS -O2)
                      
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/session_io_pin)
-  add_avr_executable(NAME "session_io_pin/tc1.atmega128.o"
-                     MCU "atmega128"
-                     SOURCES "session_io_pin/tc1.s"
-                     CCOPTS -Wa,--gstabs,-D -xassembler-with-cpp)
+  function(make_session_io_bin)
+    set(opts1 MCU OUTVAR)
+    set(optsN INVAR)
+    cmake_parse_arguments(opts "" "${opts1}" "${optsN}" ${ARGN})
 
+    set(outputs ${opts_INVAR})
+    set(obj tc1.${opts_MCU}.o)
+    set(bin ${CMAKE_CURRENT_BINARY_DIR}/session_io_pin/${obj})
+    add_avr_executable(NAME "session_io_pin/${obj}"
+                       MCU ${opts_MCU}
+                       SOURCES "session_io_pin/tc1.s"
+                       CCOPTS -Wa,--gstabs,-D -xassembler-with-cpp)
+    list(APPEND outputs ${bin})
+    
+    set("${opts_OUTVAR}" ${outputs} PARENT_SCOPE)
+    
+  endfunction(make_session_io_bin)
+  
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/session_io_pin)
+  set(session_io_elf "")
+  make_session_io_bin(MCU atmega128 INVAR ${session_io_elf} OUTVAR session_io_elf)
+  make_session_io_bin(MCU atmega16 INVAR ${session_io_elf} OUTVAR session_io_elf)
+  make_session_io_bin(MCU atmega8 INVAR ${session_io_elf} OUTVAR session_io_elf)
+  make_session_io_bin(MCU atmega164a INVAR ${session_io_elf} OUTVAR session_io_elf)
+  make_session_io_bin(MCU atmega48 INVAR ${session_io_elf} OUTVAR session_io_elf)
+  make_session_io_bin(MCU atmega640 INVAR ${session_io_elf} OUTVAR session_io_elf)
+  make_session_io_bin(MCU attiny2313 INVAR ${session_io_elf} OUTVAR session_io_elf)
+  make_session_io_bin(MCU attiny25 INVAR ${session_io_elf} OUTVAR session_io_elf)
+    
   set(dut_avr ${CMAKE_CURRENT_BINARY_DIR}/session_001/avr_code.atmega32.o
               ${CMAKE_CURRENT_BINARY_DIR}/session_irq_check/tc1.atmega32.o
               ${CMAKE_CURRENT_BINARY_DIR}/session_irq_check/tc2.atmega32.o
@@ -47,7 +70,7 @@ if(AVR_CC)
               ${CMAKE_CURRENT_BINARY_DIR}/session_irq_check/tc4.atmega32.o
               ${CMAKE_CURRENT_BINARY_DIR}/session_irq_check/tc5.atmega32.o
               ${CMAKE_CURRENT_BINARY_DIR}/session_irq_check/check.atmega32.o
-              ${CMAKE_CURRENT_BINARY_DIR}/session_io_pin/tc1.atmega128.o)
+              ${session_io_elf})
   
   set(dut_sources gtest-1.6.0/src/gtest-all.cc
                   session_001/unittest001.cpp
@@ -58,7 +81,6 @@ if(AVR_CC)
   include_directories(${CMAKE_SOURCE_DIR}/include gtest-1.6.0/include gtest-1.6.0 gtest-1.6.0/include/gtest)
 
   add_executable(dut ${dut_sources})
-  #set_target_properties(dut PROPERTIES COMPILE_FLAGS "-Dprivate=public -Dprotected=public")
   target_link_libraries(dut sim pthread)
 
   set(gtest_timestamp ${CMAKE_CURRENT_BINARY_DIR}/timestamp)
