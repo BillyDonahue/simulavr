@@ -38,7 +38,8 @@ class PinAtPort {
         int regID;
 
     public:
-        PinAtPort( HWPort *p, unsigned char pn);
+        PinAtPort();
+        PinAtPort(HWPort *p, unsigned char pn);
         void SetPort(bool val);
         void SetDdr(bool val); 
 
@@ -57,7 +58,10 @@ class PinAtPort {
         bool GetDdr(); 
         Pin& GetPin();
 
-        operator bool(); 
+        bool active();
+#ifndef SWIG
+        operator bool();
+#endif
         float GetAnalogValue(float vcc); //!< Get pin analog voltage level
 
     protected:

@@ -32,7 +32,7 @@ class TestCase(ext_int0.TestCaseBase):
     # skip initialisation
     self.assertInitDone()
     # create Pin
-    p = ext_int0.XPin(self.dev, self.sim, self.bit0name[self.processorName])
+    p = ext_int0.XPin(self.dev, self.bit0name[self.processorName])
     # check port value
     self.assertPortValue(0xff)
     # ext pin = low
@@ -63,8 +63,8 @@ class TestCase(ext_int0.TestCaseBase):
     # skip initialisation
     self.assertInitDone()
     # create Pin
-    p0 = ext_int0.XPin(self.dev, self.sim, self.bit0name[self.processorName])
-    p3 = ext_int0.XPin(self.dev, self.sim, self.bit3name[self.processorName])
+    p0 = ext_int0.XPin(self.dev, self.bit0name[self.processorName])
+    p3 = ext_int0.XPin(self.dev, self.bit3name[self.processorName])
     # check port value
     self.assertPortValue(0xff)
     # ext pin 0 = low, pin 3 = high
@@ -98,8 +98,8 @@ class TestCase(ext_int0.TestCaseBase):
     # skip initialisation
     self.assertInitDone()
     # create Pin
-    p0 = ext_int0.XPin(self.dev, self.sim, self.bit0name[self.processorName])
-    p3 = ext_int0.XPin(self.dev, self.sim, self.bit3name[self.processorName])
+    p0 = ext_int0.XPin(self.dev, self.bit0name[self.processorName])
+    p3 = ext_int0.XPin(self.dev, self.bit3name[self.processorName])
     # check port value
     self.assertPortValue(0xff)
     # ext pin 0 = low, pin 3 = high

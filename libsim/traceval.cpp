@@ -167,12 +167,16 @@ char TraceValueOutput::VcdBit(int bitNo) const {
 }
 
 TraceValueRegister::~TraceValueRegister() {
-    for (valmap_t::iterator i = _tvr_values.begin(); i != _tvr_values.end(); i++)
+    for (valmap_t::iterator i = _tvr_values.begin(); i != _tvr_values.end(); i++) {
         delete i->first;
+        delete i->second;
+    }
     _tvr_values.clear();
     for (regmap_t::iterator i = _tvr_registers.begin(); i != _tvr_registers.end(); i++)
         delete i->first;
     _tvr_registers.clear();
+    if(_tvr_parent != NULL)
+        _tvr_parent->_tvr_unregisterTraceValues(this);
 }
 
 void TraceValueRegister::_tvr_registerTraceValues(TraceValueRegister *r) {
@@ -183,6 +187,17 @@ void TraceValueRegister::_tvr_registerTraceValues(TraceValueRegister *r) {
         _tvr_registers.insert(v);
     } else
         avr_error("duplicate name '%s', another TraceValueRegister child is already registered", n.c_str());
+}
+
+void TraceValueRegister::_tvr_unregisterTraceValues(TraceValueRegister *r) {
+    string n = r->GetScopeName();
+    for (regmap_t::iterator i = _tvr_registers.begin(); i != _tvr_registers.end(); i++) {
+        if(n == *(i->first)) {
+            delete i->first;
+            _tvr_registers.erase(i);
+            break;
+        }
+    }
 }
 
 size_t TraceValueRegister::_tvr_getValuesCount(void) {
@@ -224,6 +239,8 @@ void TraceValueRegister::UnregisterTraceValue(TraceValue *t) {
     string n = t->name().substr(idx);
     for (valmap_t::iterator i = _tvr_values.begin(); i != _tvr_values.end(); i++) {
         if(n == *(i->first)) {
+            delete i->first;
+            delete i->second;
             _tvr_values.erase(i);
             break;
         }
@@ -330,8 +347,13 @@ TraceValue* TraceValueCoreRegister::GetTraceValueByName(const std::string &name)
 }
 
 TraceValueCoreRegister::~TraceValueCoreRegister() {
-    for(setmap_t::iterator i = _tvr_valset.begin(); i != _tvr_valset.end(); i++)
+    for(setmap_t::iterator i = _tvr_valset.begin(); i != _tvr_valset.end(); i++) {
+        TraceSet s = *(i->second);
+        for(int j = s.size() - 1; j >= 0; j--)
+            delete s[j];
+        delete i->first;
         delete i->second;
+    }
 }
 
 size_t TraceValueCoreRegister::_tvr_getValuesCount(void) {

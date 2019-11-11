@@ -42,15 +42,17 @@ class AvrDevice_at90s8515: public AvrDevice {
         HWPort portx; // only used for oc1b and icp (Timer1)
         
     public:
-        HWPort *porta;                  //!< port A
-        HWPort *portb;                  //!< port B
-        HWPort *portc;                  //!< port C
-        HWPort *portd;                  //!< port D
+        HWPort porta;                   //!< port A
+        HWPort portb;                   //!< port B
+        HWPort portc;                   //!< port C
+        HWPort portd;                   //!< port D
         Pin&   ocr1b;                   //!< output pin for output compare B on timer 1
         HWSpi *spi;                     //!< spi unit
         HWUart *uart;                   //!< uart unit
         HWAcomp *acomp;
-        HWPrescaler *prescaler;         //!< prescaler unit for timer
+        HWPrescaler prescaler;          //!< prescaler unit for timer
+        PrescalerMultiplexerExt premux0; //!< prescaler multiplexer for timer 0
+        PrescalerMultiplexerExt premux1; //!< prescaler multiplexer for timer 1
         TimerIRQRegister *timer01irq;   //!< timer interrupt unit for timer
         HWTimer8_0C      *timer0;       //!< timer 0 unit
         ICaptureSource   *inputCapture1; //!< input capture source for timer1

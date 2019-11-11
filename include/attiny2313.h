@@ -41,11 +41,11 @@
 class AvrDevice_attiny2313: public AvrDevice {
     
     public:
-        HWPort *porta;                  //!< port A (only 3 bit)
-        HWPort *portb;                  //!< port B
-        HWPort *portd;                  //!< port D (only 7 bit)
+        HWPort porta;                   //!< port A (only 3 bit)
+        HWPort portb;                   //!< port B
+        HWPort portd;                   //!< port D (only 7 bit)
 
-        IOSpecialReg *gtccr_reg;        //!< GTCCR IO register
+        IOSpecialReg gtccr_reg;         //!< GTCCR IO register
         GPIORegister *gpior0_reg;       //!< GPIOR0 Register
         GPIORegister *gpior1_reg;       //!< GPIOR1 Register
         GPIORegister *gpior2_reg;       //!< GPIOR2 Register
@@ -58,7 +58,9 @@ class AvrDevice_attiny2313: public AvrDevice {
         IOSpecialReg *mcucr_reg;        //!< MCUCR IO register
         IOSpecialReg *pcmsk_reg;        //!< PCMSK IO register
         
-        HWPrescaler *prescaler01;       //!< prescaler unit for timer 0 and 1
+        HWPrescaler prescaler01;        //!< prescaler unit for timer 0 and 1
+        PrescalerMultiplexerExt premux0; //!< prescaler multiplexer for timer 0
+        PrescalerMultiplexerExt premux1; //!< prescaler multiplexer for timer 1
         ICaptureSource *inputCapture1;  //!< input capture source for timer1
         HWTimer8_2C*   timer0;          //!< timer 0 unit
         HWTimer16_2C3* timer1;          //!< timer 1 unit

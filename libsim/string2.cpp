@@ -47,21 +47,6 @@
 #include "string2_template.h"
 
 /*
- *  Instantiate an error checking wrapper for strtol (long)
- */
-#undef STRING_TO_TYPE
-#undef STRING_TO_NAME
-#undef STRING_TO_METHOD
-#undef STRING_TO_MAX
-#undef STRING_TO_MIN
-#define STRING_TO_TYPE long int
-#define STRING_TO_NAME StringToLong
-#define STRING_TO_METHOD strtol
-#define STRING_TO_MIN LONG_MIN
-#define STRING_TO_MAX LONG_MAX
-#include "string2_template.h"
-
-/*
  *  Instantiate an error checking wrapper for strtoul (unsigned long)
  */
 #undef STRING_TO_TYPE
@@ -73,21 +58,6 @@
 #define STRING_TO_NAME StringToUnsignedLong
 #define STRING_TO_METHOD strtoul
 #define STRING_TO_MAX ULONG_MAX
-#include "string2_template.h"
-
-/*
- *  Instantiate an error checking wrapper for strtoll (long long)
- */
-#undef STRING_TO_TYPE
-#undef STRING_TO_NAME
-#undef STRING_TO_METHOD
-#undef STRING_TO_MAX
-#undef STRING_TO_MIN
-#define STRING_TO_TYPE long long
-#define STRING_TO_NAME StringToLongLong
-#define STRING_TO_METHOD strtoll
-#define STRING_TO_MIN LLONG_MIN
-#define STRING_TO_MAX LLONG_MAX
 #include "string2_template.h"
 
 /*

@@ -21,10 +21,11 @@ message(STATUS "version major ${VERSION_MAJOR} / minor ${VERSION_MINOR} / patch 
 option(BUILD_TCL "build TCL SWIG module" OFF)
 option(BUILD_PYTHON "build Python SWIG module" OFF)
 option(BUILD_VERILOG "build VERILOG module" OFF)
+option(CHECK_VALGRIND "run gtest regression test with valgrind" OFF)
 
 # find tools
 # find python executable, for Python3 you need a virtual env, which links python to python3 executable!
-find_package(PythonInterp)
+find_package(PythonInterp 3.4)
 execute_process(COMMAND ${PYTHON_EXECUTABLE}
                         -c "import sys; print('%s.%s' % (sys.version_info.major, sys.version_info.minor))"
                         OUTPUT_VARIABLE PYTHON_VERSION
@@ -64,6 +65,12 @@ endif(BUILD_VERILOG)
 find_program(AVR_CC avr-gcc)
 # gzip
 find_program(GZIP gzip)
+
+# valgrind tool to detect memory problems
+find_program(VALGRIND valgrind)
+
+# c++ standard
+set(CMAKE_CXX_STANDARD 11)
 
 # subdirectories
 add_subdirectory(libsim)

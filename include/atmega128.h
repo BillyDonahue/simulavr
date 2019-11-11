@@ -45,13 +45,13 @@
 class AvrDevice_atmega128base: public AvrDevice {
     
     public:
-        HWPort *porta;                  //!< port A
-        HWPort *portb;                  //!< port B
-        HWPort *portc;                  //!< port C
-        HWPort *portd;                  //!< port D
-        HWPort *porte;                  //!< port E
-        HWPort *portf;                  //!< port F
-        HWPort *portg;                  //!< port G
+        HWPort porta;                  //!< port A
+        HWPort portb;                  //!< port B
+        HWPort portc;                  //!< port C
+        HWPort portd;                  //!< port D
+        HWPort porte;                  //!< port E
+        HWPort portf;                  //!< port F
+        HWPort portg;                  //!< port G
         ExternalIRQHandler *extirq;     //!< external interrupt support
         IOSpecialReg *eicra_reg;        //!< EICRA IO register
         IOSpecialReg *eicrb_reg;        //!< EICRB IO register
@@ -65,12 +65,16 @@ class AvrDevice_atmega128base: public AvrDevice {
         HWAd *ad;                       //!< adc unit
         HWAcomp *acomp;                 //!< analog compare unit
 
-        IOSpecialReg *assr_reg;         //!< ASSR IO register
-        IOSpecialReg *sfior_reg;        //!< SFIOR IO register
-        HWPrescalerAsync *prescaler0;   //!< prescaler unit for timer 0
-        HWPrescaler *prescaler123;      //!< prescaler unit for timer 1 to 3
-        ICaptureSource *inputCapture1;  //!< input capture source for timer1
-        ICaptureSource *inputCapture3;  //!< input capture source for timer3
+        IOSpecialReg assr_reg;          //!< ASSR IO register
+        IOSpecialReg sfior_reg;         //!< SFIOR IO register
+        HWPrescalerAsync prescaler0;    //!< prescaler unit for timer 0
+        HWPrescaler prescaler123;       //!< prescaler unit for timer 1 to 3
+        PrescalerMultiplexer premux0;   //!< prescale multiplexer for timer0
+        PrescalerMultiplexerExt premux1; //!< prescale multiplexer for timer1
+        PrescalerMultiplexerExt premux2; //!< prescale multiplexer for timer2
+        PrescalerMultiplexerExt premux3; //!< prescale multiplexer for timer3
+        ICaptureSource inputCapture1;   //!< input capture source for timer1
+        ICaptureSource inputCapture3;   //!< input capture source for timer3
         HWTimer8_1C*  timer0;           //!< timer 0 unit
         HWTimer16_3C* timer1;           //!< timer 1 unit
         HWTimer8_1C*  timer2;           //!< timer 2 unit

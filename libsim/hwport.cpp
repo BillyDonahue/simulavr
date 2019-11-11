@@ -67,7 +67,6 @@ HWPort::HWPort(AvrDevice *core, const string &name, bool portToggle, int size):
 HWPort::~HWPort() {
     for(int tt = portSize - 1; tt >= 0; tt--) {
         UnregisterTraceValue(pintrace[tt]);
-        delete pintrace[tt];
     }
 }
 

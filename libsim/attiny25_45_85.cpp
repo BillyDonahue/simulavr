@@ -51,8 +51,6 @@ AvrDevice_attinyX5::~AvrDevice_attinyX5() {
     delete pllcsr_reg;
     delete timer0;
     delete timer01irq;
-    delete prescaler0;
-    delete gtccr_reg;
     delete extirq;
     delete pcmsk_reg;
     delete mcucr_reg;
@@ -61,7 +59,6 @@ AvrDevice_attinyX5::~AvrDevice_attinyX5() {
     delete gpior2_reg;
     delete gpior1_reg;
     delete gpior0_reg;
-    delete portb;
     delete osccal_reg;
     delete clkpr_reg;
     delete stack;
@@ -76,7 +73,11 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     AvrDevice(64 ,          // I/O space above General Purpose Registers
               ram_bytes,    // RAM size
               0,            // External RAM size
-              flash_bytes)  // Flash Size
+              flash_bytes), // Flash Size
+    portb(this, "B", true, 6),
+    gtccr_reg(&coreTraceGroup, "GTCCR"),
+    prescaler0(this, "0", &gtccr_reg, 0, 7),
+    premux0(&prescaler0, PinAtPort(&portb, 2))
 {
     flagJMPInstructions = false;
     flagMULInstructions = false;
@@ -99,8 +100,6 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V5);
     
-    portb = new HWPort(this, "B", true, 6);
-
     gpior0_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR0");
     gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
     gpior2_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR2");
@@ -111,52 +110,48 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     pcmsk_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK");
     extirq = new ExternalIRQHandler(this, irqSystem, gimsk_reg, gifr_reg);
     extirq->registerIrq(1, 6, new ExternalIRQSingle(mcucr_reg, 0, 2, GetPin("B2")));
-    extirq->registerIrq(2, 5, new ExternalIRQPort(pcmsk_reg, portb));
-
-    // GTCCR register and timer 0
-    gtccr_reg = new IOSpecialReg(&coreTraceGroup, "GTCCR");
-    prescaler0 = new HWPrescaler(this, "0", gtccr_reg, 0, 7);
+    extirq->registerIrq(2, 5, new ExternalIRQPort(pcmsk_reg, &portb));
 
     timer01irq = new TimerIRQRegister(this, irqSystem);
-    timer01irq->registerLine(1, new IRQLine("TOV0",   5));
-    timer01irq->registerLine(2, new IRQLine("TOV1",   4));
-    timer01irq->registerLine(3, new IRQLine("OCF0B", 11));
-    timer01irq->registerLine(4, new IRQLine("OCF0A", 10));
-    timer01irq->registerLine(5, new IRQLine("OCF1B",  9));
-    timer01irq->registerLine(6, new IRQLine("OCF1A",  3));
+    timer01irq->registerLine(1, IRQLine("TOV0",   5));
+    timer01irq->registerLine(2, IRQLine("TOV1",   4));
+    timer01irq->registerLine(3, IRQLine("OCF0B", 11));
+    timer01irq->registerLine(4, IRQLine("OCF0A", 10));
+    timer01irq->registerLine(5, IRQLine("OCF1B",  9));
+    timer01irq->registerLine(6, IRQLine("OCF1A",  3));
     
     timer0 = new HWTimer8_2C(this,
-                             new PrescalerMultiplexerExt(prescaler0, PinAtPort(portb, 2)),
+                             &premux0,
                              0,
                              timer01irq->getLine("TOV0"),
                              timer01irq->getLine("OCF0A"),
-                             new PinAtPort(portb, 0),
+                             PinAtPort(&portb, 0),
                              timer01irq->getLine("OCF0B"),
-                             new PinAtPort(portb, 1));
+                             PinAtPort(&portb, 1));
 
     // PLLCSR register and timer 1
     pllcsr_reg = new IOSpecialReg(&coreTraceGroup, "PLLCSR");
     timer1 = new HWTimerTinyX5(this,
-                               gtccr_reg,
+                               &gtccr_reg,
                                pllcsr_reg,
                                timer01irq->getLine("TOV1"),
                                timer01irq->getLine("OCF1A"),
-                               new PinAtPort(portb, 1),
-                               new PinAtPort(portb, 0),
+                               PinAtPort(&portb, 1),
+                               PinAtPort(&portb, 0),
                                timer01irq->getLine("OCF1B"),
-                               new PinAtPort(portb, 4),
-                               new PinAtPort(portb, 3));
+                               PinAtPort(&portb, 4),
+                               PinAtPort(&portb, 3));
 
     // ADC
-    admux = new HWAdmuxT25(this, &portb->GetPin(5), &portb->GetPin(2), &portb->GetPin(4), &portb->GetPin(3));
-    aref = new HWARef8(this, &portb->GetPin(0));
+    admux = new HWAdmuxT25(this, &portb.GetPin(5), &portb.GetPin(2), &portb.GetPin(4), &portb.GetPin(3));
+    aref = new HWARef8(this, &portb.GetPin(0));
     ad = new HWAd(this, HWAd::AD_T25, irqSystem, 8, admux, aref);
 
     // Analog comparator
-    acomp = new HWAcomp(this, irqSystem, PinAtPort(portb, 0), PinAtPort(portb, 1), 7, ad, NULL);
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(&portb, 0), PinAtPort(&portb, 1), 7, ad, NULL);
 
     // USI
-    usi = new HWUSI_BR(this, irqSystem, PinAtPort(portb, 0), PinAtPort(portb, 1), PinAtPort(portb, 2), 13, 14);
+    usi = new HWUSI_BR(this, irqSystem, PinAtPort(&portb, 0), PinAtPort(&portb, 1), PinAtPort(&portb, 2), 13, 14);
     timer0->SetTimerEventListener(usi);
 
     // IO register set
@@ -180,7 +175,7 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     rw[0x4f]= & timer1->tcnt_reg;
     rw[0x4e]= & timer1->tocra_reg;
     rw[0x4d]= & timer1->tocrc_reg;
-    rw[0x4c]= gtccr_reg;
+    rw[0x4c]= & gtccr_reg;
     rw[0x4b]= & timer1->tocrb_reg;
     rw[0x4a]= & timer0->tccra_reg;
     rw[0x49]= & timer0->ocra_reg;
@@ -201,9 +196,9 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     //rw[0x3b] reserved
     //rw[0x3a] reserved
     //rw[0x39] reserved
-    rw[0x38]= & portb->port_reg;
-    rw[0x37]= & portb->ddr_reg;
-    rw[0x36]= & portb->pin_reg;
+    rw[0x38]= & portb.port_reg;
+    rw[0x37]= & portb.ddr_reg;
+    rw[0x36]= & portb.pin_reg;
     rw[0x35]= pcmsk_reg;
     //rw[0x34] reserved
     rw[0x33]= gpior2_reg;

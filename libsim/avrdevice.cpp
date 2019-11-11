@@ -135,6 +135,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     iRamSize(IRamSize),
     eRamSize(ERamSize),
     devSignature(numeric_limits<unsigned int>::max()),
+    PC_size(pcSize),
     abortOnInvalidAccess(false),
     coreTraceGroup(this),
     deferIrq(false),
@@ -151,15 +152,14 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     flagMOVWInstruction(true),
     flagTiny10(false),
     flagTiny1x(false),
-    flagXMega(false),
-    PC_size(pcSize)
+    flagXMega(false)
 {
     dumpManager = DumpManager::Instance();
     dumpManager->registerAvrDevice(this);
     DebugRecentJumpsIndex = 0;
     
-    TraceValue* pc_tracer=trace_direct(&coreTraceGroup, "PC", &cPC);
-    coreTraceGroup.RegisterTraceValue(new TwiceTV(coreTraceGroup.GetTraceValuePrefix()+"PCb",  pc_tracer));
+    //TraceValue* pc_tracer=trace_direct(&coreTraceGroup, "PC", &cPC);
+    //coreTraceGroup.RegisterTraceValue(new TwiceTV(coreTraceGroup.GetTraceValuePrefix()+"PCb",  pc_tracer));
     trace_on = 0;
     
     fuses = new AvrFuses;

@@ -27,6 +27,8 @@ configure_file(${CMAKE_SOURCE_DIR}/include/config.h.in ${CMAKE_SOURCE_DIR}/inclu
 
 add_library(sim_objs OBJECT ${libSrcs})
 set_property(TARGET sim_objs PROPERTY POSITION_INDEPENDENT_CODE 1)
+#target_compile_options(sim_objs PRIVATE -Wall -Wextra)
+target_compile_options(sim_objs PRIVATE -Wall)
 
 add_library(sim SHARED $<TARGET_OBJECTS:sim_objs>)
 
@@ -60,6 +62,8 @@ if(BUILD_VERILOG)
   set_target_properties(avr_vpi PROPERTIES OUTPUT_NAME "avr.vpi")
   set_target_properties(avr_vpi PROPERTIES PREFIX "")
   set_target_properties(avr_vpi PROPERTIES SUFFIX "")
+  #target_compile_options(avr_vpi PRIVATE -Wall -Wextra)
+  #target_compile_options(avr_vpi PRIVATE -Wall)
 
   install(TARGETS avr_vpi DESTINATION "lib/simulavr")
 

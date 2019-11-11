@@ -86,11 +86,6 @@ unsigned char RWMemoryMember::operator=(const RWMemoryMember &mm) {
     return v;
 }
 
-RWMemoryMember::~RWMemoryMember() {
-    if (tv)
-        delete tv;
-}
-
 CLKPRRegister::CLKPRRegister(AvrDevice *core,
                              TraceValueRegister *registry):
         RWMemoryMember(registry, "CLKPR"),
@@ -231,16 +226,65 @@ void InvalidMem::set(unsigned char c) {
     avr_warning("%s", s.c_str());
 }
 
-NotSimulatedRegister::NotSimulatedRegister(const char * message_on_access_)
-    : message_on_access(message_on_access_)  {}
+NotSimulatedRegister::NotSimulatedRegister(const char * oname, const char * rname)
+    : obj_name(oname),
+      reg_name(rname)  {}
 
 unsigned char NotSimulatedRegister::get() const {
-    avr_warning("%s (read from register)", message_on_access);
+    avr_warning("%s register %s not simulated (read from register)", obj_name, reg_name);
     return 0;
 }
 
 void NotSimulatedRegister::set(unsigned char c) {
-    avr_warning("%s (write 0x%02x to register)", message_on_access, (unsigned)c);
+    avr_warning("%s register %s not simulated (write 0x%02x to register)", obj_name, reg_name, (unsigned)c);
+}
+
+NotSimulatedRegister NSR_TWI_TWAMR = NotSimulatedRegister("TWI", "TWAMR");
+NotSimulatedRegister NSR_TWI_TWCR = NotSimulatedRegister("TWI", "TWCR");
+NotSimulatedRegister NSR_TWI_TWDR = NotSimulatedRegister("TWI", "TWDR");
+NotSimulatedRegister NSR_TWI_TWAR = NotSimulatedRegister("TWI", "TWAR");
+NotSimulatedRegister NSR_TWI_TWSR = NotSimulatedRegister("TWI", "TWSR");
+NotSimulatedRegister NSR_TWI_TWBR = NotSimulatedRegister("TWI", "TWBR");
+NotSimulatedRegister NSR_ADC_DIDR0 = NotSimulatedRegister("ADC", "DIDR0");
+NotSimulatedRegister NSR_ADC_DIDR1 = NotSimulatedRegister("ADC", "DIDR1");
+NotSimulatedRegister NSR_ADC_DIDR2 = NotSimulatedRegister("ADC", "DIDR2");
+NotSimulatedRegister NSR_MCU_PRR = NotSimulatedRegister("MCU", "PRR");
+NotSimulatedRegister NSR_MCU_PRR0 = NotSimulatedRegister("MCU", "PRR0");
+NotSimulatedRegister NSR_MCU_PRR1 = NotSimulatedRegister("MCU", "PRR1");
+NotSimulatedRegister NSR_MCU_WDTCSR = NotSimulatedRegister("MCU", "WDTCSR");
+NotSimulatedRegister NSR_MCU_MCUCR = NotSimulatedRegister("MCU", "MCUCR");
+NotSimulatedRegister NSR_MCU_MCUSR = NotSimulatedRegister("MCU", "MCUSR");
+NotSimulatedRegister NSR_MCU_SMCR = NotSimulatedRegister("MCU", "SMCR");
+NotSimulatedRegister NSR_OCD_OCDR = NotSimulatedRegister("On chip debug", "OCDR");
+NotSimulatedRegister NSR_XMC_XMCRA = NotSimulatedRegister("External memory control", "XMCRA");
+NotSimulatedRegister NSR_XMC_XMCRB = NotSimulatedRegister("External memory control", "XMCRB");
+
+NotSimulatedRegister* NSR[NotSimulatedRegister::NSR_size] = {
+   &NSR_TWI_TWAMR,
+   &NSR_TWI_TWCR,
+   &NSR_TWI_TWDR,
+   &NSR_TWI_TWAR,
+   &NSR_TWI_TWSR,
+   &NSR_TWI_TWBR,
+   &NSR_ADC_DIDR0,
+   &NSR_ADC_DIDR1,
+   &NSR_ADC_DIDR2,
+   &NSR_MCU_PRR,
+   &NSR_MCU_PRR0,
+   &NSR_MCU_PRR1,
+   &NSR_MCU_WDTCSR,
+   &NSR_MCU_MCUCR,
+   &NSR_MCU_MCUSR,
+   &NSR_MCU_SMCR,
+   &NSR_OCD_OCDR,
+   &NSR_XMC_XMCRA,
+   &NSR_XMC_XMCRB,
+};
+
+NotSimulatedRegister* NotSimulatedRegister::getRegister(int reg) {
+    if(reg >= NotSimulatedRegister::NSR_size)
+        avr_error("wrong register id for NotSimulatedRegister");
+    return NSR[reg];
 }
 
 IOSpecialReg::IOSpecialReg(TraceValueRegister *registry, const std::string &name):

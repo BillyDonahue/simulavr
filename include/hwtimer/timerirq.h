@@ -49,10 +49,12 @@ class IRQLine {
         TimerIRQRegister *irqreg; //!< pointer to irq registers, where this line is hold
         
     public:
+        IRQLine();
         //! Creates a IRQLine instance, to use in connection with TimerIRQRegister and timers
         IRQLine(const std::string& name, int irqvector);
         //! inform interrupt system, that an interrupt occured
         void fireInterrupt(void);
+        bool active();
 };
 
 //! Provices flag and mask register for timer interrupts and connects irq lines to irqsystem
@@ -61,7 +63,7 @@ class TimerIRQRegister: public Hardware, public IOSpecialRegClient, public Trace
     private:
         HWIrqSystem* irqsystem; //!< pointer to irq system
         AvrDevice* core; //!< pointer to device
-        std::vector<IRQLine*> lines; //!< list with IRQ lines
+        std::vector<IRQLine> lines; //!< list with IRQ lines
         std::map<std::string, int> name2line; //!< mapping IRQ line name to index
         std::map<int, int> vector2line; //!< mapping IRQ vector to index
         unsigned char irqmask; //!< mask register value;
@@ -74,6 +76,7 @@ class TimerIRQRegister: public Hardware, public IOSpecialRegClient, public Trace
         
         TimerIRQRegister(AvrDevice* core, HWIrqSystem* irqsys, int regidx = -1);
         void registerLine(int idx, IRQLine* irq);
+        void registerLine(int idx, const IRQLine& irq);
         IRQLine* getLine(const std::string& name);
         void fireInterrupt(int irqvector);
         

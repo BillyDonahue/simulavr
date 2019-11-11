@@ -63,7 +63,7 @@ class RWMemoryMember {
         //! Write access on memory
         unsigned char operator=(const RWMemoryMember &mm);
 #endif
-        virtual ~RWMemoryMember();
+        virtual ~RWMemoryMember() {}
         const std::string &GetTraceName(void) { return tracename; }
         bool IsInvalid(void) const { return isInvalid; } 
 
@@ -210,15 +210,46 @@ class InvalidMem : public RWMemoryMember {
         void set(unsigned char);
 };
 
-//! An IO register which is not simulated because programmers are lazy.
-/*! Reads and writes are ignored and produce warning. */
+//! An IO register which is not simulated in the moment. Reads and writes are ignored and produce warning.
 class NotSimulatedRegister : public RWMemoryMember {
     private:
-        const char * message_on_access;
+        const char * obj_name;
+        const char * reg_name;
 
     public:
-        NotSimulatedRegister(const char * message_on_access);
-
+        NotSimulatedRegister(const char * oname, const char * rname);
+        
+        enum {
+            // TWI registers
+            TWI_TWAMR = 0,
+            TWI_TWCR,
+            TWI_TWDR,
+            TWI_TWAR,
+            TWI_TWSR,
+            TWI_TWBR,
+            // ADC registers
+            ADC_DIDR0,
+            ADC_DIDR1,
+            ADC_DIDR2,
+            //MCU registers
+            MCU_PRR,
+            MCU_PRR0,
+            MCU_PRR1,
+            MCU_WDTCSR,
+            MCU_MCUCR,
+            MCU_MCUSR,
+            MCU_SMCR,
+            // On chip debug register
+            OCD_OCDR,
+            // external memory control register
+            XMC_XMCRA,
+            XMC_XMCRB,
+            // NSR array size
+            NSR_size
+        };
+        
+        static NotSimulatedRegister* getRegister(int reg);
+        
     protected:
         unsigned char get() const;
         void set(unsigned char);
@@ -259,7 +290,6 @@ class IOReg: public RWMemoryMember {
         void releaseTraceValue(void) {
             if(tv) {
                 registry->UnregisterTraceValue(tv);
-                delete tv;
                 tv = NULL;
             }
         }

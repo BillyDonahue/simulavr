@@ -41,16 +41,18 @@ class HWMcucr;
 class AvrDevice_at90s4433: public AvrDevice {
     
     public:
-        HWPort *portb;                  //!< port B
-        HWPort *portc;                  //!< port C
-        HWPort *portd;                  //!< port D
+        HWPort portb;                   //!< port B
+        HWPort portc;                   //!< port C
+        HWPort portd;                   //!< port D
         HWAdmux *admux;                 //!< adc multiplexer unit
         HWARef *aref;                   //!< adc reference unit
         HWAd *ad;                       //!< adc unit
         HWSpi *spi;                     //!< spi unit
         HWUart *uart;                   //!< uart unit
         HWAcomp *acomp;
-        HWPrescaler      *prescaler;    //!< prescaler unit for timer
+        HWPrescaler      prescaler;     //!< prescaler unit for timer
+        PrescalerMultiplexerExt premux0; //!< prescaler multiplexer for timer 0
+        PrescalerMultiplexerExt premux1; //!< prescaler multiplexer for timer 1
         TimerIRQRegister *timer01irq;   //!< timer interrupt unit for timer
         HWTimer8_0C      *timer0;       //!< timer 0 unit
         ICaptureSource   *inputCapture1; //!< input capture source for timer1

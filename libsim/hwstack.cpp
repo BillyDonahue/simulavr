@@ -39,6 +39,13 @@ HWStack::HWStack(AvrDevice *c):
     Reset();
 }
 
+HWStack::~HWStack() {
+    typedef multimap<unsigned long, Funktor *>::iterator I;
+    for(I i = returnPointList.begin(); i != returnPointList.end(); ++i) {
+        delete i->second;
+    }
+}
+
 void HWStack::Reset(void) {
     returnPointList.clear();
     stackPointer = 0;

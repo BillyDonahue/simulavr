@@ -78,6 +78,7 @@ HWWado::HWWado(AvrDevice *c):
 void HWWado::Reset() {
 	timeOutAt=0;
 	wdtcr=0;
+        cntWde = 0;
 }
 
 

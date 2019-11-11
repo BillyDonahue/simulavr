@@ -37,7 +37,14 @@ AVR_REGISTER(at90s8515, AvrDevice_at90s8515)
 AvrDevice_at90s8515::AvrDevice_at90s8515():
     AvrDevice(64, 512, 0xfda0, 8192),
     portx(this, "X"),
-    ocr1b(portx.GetPin(0))
+    porta(this, "A"),
+    portb(this, "B"),
+    portc(this, "C"),
+    portd(this, "D"),
+    ocr1b(portx.GetPin(0)),
+    prescaler(this, "01"),
+    premux0(&prescaler, PinAtPort(&portb, 0)),
+    premux1(&prescaler, PinAtPort(&portb, 1))
 { 
     flagJMPInstructions = false;
     flagMULInstructions = false;
@@ -47,48 +54,42 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
     eeprom= new HWEeprom(this, NULL, 512, 0, HWEeprom::DEVMODE_AT90S); // no irq available
     stack = new HWStackSram(this, 16);
     
-    porta= new HWPort(this, "A");
-    portb= new HWPort(this, "B");
-    portc= new HWPort(this, "C");
-    portd= new HWPort(this, "D");
-
     // portx is internaly used for ocr1b and icp, this 2 pins are not gpio!
     // set DDR Bit 0 to output: ocr1b
     // set DDT Bit 1 to input: icp
     portx.SetDdr(0x01);
     
-    spi= new HWSpi(this, irqSystem, PinAtPort( portb, 5), PinAtPort( portb, 6), PinAtPort( portb, 7), PinAtPort(portb, 4),/*irqvec*/ 8, false);
+    spi= new HWSpi(this, irqSystem, PinAtPort(&portb, 5), PinAtPort(&portb, 6), PinAtPort(&portb, 7), PinAtPort(&portb, 4),/*irqvec*/ 8, false);
 
-    uart= new HWUart( this, irqSystem, PinAtPort(portd,1), PinAtPort(portd, 0),9,10,11) ;
+    uart= new HWUart(this, irqSystem, PinAtPort(&portd,1), PinAtPort(&portd, 0),9,10,11) ;
 
     wado= new HWWado(this);
 
-    prescaler = new HWPrescaler(this, "01");
     timer01irq = new TimerIRQRegister(this, irqSystem);
-    timer01irq->registerLine(1, new IRQLine("TOV0", 7));
-    timer01irq->registerLine(3, new IRQLine("ICF1", 3));
-    timer01irq->registerLine(5, new IRQLine("OCF1B", 5));
-    timer01irq->registerLine(6, new IRQLine("OCF1A", 4));
-    timer01irq->registerLine(7, new IRQLine("TOV1", 6));
+    timer01irq->registerLine(1, IRQLine("TOV0", 7));
+    timer01irq->registerLine(3, IRQLine("ICF1", 3));
+    timer01irq->registerLine(5, IRQLine("OCF1B", 5));
+    timer01irq->registerLine(6, IRQLine("OCF1A", 4));
+    timer01irq->registerLine(7, IRQLine("TOV1", 6));
     timer0 = new HWTimer8_0C(this,
-                             new PrescalerMultiplexerExt(prescaler, PinAtPort(portb, 0)),
+                             &premux0,
                              0,
                              timer01irq->getLine("TOV0"));
     inputCapture1 = new ICaptureSource(PinAtPort(&portx, 1));
     timer1 = new HWTimer16_2C2(this,
-                               new PrescalerMultiplexerExt(prescaler, PinAtPort(portb, 1)),
+                               &premux1,
                                1,
                                timer01irq->getLine("TOV1"),
                                timer01irq->getLine("OCF1A"),
-                               new PinAtPort(portd, 5),
+                               PinAtPort(&portd, 5),
                                timer01irq->getLine("OCF1B"),
-                               new PinAtPort(&portx, 0),
+                               PinAtPort(&portx, 0),
                                timer01irq->getLine("ICF1"),
                                inputCapture1,
                                true);
 
     // analog comparator: no bandgap, no ADC-connection
-    acomp = new HWAcomp(this, irqSystem, PinAtPort(portb,2), PinAtPort(portb, 3), 12, NULL, timer1, NULL, NULL, false);
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(&portb,2), PinAtPort(&portb, 3), 12, NULL, timer1, NULL, NULL, false);
 
     gimsk_reg = new IOSpecialReg(&coreTraceGroup, "GIMSK");
     gifr_reg = new IOSpecialReg(&coreTraceGroup, "GIFR");
@@ -130,21 +131,21 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
     rw[0x3d]= & eeprom->eedr_reg;
     rw[0x3c]= & eeprom->eecr_reg;
 
-    rw[0x3b]= & porta->port_reg;
-    rw[0x3a]= & porta->ddr_reg;
-    rw[0x39]= & porta->pin_reg;
+    rw[0x3b]= & porta.port_reg;
+    rw[0x3a]= & porta.ddr_reg;
+    rw[0x39]= & porta.pin_reg;
 
-    rw[0x38]= & portb->port_reg;
-    rw[0x37]= & portb->ddr_reg;
-    rw[0x36]= & portb->pin_reg;
+    rw[0x38]= & portb.port_reg;
+    rw[0x37]= & portb.ddr_reg;
+    rw[0x36]= & portb.pin_reg;
 
-    rw[0x35]= & portc->port_reg;
-    rw[0x34]= & portc->ddr_reg;
-    rw[0x33]= & portc->pin_reg;
+    rw[0x35]= & portc.port_reg;
+    rw[0x34]= & portc.ddr_reg;
+    rw[0x33]= & portc.pin_reg;
 
-    rw[0x32]= & portd->port_reg;
-    rw[0x31]= & portd->ddr_reg;
-    rw[0x30]= & portd->pin_reg;
+    rw[0x32]= & portd.port_reg;
+    rw[0x31]= & portd.ddr_reg;
+    rw[0x30]= & portd.pin_reg;
 
     rw[0x2f]= & spi->spdr_reg;
     rw[0x2e]= & spi->spsr_reg;
@@ -170,14 +171,9 @@ AvrDevice_at90s8515::~AvrDevice_at90s8515() {
     delete inputCapture1;
     delete timer0;
     delete timer01irq;
-    delete prescaler;
     delete wado;
     delete uart;
     delete spi;
-    delete portd;
-    delete portc;
-    delete portb;
-    delete porta;
     delete stack;
     delete irqSystem;
     delete eeprom;

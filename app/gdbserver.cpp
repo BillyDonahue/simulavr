@@ -867,7 +867,7 @@ void GdbServer::gdb_read_memory(const char *pkt) {
             {
                 byte bval;
 
-                bval &= 0xff;
+                bval = val & 0xff;
                 buf[i++] = HEX_DIGIT[bval >> 4];
                 buf[i++] = HEX_DIGIT[bval & 0xf];
             }

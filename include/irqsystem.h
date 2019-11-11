@@ -124,13 +124,15 @@ class HWIrqSystem: public TraceValueRegister {
         std::vector<TraceValue*> irqTrace;
         
         /// priority queue of pending interrupts (i.e. waiting to be processed)
-        std::map<unsigned int, Hardware *> irqPartnerList;
+        std::vector<Hardware*> irqStack;
+        unsigned int irqStackSize;
         AvrDevice *core;
         IrqStatistic irqStatistic;
         std::vector<const Hardware*> debugInterruptTable;
 
     public:
         HWIrqSystem (AvrDevice* _core, int bytes_per_vector, int number_of_vectors);
+        virtual ~HWIrqSystem();
 
         bool IsIrqPending();
         /// returns a new PC pointer if interrupt occurred, -1 otherwise.

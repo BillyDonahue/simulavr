@@ -40,6 +40,7 @@ class PrescalerMultiplexer {
     public:
         //! Creates a multiplexer instance, connected with prescaler
         PrescalerMultiplexer(HWPrescaler *ps);
+        virtual ~PrescalerMultiplexer() {}
         //! Requests a clock event depending on cs
         //! @param cs multiplexer select value
         //! @return true, if a clock event occured

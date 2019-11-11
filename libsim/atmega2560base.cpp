@@ -76,6 +76,8 @@ AvrDevice_atmega2560base::~AvrDevice_atmega2560base() {
     delete eimsk_reg;
     delete eicra_reg;
     delete eicrb_reg;
+    delete eind;
+    delete rampz;
     delete osccal_reg;
     delete clkpr_reg;
     delete stack;
@@ -107,7 +109,13 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     gtccr_reg(&coreTraceGroup, "GTCCR"),
     assr_reg(&coreTraceGroup, "ASSR"),
     prescaler1(this, "1", &gtccr_reg, 0, 7),
-    prescaler2(this, "2", PinAtPort(&portg, 4), &assr_reg, 5, &gtccr_reg, 1, 7)
+    prescaler2(this, "2", PinAtPort(&portg, 4), &assr_reg, 5, &gtccr_reg, 1, 7),
+    premux0(&prescaler1, PinAtPort(&portd, 7)),
+    premux1(&prescaler1, PinAtPort(&portd, 6)),
+    premux2(&prescaler2),
+    premux3(&prescaler1, PinAtPort(&porte, 6)),
+    premux4(&prescaler1, PinAtPort(&porth, 7)),
+    premux5(&prescaler1, PinAtPort(&portl, 2))
 { 
     flagELPMInstructions = true;
     flagEIJMPInstructions = true;
@@ -162,114 +170,114 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     extirqpc->registerIrq(11, 2, new ExternalIRQPort(pcmsk2_reg, &portk));
 
     timerIrq0 = new TimerIRQRegister(this, irqSystem, 0);
-    timerIrq0->registerLine(0, new IRQLine("TOV0",  23));
-    timerIrq0->registerLine(1, new IRQLine("OCF0A", 21));
-    timerIrq0->registerLine(2, new IRQLine("OCF0B", 22));
+    timerIrq0->registerLine(0, IRQLine("TOV0",  23));
+    timerIrq0->registerLine(1, IRQLine("OCF0A", 21));
+    timerIrq0->registerLine(2, IRQLine("OCF0B", 22));
 
     timer0 = new HWTimer8_2C(this,
-                             new PrescalerMultiplexerExt(&prescaler1, PinAtPort(&portd, 7)),
+                             &premux0,
                              0,
                              timerIrq0->getLine("TOV0"),
                              timerIrq0->getLine("OCF0A"),
-                             new PinAtPort(&portb, 7),
+                             PinAtPort(&portb, 7),
                              timerIrq0->getLine("OCF0B"),
-                             new PinAtPort(&portg, 5));
+                             PinAtPort(&portg, 5));
 
     timerIrq1 = new TimerIRQRegister(this, irqSystem, 1);
-    timerIrq1->registerLine(0, new IRQLine("TOV1",  20));
-    timerIrq1->registerLine(1, new IRQLine("OCF1A", 17));
-    timerIrq1->registerLine(2, new IRQLine("OCF1B", 18));
-    timerIrq1->registerLine(3, new IRQLine("OCF1C", 19));
-    timerIrq1->registerLine(5, new IRQLine("ICF1",  16));
+    timerIrq1->registerLine(0, IRQLine("TOV1",  20));
+    timerIrq1->registerLine(1, IRQLine("OCF1A", 17));
+    timerIrq1->registerLine(2, IRQLine("OCF1B", 18));
+    timerIrq1->registerLine(3, IRQLine("OCF1C", 19));
+    timerIrq1->registerLine(5, IRQLine("ICF1",  16));
 
     inputCapture1 = new ICaptureSource(PinAtPort(&portd, 4));
     timer1 = new HWTimer16_3C(this,
-                  new PrescalerMultiplexerExt(&prescaler1, PinAtPort(&portd, 6)),
+                  &premux1,
 			      1,
 			      timerIrq1->getLine("TOV1"),
 			      timerIrq1->getLine("OCF1A"),
-                  new PinAtPort(&portb, 5),
+                  PinAtPort(&portb, 5),
 			      timerIrq1->getLine("OCF1B"),
-                  new PinAtPort(&portb, 6),
+                  PinAtPort(&portb, 6),
 			      timerIrq1->getLine("OCF1C"),
-                  new PinAtPort(&portb, 7),
+                  PinAtPort(&portb, 7),
 			      timerIrq1->getLine("ICF1"),
 			      inputCapture1);
 
     timerIrq2 = new TimerIRQRegister(this, irqSystem, 2);
-    timerIrq2->registerLine(0, new IRQLine("TOV2",  15));
-    timerIrq2->registerLine(1, new IRQLine("OCF2A", 13));
-    timerIrq2->registerLine(2, new IRQLine("OCF2B", 14));
+    timerIrq2->registerLine(0, IRQLine("TOV2",  15));
+    timerIrq2->registerLine(1, IRQLine("OCF2A", 13));
+    timerIrq2->registerLine(2, IRQLine("OCF2B", 14));
 
     timer2 = new HWTimer8_2C(this,
-                             new PrescalerMultiplexer(&prescaler2),
+                             &premux2,
                              2,
                              timerIrq2->getLine("TOV2"),
                              timerIrq2->getLine("OCF2A"),
-                             new PinAtPort(&portb, 4),
+                             PinAtPort(&portb, 4),
                              timerIrq2->getLine("OCF2B"),
-                             new PinAtPort(&porth, 6));
+                             PinAtPort(&porth, 6));
 
     timerIrq3 = new TimerIRQRegister(this, irqSystem, 3);
-    timerIrq3->registerLine(0, new IRQLine("TOV3",  35));
-    timerIrq3->registerLine(1, new IRQLine("OCF3A", 32));
-    timerIrq3->registerLine(2, new IRQLine("OCF3B", 33));
-    timerIrq3->registerLine(3, new IRQLine("OCF3C", 34));
-    timerIrq3->registerLine(5, new IRQLine("ICF3",  31));
+    timerIrq3->registerLine(0, IRQLine("TOV3",  35));
+    timerIrq3->registerLine(1, IRQLine("OCF3A", 32));
+    timerIrq3->registerLine(2, IRQLine("OCF3B", 33));
+    timerIrq3->registerLine(3, IRQLine("OCF3C", 34));
+    timerIrq3->registerLine(5, IRQLine("ICF3",  31));
 
     inputCapture3 = new ICaptureSource(PinAtPort(&porte, 7));
     timer3 = new HWTimer16_3C(this,
-                  new PrescalerMultiplexerExt(&prescaler1, PinAtPort(&porte, 6)),
+                  &premux3,
 			      3,
                   timerIrq3->getLine("TOV3"),
                   timerIrq3->getLine("OCF3A"),
-                  new PinAtPort(&porte, 3),
+                  PinAtPort(&porte, 3),
                   timerIrq3->getLine("OCF3B"),
-                  new PinAtPort(&porte, 4),
+                  PinAtPort(&porte, 4),
                   timerIrq3->getLine("OCF3C"),
-                  new PinAtPort(&porte, 5),
+                  PinAtPort(&porte, 5),
                   timerIrq3->getLine("ICF3"),
 			      inputCapture3);
 
     timerIrq4 = new TimerIRQRegister(this, irqSystem, 4);
-    timerIrq4->registerLine(0, new IRQLine("TOV4",  45));
-    timerIrq4->registerLine(1, new IRQLine("OCF4A", 42));
-    timerIrq4->registerLine(2, new IRQLine("OCF4B", 43));
-    timerIrq4->registerLine(3, new IRQLine("OCF4C", 44));
-    timerIrq4->registerLine(5, new IRQLine("ICF4",  41));
+    timerIrq4->registerLine(0, IRQLine("TOV4",  45));
+    timerIrq4->registerLine(1, IRQLine("OCF4A", 42));
+    timerIrq4->registerLine(2, IRQLine("OCF4B", 43));
+    timerIrq4->registerLine(3, IRQLine("OCF4C", 44));
+    timerIrq4->registerLine(5, IRQLine("ICF4",  41));
 
     inputCapture4 = new ICaptureSource(PinAtPort(&portl, 0));
     timer4 = new HWTimer16_3C(this,
-                  new PrescalerMultiplexerExt(&prescaler1, PinAtPort(&porth, 7)),
+                  &premux4,
 			      4,
                   timerIrq4->getLine("TOV4"),
                   timerIrq4->getLine("OCF4A"),
-                  new PinAtPort(&porth, 3),
+                  PinAtPort(&porth, 3),
                   timerIrq4->getLine("OCF4B"),
-                  new PinAtPort(&porth, 4),
+                  PinAtPort(&porth, 4),
                   timerIrq4->getLine("OCF4C"),
-                  new PinAtPort(&porth, 5),
+                  PinAtPort(&porth, 5),
                   timerIrq4->getLine("ICF4"),
 			      inputCapture4);
 
     timerIrq5 = new TimerIRQRegister(this, irqSystem, 5);
-    timerIrq5->registerLine(0, new IRQLine("TOV5",  50));
-    timerIrq5->registerLine(1, new IRQLine("OCF5A", 47));
-    timerIrq5->registerLine(2, new IRQLine("OCF5B", 48));
-    timerIrq5->registerLine(3, new IRQLine("OCF5C", 49));
-    timerIrq5->registerLine(5, new IRQLine("ICF5",  46));
+    timerIrq5->registerLine(0, IRQLine("TOV5",  50));
+    timerIrq5->registerLine(1, IRQLine("OCF5A", 47));
+    timerIrq5->registerLine(2, IRQLine("OCF5B", 48));
+    timerIrq5->registerLine(3, IRQLine("OCF5C", 49));
+    timerIrq5->registerLine(5, IRQLine("ICF5",  46));
 
     inputCapture5 = new ICaptureSource(PinAtPort(&portl, 1));
     timer5 = new HWTimer16_3C(this,
-                  new PrescalerMultiplexerExt(&prescaler1, PinAtPort(&portl, 2)),
+                  &premux5,
 			      5,
                   timerIrq5->getLine("TOV5"),
                   timerIrq5->getLine("OCF5A"),
-                  new PinAtPort(&portl, 3),
+                  PinAtPort(&portl, 3),
                   timerIrq5->getLine("OCF5B"),
-                  new PinAtPort(&portl, 4),
+                  PinAtPort(&portl, 4),
                   timerIrq5->getLine("OCF5C"),
-                  new PinAtPort(&portl, 5),
+                  PinAtPort(&portl, 5),
                   timerIrq5->getLine("ICF5"),
 			      inputCapture5);
 
@@ -396,12 +404,12 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     rw[0xC0]= & usart0->ucsra_reg;
     // 0xBF reserved
     // 0xBE reserved
-    rw[0xBD]= new NotSimulatedRegister("TWI register TWAMR not simulated");
-    rw[0xBC]= new NotSimulatedRegister("TWI register TWCR not simulated");
-    rw[0xBB]= new NotSimulatedRegister("TWI register TWDR not simulated");
-    rw[0xBA]= new NotSimulatedRegister("TWI register TWAR not simulated");
-    rw[0xB9]= new NotSimulatedRegister("TWI register TWSR not simulated");
-    rw[0xB8]= new NotSimulatedRegister("TWI register TWBR not simulated");
+    rw[0xBD]= NotSimulatedRegister::getRegister(NotSimulatedRegister::TWI_TWAMR);
+    rw[0xBC]= NotSimulatedRegister::getRegister(NotSimulatedRegister::TWI_TWCR);
+    rw[0xBB]= NotSimulatedRegister::getRegister(NotSimulatedRegister::TWI_TWDR);
+    rw[0xBA]= NotSimulatedRegister::getRegister(NotSimulatedRegister::TWI_TWAR);
+    rw[0xB9]= NotSimulatedRegister::getRegister(NotSimulatedRegister::TWI_TWSR);
+    rw[0xB8]= NotSimulatedRegister::getRegister(NotSimulatedRegister::TWI_TWBR);
     // 0xB7 reserved
     rw[0xB6]= & assr_reg;
     // 0xB5 reserved
@@ -455,17 +463,17 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     rw[0x82]= & timer1->tccrc_reg;
     rw[0x81]= & timer1->tccrb_reg;
     rw[0x80]= & timer1->tccra_reg;
-    rw[0x7F]= new NotSimulatedRegister("ADC register DIDR1 not simulated");
-    rw[0x7E]= new NotSimulatedRegister("ADC register DIDR0 not simulated");
-    rw[0x7D]= new NotSimulatedRegister("ADC register DIDR2 not simulated");
+    rw[0x7F]= NotSimulatedRegister::getRegister(NotSimulatedRegister::ADC_DIDR1);
+    rw[0x7E]= NotSimulatedRegister::getRegister(NotSimulatedRegister::ADC_DIDR0);
+    rw[0x7D]= NotSimulatedRegister::getRegister(NotSimulatedRegister::ADC_DIDR2);
     rw[0x7C]= & ad->admux_reg;
     rw[0x7B]= & ad->adcsrb_reg;
     rw[0x7A]= & ad->adcsra_reg;
     rw[0x79]= & ad->adch_reg;
     rw[0x78]= & ad->adcl_reg;
     // 0x76, 0x77 reserved
-    rw[0x75]= new NotSimulatedRegister("External Memory Control Register B not simulated");
-    rw[0x74]= new NotSimulatedRegister("External Memory Control Register A not simulated");
+    rw[0x75]= NotSimulatedRegister::getRegister(NotSimulatedRegister::XMC_XMCRB);
+    rw[0x74]= NotSimulatedRegister::getRegister(NotSimulatedRegister::XMC_XMCRA);
     rw[0x73]= & timerIrq5->timsk_reg;
     rw[0x72]= & timerIrq4->timsk_reg;
     rw[0x71]= & timerIrq3->timsk_reg;
@@ -480,12 +488,12 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     rw[0x68]= pcicr_reg;
     // 0x67 reserved
     rw[0x66]= osccal_reg;
-    rw[0x65]= new NotSimulatedRegister("MCU register PRR1 not simulated");
-    rw[0x64]= new NotSimulatedRegister("MCU register PRR0 not simulated");
+    rw[0x65]= NotSimulatedRegister::getRegister(NotSimulatedRegister::MCU_PRR1);
+    rw[0x64]= NotSimulatedRegister::getRegister(NotSimulatedRegister::MCU_PRR0);
     // 0x63 reserved
     // 0x62 reserved
     rw[0x61]= clkpr_reg;
-    rw[0x60]= new NotSimulatedRegister("MCU register WDTCSR not simulated");
+    rw[0x60]= NotSimulatedRegister::getRegister(NotSimulatedRegister::MCU_WDTCSR);
     rw[0x5F]= statusRegister;
     rw[0x5E]= & ((HWStackSram *)stack)->sph_reg;
     rw[0x5D]= & ((HWStackSram *)stack)->spl_reg;
@@ -494,11 +502,11 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     // 0x58 - 0x5A reserved
     rw[0x57]= & spmRegister->spmcr_reg;
     // 0x56 reserved
-    rw[0x55]= new NotSimulatedRegister("MCU register MCUCR not simulated");
-    rw[0x54]= new NotSimulatedRegister("MCU register MCUSR not simulated");
-    rw[0x53]= new NotSimulatedRegister("MCU register SMCR not simulated");
+    rw[0x55]= NotSimulatedRegister::getRegister(NotSimulatedRegister::MCU_MCUCR);
+    rw[0x54]= NotSimulatedRegister::getRegister(NotSimulatedRegister::MCU_MCUSR);
+    rw[0x53]= NotSimulatedRegister::getRegister(NotSimulatedRegister::MCU_SMCR);
     // 0x52 reserved
-    rw[0x51]= new NotSimulatedRegister("On-chip debug register OCDR not simulated");
+    rw[0x51]= NotSimulatedRegister::getRegister(NotSimulatedRegister::OCD_OCDR);
     rw[0x50]= & acomp->acsr_reg;
     // 0x4F reserved
     rw[0x4E]= & spi->spdr_reg;

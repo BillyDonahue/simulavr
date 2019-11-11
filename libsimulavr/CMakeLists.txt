@@ -9,6 +9,8 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 set_source_files_properties(${swigSrc} PROPERTIES CPLUSPLUS ON)
 
+#set(SWIG_MODULE_simtcl_EXTRA_DEPS ${CMAKE_SOURCE_DIR}/include)
+set(SWIG_MODULE_simtcl_EXTRA_DEPS $<TARGET_FILE:sim>)
 swig_add_module(simtcl tcl8 ${libSrcs})
 
 set_target_properties(simtcl PROPERTIES OUTPUT_NAME "simulavr")

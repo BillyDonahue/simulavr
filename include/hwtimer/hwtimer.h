@@ -74,7 +74,7 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
                        IRQLine* tcap,
                        ICaptureSource* icapsrc,
                        int countersize = 8);
-        ~BasicTimerUnit();
+        ~BasicTimerUnit() {}
         //! Perform a reset of this unit
         void Reset();
         
@@ -155,7 +155,7 @@ class BasicTimerUnit: public Hardware, public TraceValueRegister {
         bool compareEnable[OCRIDX_maxUnits]; //!< enables compare operation
         COMtype com[OCRIDX_maxUnits]; //!< compare match output mode
         IRQLine* timerCompare[OCRIDX_maxUnits]; //!< irq line for compare interrupt
-        PinAtPort* compare_output[OCRIDX_maxUnits]; //!< output pins for compare units
+        PinAtPort compare_output[OCRIDX_maxUnits]; //!< output pins for compare units
         bool compare_output_state[OCRIDX_maxUnits]; //!< status compare output pin
         
         //! Supports the count operation, emits count events to HandleEvent method
@@ -235,9 +235,9 @@ class HWTimer8: public BasicTimerUnit {
                  int unit,
                  IRQLine* tov,
                  IRQLine* tcompA,
-                 PinAtPort* outA,
+                 const PinAtPort& outA,
                  IRQLine* tcompB,
-                 PinAtPort* outB);
+                 const PinAtPort& outB);
         //! Perform a reset of this unit
         void Reset();
 };
@@ -323,11 +323,11 @@ class HWTimer16: public BasicTimerUnit {
                   int unit,
                   IRQLine* tov,
                   IRQLine* tcompA,
-                  PinAtPort* outA,
+                  const PinAtPort& outA,
                   IRQLine* tcompB,
-                  PinAtPort* outB,
+                  const PinAtPort& outB,
                   IRQLine* tcompC,
-                  PinAtPort* outC,
+                  const PinAtPort& outC,
                   IRQLine* ticap,
                   ICaptureSource* icapsrc);
         //! Perform a reset of this unit
@@ -392,7 +392,7 @@ class HWTimer8_1C: public HWTimer8 {
                     int unit,
                     IRQLine* tov,
                     IRQLine* tcompA,
-                    PinAtPort* outA);
+                    const PinAtPort& outA);
         //! Perform a reset of this unit
         void Reset(void);
 };
@@ -444,9 +444,9 @@ class HWTimer8_2C: public HWTimer8 {
                     int unit,
                     IRQLine* tov,
                     IRQLine* tcompA,
-                    PinAtPort* outA,
+                    const PinAtPort& outA,
                     IRQLine* tcompB,
-                    PinAtPort* outB);
+                    const PinAtPort& outB);
         //! Perform a reset of this unit
         void Reset(void);
 };
@@ -498,7 +498,7 @@ class HWTimer16_1C: public HWTimer16 {
                      int unit,
                      IRQLine* tov,
                      IRQLine* tcompA,
-                     PinAtPort* outA,
+                     const PinAtPort& outA,
                      IRQLine* ticap,
                      ICaptureSource* icapsrc);
         //! Perform a reset of this unit
@@ -557,9 +557,9 @@ class HWTimer16_2C2: public HWTimer16 {
                       int unit,
                       IRQLine* tov,
                       IRQLine* tcompA,
-                      PinAtPort* outA,
+                      const PinAtPort& outA,
                       IRQLine* tcompB,
-                      PinAtPort* outB,
+                      const PinAtPort& outB,
                       IRQLine* ticap,
                       ICaptureSource* icapsrc,
                       bool is_at8515);
@@ -621,9 +621,9 @@ class HWTimer16_2C3: public HWTimer16 {
                       int unit,
                       IRQLine* tov,
                       IRQLine* tcompA,
-                      PinAtPort* outA,
+                      const PinAtPort& outA,
                       IRQLine* tcompB,
-                      PinAtPort* outB,
+                      const PinAtPort& outB,
                       IRQLine* ticap,
                       ICaptureSource* icapsrc);
         //! Perform a reset of this unit
@@ -684,11 +684,11 @@ class HWTimer16_3C: public HWTimer16 {
                      int unit,
                      IRQLine* tov,
                      IRQLine* tcompA,
-                     PinAtPort* outA,
+                     const PinAtPort& outA,
                      IRQLine* tcompB,
-                     PinAtPort* outB,
+                     const PinAtPort& outB,
                      IRQLine* tcompC,
-                     PinAtPort* outC,
+                     const PinAtPort& outC,
                      IRQLine* ticap,
                      ICaptureSource* icapsrc);
         //! Perform a reset of this unit
@@ -701,8 +701,8 @@ class HWTimer16_3C: public HWTimer16 {
  */
 class TimerTinyX5_OCR {
     private:
-        PinAtPort* outPin;           //!< normal output pin for OCR unit
-        PinAtPort* outPinInv;        //!< inverted output pin for OCR unit
+        PinAtPort outPin;            //!< normal output pin for OCR unit
+        PinAtPort outPinInv;         //!< inverted output pin for OCR unit
 
         int ocrComMode;              //!< COM mode
         bool ocrPWM;                 //!< flag, if OCR unit is in PWM mode
@@ -718,7 +718,7 @@ class TimerTinyX5_OCR {
         void SetDeadTime(bool pwmValue);
 
     public:
-        TimerTinyX5_OCR(PinAtPort* pinOut, PinAtPort* pinOutInv);
+        TimerTinyX5_OCR(const PinAtPort& pinOut, const PinAtPort& pinOutInv);
 
         //! Reset internal states on device reset
         void Reset();
@@ -757,8 +757,10 @@ class HWTimerTinyX5_SyncReg {
         //! assign new register value
         unsigned char operator=(unsigned char v) { inValue = v; return v; }
 
+#ifndef SWIG
         //! read register value inside sync area
         operator unsigned char() { return regValue; }
+#endif
 
         //! read register value on input area
         unsigned char GetBusValue(void) { return inValue; }
@@ -924,12 +926,12 @@ class HWTimerTinyX5: public Hardware,
                       IOSpecialReg *pllcsr,
                       IRQLine* tov,
                       IRQLine* tocra,
-                      PinAtPort* ocra_out,
-                      PinAtPort* ocra_outinv,
+                      const PinAtPort& ocra_out,
+                      const PinAtPort& ocra_outinv,
                       IRQLine* tocrb,
-                      PinAtPort* ocrb_out,
-                      PinAtPort* ocrb_outinv);
-        ~HWTimerTinyX5();
+                      const PinAtPort& ocrb_out,
+                      const PinAtPort& ocrb_outinv);
+        ~HWTimerTinyX5() {}
 
         //! Performs the async clocking, if necessary
         int Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_ns);

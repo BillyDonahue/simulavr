@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
     string filename("unknown");
     string devicename("unknown");
     string tracefilename("unknown");
-    long global_gdbserver_port = 1212;
+    unsigned long global_gdbserver_port = 1212;
     int global_gdb_debug = 0;
     bool globalWaitForGdbConnection = true; //please wait for gdb connection
     int userinterface_flag = 0;
@@ -288,7 +288,7 @@ int main(int argc, char *argv[]) {
                 break;
             
             case 'p':
-                if(!StringToLong( optarg, &global_gdbserver_port, NULL, 10)) {
+                if(!StringToUnsignedLong( optarg, &global_gdbserver_port, NULL, 10)) {
                     cerr << "GDB Server Port is not a number" << endl;
                     exit(1);
                 }

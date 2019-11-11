@@ -27,10 +27,20 @@
 #include "helper.h"
 #include "avrerror.h"
 
+IRQLine::IRQLine():
+    irqvector(-1),
+    name("") {
+    irqreg = NULL; // set unregistered state
+}
+
 IRQLine::IRQLine(const std::string& n, int irqvec):
     irqvector(irqvec),
     name(n) {
     irqreg = NULL; // set unregistered state
+}
+
+bool IRQLine::active() {
+    return irqvector != -1;
 }
 
 void IRQLine::fireInterrupt(void) {
@@ -80,9 +90,20 @@ void TimerIRQRegister::registerLine(int idx, IRQLine* irq) {
     irqsystem->DebugVerifyInterruptVector(irq->irqvector, this);
     // no check, if idx is in right range!
     irq->irqreg = this;
-    lines[idx] = irq;
+    lines[idx] = *irq;
     vector2line[irq->irqvector] = idx;
     name2line[irq->name] = idx;
+    bitmask |= 1 << idx;
+}
+
+void TimerIRQRegister::registerLine(int idx, const IRQLine& irq) {
+    IRQLine i = irq;
+    irqsystem->DebugVerifyInterruptVector(i.irqvector, this);
+    // no check, if idx is in right range!
+    i.irqreg = this;
+    lines[idx] = i;
+    vector2line[i.irqvector] = idx;
+    name2line[i.name] = idx;
     bitmask |= 1 << idx;
 }
 
@@ -90,7 +111,7 @@ IRQLine* TimerIRQRegister::getLine(const std::string& n) {
     std::map<std::string, int>::iterator cur  = name2line.find(n);
     if(cur == name2line.end())
         avr_error("IRQ line '%s' not found", n.c_str());
-    return lines[name2line[n]];
+    return &lines[name2line[n]];
 }
 
 void TimerIRQRegister::fireInterrupt(int irqvector) {
@@ -125,8 +146,8 @@ unsigned char TimerIRQRegister::set_from_reg(const IOSpecialReg* reg, unsigned c
             if(((nv & m) != 0) &&
                ((irqmask & m) == 0) &&
                ((irqflags & m) != 0) &&
-               (lines[idx] != NULL))
-                irqsystem->SetIrqFlag(this, lines[idx]->irqvector);
+               (lines[idx].active()))
+                irqsystem->SetIrqFlag(this, lines[idx].irqvector);
         }
         irqmask = nv;
     } else {
@@ -139,7 +160,7 @@ unsigned char TimerIRQRegister::set_from_reg(const IOSpecialReg* reg, unsigned c
         for(unsigned char idx = 0; idx < lines.size(); ++idx)
             if(reset & (1<<idx))
                 // ... and remove there pending calls from the irq system.
-                ClearIrqFlag(lines[idx]->irqvector);
+                ClearIrqFlag(lines[idx].irqvector);
     }
 
     return nv;

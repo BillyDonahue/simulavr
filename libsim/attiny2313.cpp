@@ -46,6 +46,7 @@ AvrDevice_attiny2313::~AvrDevice_attiny2313() {
     delete timer0;
     delete timer01irq;
     delete usart;
+    delete extirq;
     delete pcmsk_reg;
     delete mcucr_reg;
     delete eifr_reg;
@@ -53,12 +54,7 @@ AvrDevice_attiny2313::~AvrDevice_attiny2313() {
     delete gpior2_reg;
     delete gpior1_reg;
     delete gpior0_reg;
-    delete prescaler01;
-    delete gtccr_reg;
     delete spmRegister;
-    delete portd;
-    delete portb;
-    delete porta;
     delete osccal_reg;
     delete clkpr_reg;
     delete stack;
@@ -70,7 +66,14 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     AvrDevice(64 ,          // I/O space above General Purpose Registers
               128,          // RAM size
               0,            // External RAM size
-              2 * 1024)     // Flash Size
+              2 * 1024),    // Flash Size
+    porta(this, "A", true, 3),
+    portb(this, "B", true),
+    portd(this, "D", true, 7),
+    gtccr_reg(&coreTraceGroup, "GTCCR"),
+    prescaler01(this, "01", &gtccr_reg, 0),
+    premux0(&prescaler01, PinAtPort(&portd, 4)),
+    premux1(&prescaler01, PinAtPort(&portd, 5))
 {
     flagJMPInstructions = false;
     flagMULInstructions = false;
@@ -80,14 +83,8 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     stack = new HWStackSram(this, 8, true);
     clkpr_reg = new CLKPRRegister(this, &coreTraceGroup);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V4);
-    porta = new HWPort(this, "A", true, 3);
-    portb = new HWPort(this, "B", true);
-    portd = new HWPort(this, "D", true, 7);
 
     spmRegister = new FlashProgramming(this, 16, 0, FlashProgramming::SPM_TINY_MODE);
-    
-    gtccr_reg = new IOSpecialReg(&coreTraceGroup, "GTCCR");
-    prescaler01 = new HWPrescaler(this, "01", gtccr_reg, 0);
     
     gpior0_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR0");
     gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
@@ -100,48 +97,48 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     extirq = new ExternalIRQHandler(this, irqSystem, gimsk_reg, eifr_reg);
     extirq->registerIrq(1, 6, new ExternalIRQSingle(mcucr_reg, 0, 2, GetPin("D2")));
     extirq->registerIrq(2, 7, new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3")));
-    extirq->registerIrq(11, 5, new ExternalIRQPort(pcmsk_reg, portb));
+    extirq->registerIrq(11, 5, new ExternalIRQPort(pcmsk_reg, &portb));
     
     //wado = new HWWado(this);
 
     usart = new HWUsart(this, irqSystem,
-                        PinAtPort(portd,1), PinAtPort(portd,0), PinAtPort(portd, 2),
+                        PinAtPort(&portd,1), PinAtPort(&portd,0), PinAtPort(&portd, 2),
                         7, 8, 9,
                         0, false);
 
     timer01irq = new TimerIRQRegister(this, irqSystem);
-    timer01irq->registerLine(0, new IRQLine("OCF0A", 13));
-    timer01irq->registerLine(1, new IRQLine("TOV0",   6));
-    timer01irq->registerLine(2, new IRQLine("OCF0B", 14));
-    timer01irq->registerLine(3, new IRQLine("ICF1",   3));
-    timer01irq->registerLine(5, new IRQLine("OCF1B", 12));
-    timer01irq->registerLine(6, new IRQLine("OCF1A",  4));
-    timer01irq->registerLine(7, new IRQLine("TOV1",   5));
+    timer01irq->registerLine(0, IRQLine("OCF0A", 13));
+    timer01irq->registerLine(1, IRQLine("TOV0",   6));
+    timer01irq->registerLine(2, IRQLine("OCF0B", 14));
+    timer01irq->registerLine(3, IRQLine("ICF1",   3));
+    timer01irq->registerLine(5, IRQLine("OCF1B", 12));
+    timer01irq->registerLine(6, IRQLine("OCF1A",  4));
+    timer01irq->registerLine(7, IRQLine("TOV1",   5));
     
     timer0 = new HWTimer8_2C(this,
-                             new PrescalerMultiplexerExt(prescaler01, PinAtPort(portd, 4)),
+                             &premux0,
                              0,
                              timer01irq->getLine("TOV0"),
                              timer01irq->getLine("OCF0A"),
-                             new PinAtPort(portb, 2),
+                             PinAtPort(&portb, 2),
                              timer01irq->getLine("OCF0B"),
-                             new PinAtPort(portd, 5));
-    inputCapture1 = new ICaptureSource(PinAtPort(portd, 6));
+                             PinAtPort(&portd, 5));
+    inputCapture1 = new ICaptureSource(PinAtPort(&portd, 6));
     timer1 = new HWTimer16_2C3(this,
-                               new PrescalerMultiplexerExt(prescaler01, PinAtPort(portd, 5)),
+                               &premux1,
                                1,
                                timer01irq->getLine("TOV1"),
                                timer01irq->getLine("OCF1A"),
-                               new PinAtPort(portb, 3),
+                               PinAtPort(&portb, 3),
                                timer01irq->getLine("OCF1B"),
-                               new PinAtPort(portb, 4),
+                               PinAtPort(&portb, 4),
                                timer01irq->getLine("ICF1"),
                                inputCapture1);
     
-    acomp = new HWAcomp(this, irqSystem, PinAtPort(portb, 0), PinAtPort(portb, 1), 10, NULL, timer1);
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(&portb, 0), PinAtPort(&portb, 1), 10, NULL, timer1);
 
     // USI
-    usi = new HWUSI(this, irqSystem, PinAtPort(portb, 0), PinAtPort(portb, 1), PinAtPort(portb, 2), 15, 16);
+    usi = new HWUSI(this, irqSystem, PinAtPort(&portb, 0), PinAtPort(&portb, 1), PinAtPort(&portb, 2), 15, 16);
 
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
@@ -171,7 +168,7 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     rw[0x46]= clkpr_reg;
     rw[0x45]= & timer1->icr_h_reg;
     rw[0x44]= & timer1->icr_l_reg;
-    rw[0x43]= gtccr_reg;
+    rw[0x43]= & gtccr_reg;
     rw[0x42]= & timer1->tccrc_reg;
     //rw[0x41]= & wado->wdtcr_reg;
     rw[0x40]= pcmsk_reg;
@@ -179,18 +176,18 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     rw[0x3e]= & eeprom->eearl_reg;
     rw[0x3d]= & eeprom->eedr_reg;
     rw[0x3c]= & eeprom->eecr_reg;
-    rw[0x3b]= & porta->port_reg;
-    rw[0x3a]= & porta->ddr_reg;
-    rw[0x39]= & porta->pin_reg;
-    rw[0x38]= & portb->port_reg;
-    rw[0x37]= & portb->ddr_reg;
-    rw[0x36]= & portb->pin_reg;
+    rw[0x3b]= & porta.port_reg;
+    rw[0x3a]= & porta.ddr_reg;
+    rw[0x39]= & porta.pin_reg;
+    rw[0x38]= & portb.port_reg;
+    rw[0x37]= & portb.ddr_reg;
+    rw[0x36]= & portb.pin_reg;
     rw[0x35]= gpior2_reg;
     rw[0x34]= gpior1_reg;
     rw[0x33]= gpior0_reg;
-    rw[0x32]= & portd->port_reg;
-    rw[0x31]= & portd->ddr_reg;
-    rw[0x30]= & portd->pin_reg;
+    rw[0x32]= & portd.port_reg;
+    rw[0x31]= & portd.ddr_reg;
+    rw[0x30]= & portd.pin_reg;
     rw[0x2f]= & usi->usidr_reg;
     rw[0x2e]= & usi->usisr_reg;
     rw[0x2d]= & usi->usicr_reg;

@@ -37,7 +37,13 @@
 AVR_REGISTER(at90s4433, AvrDevice_at90s4433)
 
 AvrDevice_at90s4433::AvrDevice_at90s4433():
-    AvrDevice(64, 128, 0, 4*1024)
+    AvrDevice(64, 128, 0, 4*1024),
+    portb(this, "B"),
+    portc(this, "C"),
+    portd(this, "D"),
+    prescaler(this, "01"),
+    premux0(&prescaler, PinAtPort(&portd, 4)),
+    premux1(&prescaler, PinAtPort(&portd, 5))
 { 
     flagJMPInstructions = false;
     flagMULInstructions = false;
@@ -48,43 +54,38 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
     eeprom= new HWEeprom(this, irqSystem, 256, 12, HWEeprom::DEVMODE_AT90S);
     stack = new HWStackSram(this, 8);
 
-    portb= new HWPort(this, "B");
-    portc= new HWPort(this, "C");
-    portd= new HWPort(this, "D");
-
-    admux = new HWAdmux6(this, &portc->GetPin(0), &portc->GetPin(1), &portc->GetPin(2),
-                               &portc->GetPin(3), &portc->GetPin(4), &portc->GetPin(5));
+    admux = new HWAdmux6(this, &portc.GetPin(0), &portc.GetPin(1), &portc.GetPin(2),
+                               &portc.GetPin(3), &portc.GetPin(4), &portc.GetPin(5));
     aref = new HWARefPin(this);
     ad = new HWAd(this, HWAd::AD_4433, irqSystem, 11, admux, aref); // vec 11 ADConversion Complete
     
-    spi= new HWSpi(this, irqSystem, PinAtPort( portb, 3), PinAtPort( portb, 4), PinAtPort( portb, 5), PinAtPort(portb, 2),/*irqvec*/ 7, false);
+    spi= new HWSpi(this, irqSystem, PinAtPort(&portb, 3), PinAtPort(&portb, 4), PinAtPort(&portb, 5), PinAtPort(&portb, 2),/*irqvec*/ 7, false);
     
-    uart= new HWUart( this, irqSystem, PinAtPort(portd,1), PinAtPort(portd, 0),8,9,10) ;
+    uart= new HWUart( this, irqSystem, PinAtPort(&portd,1), PinAtPort(&portd, 0),8,9,10) ;
     
     wado= new HWWado(this);
 
-    prescaler = new HWPrescaler(this, "01");
     timer01irq = new TimerIRQRegister(this, irqSystem);
-    timer01irq->registerLine(1, new IRQLine("TOV0", 6));
-    timer01irq->registerLine(3, new IRQLine("ICF1", 3));
-    timer01irq->registerLine(6, new IRQLine("OCF1", 4));
-    timer01irq->registerLine(7, new IRQLine("TOV1", 5));
+    timer01irq->registerLine(1, IRQLine("TOV0", 6));
+    timer01irq->registerLine(3, IRQLine("ICF1", 3));
+    timer01irq->registerLine(6, IRQLine("OCF1", 4));
+    timer01irq->registerLine(7, IRQLine("TOV1", 5));
     timer0 = new HWTimer8_0C(this,
-                             new PrescalerMultiplexerExt(prescaler, PinAtPort(portd, 4)),
+                             &premux0,
                              0,
                              timer01irq->getLine("TOV0"));
-    inputCapture1 = new ICaptureSource(PinAtPort(portb, 0));
+    inputCapture1 = new ICaptureSource(PinAtPort(&portb, 0));
     timer1 = new HWTimer16_1C(this,
-                              new PrescalerMultiplexerExt(prescaler, PinAtPort(portd, 5)),
+                              &premux1,
                               1,
                               timer01irq->getLine("TOV1"),
                               timer01irq->getLine("OCF1"),
-                              new PinAtPort(portb, 1),
+                              PinAtPort(&portb, 1),
                               timer01irq->getLine("ICF1"),
                               inputCapture1);
     
     // analog comparator: no ADC-connection
-    acomp = new HWAcomp(this, irqSystem, PinAtPort(portd, 6), PinAtPort(portd, 7), 13, NULL, timer1);
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(&portd, 6), PinAtPort(&portd, 7), 13, NULL, timer1);
 
     gimsk_reg = new IOSpecialReg(&coreTraceGroup, "GIMSK");
     gifr_reg = new IOSpecialReg(&coreTraceGroup, "GIFR");
@@ -128,17 +129,17 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
 
     // 0x3b-0x39: no port a here
 
-    rw[0x38]= & portb->port_reg;
-    rw[0x37]= & portb->ddr_reg;
-    rw[0x36]= & portb->pin_reg;
+    rw[0x38]= & portb.port_reg;
+    rw[0x37]= & portb.ddr_reg;
+    rw[0x36]= & portb.pin_reg;
 
-    rw[0x35]= & portc->port_reg;
-    rw[0x34]= & portc->ddr_reg;
-    rw[0x33]= & portc->pin_reg;
+    rw[0x35]= & portc.port_reg;
+    rw[0x34]= & portc.ddr_reg;
+    rw[0x33]= & portc.pin_reg;
 
-    rw[0x32]= & portd->port_reg;
-    rw[0x31]= & portd->ddr_reg;
-    rw[0x30]= & portd->pin_reg;
+    rw[0x32]= & portd.port_reg;
+    rw[0x31]= & portd.ddr_reg;
+    rw[0x30]= & portd.pin_reg;
 
     rw[0x2f]= & spi->spdr_reg;
     rw[0x2e]= & spi->spsr_reg;
@@ -171,16 +172,12 @@ AvrDevice_at90s4433::~AvrDevice_at90s4433() {
     delete inputCapture1;
     delete timer0;
     delete timer01irq;
-    delete prescaler;
     delete wado;
     delete uart;
     delete spi;
     delete ad;
     delete aref;
     delete admux;
-    delete portd;
-    delete portc;
-    delete portb;
     delete stack;
     delete eeprom;
     delete irqSystem;

@@ -42,7 +42,7 @@
 class AvrDevice_attinyX5: public AvrDevice {
     
     public:
-        HWPort *portb;                  //!< port B (only 6 bit)
+        HWPort portb;                   //!< port B (only 6 bit)
 
         GPIORegister *gpior0_reg;       //!< GPIOR0 Register
         GPIORegister *gpior1_reg;       //!< GPIOR1 Register
@@ -55,8 +55,9 @@ class AvrDevice_attinyX5: public AvrDevice {
         CLKPRRegister *clkpr_reg;       //!< CLKPR IO register
         OSCCALRegister *osccal_reg;     //!< OSCCAL IO register
 
-        IOSpecialReg      *gtccr_reg;   //!< GTCCR IO register
-        HWPrescaler       *prescaler0;  //!< prescaler unit for timer 0 (10 bit w. reset/sync and only sys clock)
+        IOSpecialReg      gtccr_reg;    //!< GTCCR IO register
+        HWPrescaler       prescaler0;   //!< prescaler unit for timer 0 (10 bit w. reset/sync and only sys clock)
+        PrescalerMultiplexerExt premux0; //!< prescaler multiplexer for timer 0
         HWTimer8_2C       *timer0;      //!< timer 0 unit
         TimerIRQRegister  *timer01irq;  //!< timer interrupt unit for timer 0 and 1
 

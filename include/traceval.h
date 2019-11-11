@@ -105,9 +105,9 @@ class TraceValue {
         //! Generate a new unitialized trace value of width bits
         TraceValue(size_t bits,
                    const std::string &_name,
-                   const int __index=-1,
-                   const void* shadow=0);
-        virtual ~TraceValue() {}
+                   const int __index = -1,
+                   const void* shadow = NULL);
+        virtual ~TraceValue() { shadow = NULL; }
 
         //! Give number of bits for this value. Max 32.
         size_t bits() const;
@@ -451,7 +451,9 @@ class TraceValueRegister {
         regmap_t _tvr_registers; //!< the sub-registers
         
         //! Registers a TraceValueRegister for this register, build a hierarchy
+        TraceValueRegister *_tvr_parent;
         void _tvr_registerTraceValues(TraceValueRegister *r);
+        void _tvr_unregisterTraceValues(TraceValueRegister *r);
         
     protected:
         //! Get the count of all TraceValues, that are registered here and descending
@@ -464,14 +466,16 @@ class TraceValueRegister {
         //! Create a TraceValueRegister, with a scope prefix built on parent scope + name
         TraceValueRegister(TraceValueRegister *parent, const std::string &name):
             _tvr_scopename(name),
-            _tvr_scopeprefix(parent->GetTraceValuePrefix() + name + ".")
+            _tvr_scopeprefix(parent->GetTraceValuePrefix() + name + "."),
+            _tvr_parent(parent)
         {
-            parent->_tvr_registerTraceValues(this);
+            _tvr_parent->_tvr_registerTraceValues(this);
         }
         //! Create a TraceValueRegister, with a empty scope name, single device application
         TraceValueRegister():
             _tvr_scopename(""),
-            _tvr_scopeprefix("")
+            _tvr_scopeprefix(""),
+            _tvr_parent(NULL)
         {
             DumpManager::Instance()->appendDeviceName(_tvr_scopename);
             if(_tvr_scopename.length() > 0)

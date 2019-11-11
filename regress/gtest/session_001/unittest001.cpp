@@ -17,10 +17,10 @@ TEST( EXAMPLE_SESSION_001, TEST1)
     SystemClock::Instance().Endless(); // should break if myexit is reached
 
     // Read out Register 31
-   EXPECT_EQ(0x40, (unsigned char)(*(dev1->rw[16])))<< "Register contains wrong content" << endl;
-   EXPECT_EQ(0x41, (unsigned char)(*(dev1->rw[17])))<< "Register contains wrong content" << endl;
-   EXPECT_EQ(0x51, (unsigned char)(*(dev1->rw[18])))<< "Register contains wrong content" << endl;
-   EXPECT_EQ(0x10, (unsigned char)(*(dev1->rw[19])))<< "Register contains wrong content" << endl;
+    EXPECT_EQ(0x40, (unsigned char)(*(dev1->rw[16])))<< "Register contains wrong content" << endl;
+    EXPECT_EQ(0x41, (unsigned char)(*(dev1->rw[17])))<< "Register contains wrong content" << endl;
+    EXPECT_EQ(0x51, (unsigned char)(*(dev1->rw[18])))<< "Register contains wrong content" << endl;
+    EXPECT_EQ(0x10, (unsigned char)(*(dev1->rw[19])))<< "Register contains wrong content" << endl;
 
-
+    delete dev1;
 }

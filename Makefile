@@ -7,7 +7,8 @@ help:
 	@echo "make targets:"
 	@echo ""
 	@echo "	build targets:"
-	@echo "	clean		remove build area"
+	@echo "	cfgclean	remove complete build area (including cmake configuration!)"
+	@echo "	clean		remove build artifacts in build area"
 	@echo "	build		build/rebuild program"
 	@echo "	doc		create doc files"
 	@echo "	doxygen		create doxygen documentation"
@@ -23,11 +24,15 @@ help:
 	@echo "	no-python	set/reset PYTHON option (default OFF)"
 	@echo "	tcl"
 	@echo "	no-tcl		set/reset TCL option (default OFF)"
+	@echo "	valgrind"
+	@echo "	no-valgrind	set/reset gtest regression check with valgrind leak check (default OFF)"
+	@echo "	all    		set all configure variants (python, tcl, verilog)"
+	@echo "	simple		reset all configure variants (python, tcl, verilog)"
 	@echo ""
 	@echo "	maintainance targets:"
 	@echo "	keytrans	create keytrans.h"
 
-clean:
+cfgclean:
 	rm -rf build
 
 # for config cmake options see:
@@ -36,6 +41,9 @@ check-config:
 	@test -f build/Makefile || cmake ${CMAKE_CONFIG_OPTS}
 
 # build targets
+
+clean: check-config
+	@make ${BUILD_CONFIG_OPTS} clean
 
 build: check-config
 	@make ${BUILD_CONFIG_OPTS}
@@ -84,6 +92,22 @@ tcl:
 
 no-tcl:
 	@cmake ${CMAKE_CONFIG_OPTS} -DBUILD_TCL=OFF
+	@cmake ${CMAKE_CONFIG_OPTS} -L | grep -v "^--"
+
+valgrind:
+	@cmake ${CMAKE_CONFIG_OPTS} -DCHECK_VALGRIND=ON
+	@cmake ${CMAKE_CONFIG_OPTS} -L | grep -v "^--"
+
+no-valgrind:
+	@cmake ${CMAKE_CONFIG_OPTS} -DCHECK_VALGRIND=OFF
+	@cmake ${CMAKE_CONFIG_OPTS} -L | grep -v "^--"
+
+all:
+	@cmake ${CMAKE_CONFIG_OPTS} -DBUILD_TCL=ON -DBUILD_PYTHON=ON -DBUILD_VERILOG=ON -DCHECK_VALGRIND=ON
+	@cmake ${CMAKE_CONFIG_OPTS} -L | grep -v "^--"
+
+simple:
+	@cmake ${CMAKE_CONFIG_OPTS} -DBUILD_TCL=OFF -DBUILD_PYTHON=OFF -DBUILD_VERILOG=OFF -DCHECK_VALGRIND=OFF
 	@cmake ${CMAKE_CONFIG_OPTS} -L | grep -v "^--"
 
 # maintainance targets

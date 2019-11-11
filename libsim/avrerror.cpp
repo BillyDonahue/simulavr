@@ -56,11 +56,15 @@ SystemConsoleHandler::SystemConsoleHandler() {
     msgStream = &std::cout;
     wrnStream = &std::cerr;
     traceStream = nullStream;
+    fileTraceStream = NULL;
     traceEnabled = false;
+    traceToFile = false;
 }
 
 SystemConsoleHandler::~SystemConsoleHandler() {
     StopTrace();
+    if(traceToFile)
+        delete traceStream;
     delete nullStream;
 }
 
@@ -78,10 +82,10 @@ void SystemConsoleHandler::SetWarningStream(std::ostream *s) {
 
 void SystemConsoleHandler::SetTraceFile(const char *name, unsigned int maxlines) {
     StopTrace();
-    std::ofstream* os = new std::ofstream();
-    os->open(name);
+    fileTraceStream = new std::ofstream();
+    fileTraceStream->open(name);
     traceFilename = name;
-    traceStream = os;
+    traceStream = fileTraceStream;
     traceFileCount = 1;
     traceLinesOnFile = maxlines;
     traceLines = 0;
@@ -92,6 +96,11 @@ void SystemConsoleHandler::SetTraceFile(const char *name, unsigned int maxlines)
 void SystemConsoleHandler::SetTraceStream(std::ostream *s) {
     StopTrace();
     traceStream = s;
+    if(fileTraceStream != NULL) {
+        fileTraceStream->close();
+        delete fileTraceStream;
+        fileTraceStream = NULL;
+    }
     traceEnabled = true;
     traceToFile = false;
 }
@@ -99,10 +108,14 @@ void SystemConsoleHandler::SetTraceStream(std::ostream *s) {
 void SystemConsoleHandler::StopTrace(void) {
     if(!traceEnabled)
         return;
-    if(traceToFile)
-        ((std::ofstream *)traceStream)->close();
+    if(traceToFile) {
+        fileTraceStream->close();
+        delete fileTraceStream;
+        fileTraceStream = NULL;
+    }
     traceStream = nullStream;
     traceEnabled = false;
+    traceToFile = false;
 }
 
 void SystemConsoleHandler::TraceNextLine(void) {
@@ -114,16 +127,16 @@ void SystemConsoleHandler::TraceNextLine(void) {
         traceFileCount++;
         traceLines = 0;
         
-        ((std::ofstream *)traceStream)->close();
-        delete traceStream;
+        fileTraceStream->close();
+        delete fileTraceStream;
         
         std::ostringstream n;
         int idx = traceFilename.rfind('.');
         n << traceFilename.substr(0, idx) << "_" << traceFileCount << traceFilename.substr(idx);
-        std::ofstream* os = new std::ofstream();
-        os->open(n.str().c_str());
+        fileTraceStream = new std::ofstream();
+        fileTraceStream->open(n.str().c_str());
         
-        traceStream = os;
+        traceStream = fileTraceStream;
     }
 }
 

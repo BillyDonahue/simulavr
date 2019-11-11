@@ -15,6 +15,7 @@
 #include "ui/ui.h"
 #include "hardware.h"
 #include "pin.h"
+#include "pinatport.h"
 #include "ui/extpin.h"
 #include "net.h"
 #include "gdb/gdb.h"
@@ -30,6 +31,11 @@
 #include "specialmem.h"
 #include "ui/scope.h"
 #include "avrerror.h"
+#include "hwport.h"
+#include "hwtimer/timerprescaler.h"
+#include "hwtimer/prescalermux.h"
+#include "hwtimer/hwtimer.h"
+#include "hwtimer/icapturesrc.h"
 
 SystemClock &GetSystemClock() { return SystemClock::Instance(); }
 %}
@@ -57,11 +63,17 @@ namespace std {
 %include "ui/ui.h"
 %include "hardware.h"
 %include "pin.h"
-
 %extend Pin {
     void SetOutState(int s) {
         $self->outState = (Pin::T_Pinstate)s;
     }
+}
+
+%include "pinatport.h"
+%extend PinAtPort {
+  bool GetPinInput(void) {
+    return (bool)*$self;
+  }
 }
 
 %include "config.h"
@@ -80,5 +92,10 @@ namespace std {
 %include "specialmem.h"
 %include "ui/scope.h"
 %include "avrerror.h"
+%include "hwport.h"
+%include "hwtimer/timerprescaler.h"
+%include "hwtimer/prescalermux.h"
+%include "hwtimer/hwtimer.h"
+%include "hwtimer/icapturesrc.h"
 
 SystemClock &GetSystemClock();

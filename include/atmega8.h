@@ -41,9 +41,9 @@ class AvrDevice_atmega8: public AvrDevice {
     public:
         Pin adc6;                       //!< adc channel 6 input pin
         Pin adc7;                       //!< adc channel 7 input pin
-        HWPort *portb;                  //!< port B
-        HWPort *portc;                  //!< port C
-        HWPort *portd;                  //!< port D
+        HWPort portb;                   //!< port B
+        HWPort portc;                   //!< port C
+        HWPort portd;                   //!< port D
         ExternalIRQHandler *extirq;     //!< external interrupt support
         IOSpecialReg *gicr_reg;         //!< GICR IO register
         IOSpecialReg *gifr_reg;         //!< GIFR IO register
@@ -56,10 +56,13 @@ class AvrDevice_atmega8: public AvrDevice {
         HWAd *ad;                       //!< ADC unit
         HWAcomp *acomp;                 //!< analog compare unit
 
-        IOSpecialReg *assr_reg;         //!< ASSR IO register
-        IOSpecialReg *sfior_reg;        //!< SFIOR IO register
-        HWPrescaler *prescaler01;       //!< prescaler unit for timer 0 and 1
-        HWPrescalerAsync *prescaler2;   //!< prescaler unit for timer 2
+        IOSpecialReg assr_reg;          //!< ASSR IO register
+        IOSpecialReg sfior_reg;         //!< SFIOR IO register
+        HWPrescaler prescaler01;        //!< prescaler unit for timer 0 and 1
+        HWPrescalerAsync prescaler2;    //!< prescaler unit for timer 2
+        PrescalerMultiplexerExt premux0; //!< prescaler multiplexer for timer 0
+        PrescalerMultiplexerExt premux1; //!< prescaler multiplexer for timer 1
+        PrescalerMultiplexer premux2;   //!< prescaler multiplexer for timer 2
         ICaptureSource *inputCapture1;  //!< input capture source for timer1
         HWTimer8_0C*   timer0;          //!< timer 0 unit
         HWTimer16_2C2* timer1;          //!< timer 1 unit

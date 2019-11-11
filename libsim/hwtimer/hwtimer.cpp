@@ -44,12 +44,12 @@ BasicTimerUnit::BasicTimerUnit(AvrDevice *core,
                                int countersize):
     Hardware(core),
     TraceValueRegister(core, "TIMER" + int2str(unit)),
+    eventListener(NULL),
     core(core),
     premx(p),
     timerOverflow(tov),
     timerCapture(tcap),
-    icapSource(icapsrc),
-    eventListener(NULL)
+    icapSource(icapsrc)
 {
     // check counter size and set limit_max
     if(countersize != 8 && countersize != 16)
@@ -71,7 +71,6 @@ BasicTimerUnit::BasicTimerUnit(AvrDevice *core,
     for(int i = 0; i < OCRIDX_maxUnits; i++) {
         compareEnable[i] = false;
         timerCompare[i] = NULL;
-        compare_output[i] = NULL;
     }
     
     // set wgm functions
@@ -86,10 +85,6 @@ BasicTimerUnit::BasicTimerUnit(AvrDevice *core,
     // reset internal values
     Reset();
     
-}
-
-BasicTimerUnit::~BasicTimerUnit() {
-    delete counterTrace;
 }
 
 void BasicTimerUnit::CountTimer() {
@@ -212,12 +207,12 @@ void BasicTimerUnit::SetCounter(unsigned long val) {
 
 void BasicTimerUnit::SetCompareOutputMode(int idx, COMtype mode) {
     com[idx] = mode;
-    if(compare_output[idx]) {
+    if(compare_output[idx].active()) {
         if(mode == COM_NOOP)
-            compare_output[idx]->SetUseAlternatePortIfDdrSet(false);
+            compare_output[idx].SetUseAlternatePortIfDdrSet(false);
         else {
-            compare_output[idx]->SetUseAlternatePortIfDdrSet(true);
-            compare_output[idx]->SetAlternatePort(compare_output_state[idx]);
+            compare_output[idx].SetUseAlternatePortIfDdrSet(true);
+            compare_output[idx].SetAlternatePort(compare_output_state[idx]);
         }
     }
 }
@@ -242,8 +237,8 @@ void BasicTimerUnit::SetCompareOutput(int idx) {
             break;
     }
     compare_output_state[idx] = new_state;
-    if(compare_output[idx] && old_state != new_state)
-        compare_output[idx]->SetAlternatePort(new_state);
+    if(compare_output[idx].active() && old_state != new_state)
+        compare_output[idx].SetAlternatePort(new_state);
 }
 
 void BasicTimerUnit::SetPWMCompareOutput(int idx, bool topOrDown) {
@@ -278,8 +273,8 @@ void BasicTimerUnit::SetPWMCompareOutput(int idx, bool topOrDown) {
             break;
     }
     compare_output_state[idx] = new_state;
-    if(compare_output[idx] && old_state != new_state)
-        compare_output[idx]->SetAlternatePort(new_state);
+    if(compare_output[idx].active() && old_state != new_state)
+        compare_output[idx].SetAlternatePort(new_state);
 }
 
 void BasicTimerUnit::WGMfunc_normal(CEtype event) {
@@ -585,9 +580,9 @@ HWTimer8::HWTimer8(AvrDevice *core,
                    int unit,
                    IRQLine* tov,
                    IRQLine* tcompA,
-                   PinAtPort* outA,
+                   const PinAtPort& outA,
                    IRQLine* tcompB,
-                   PinAtPort* outB):
+                   const PinAtPort& outB):
     BasicTimerUnit(core, p, unit, tov, NULL, NULL, 8),
     tcnt_reg(this, "TCNT",
              this, &HWTimer8::Get_TCNT, &HWTimer8::Set_TCNT),
@@ -690,11 +685,11 @@ HWTimer16::HWTimer16(AvrDevice *core,
                      int unit,
                      IRQLine* tov,
                      IRQLine* tcompA,
-                     PinAtPort* outA,
+                     const PinAtPort& outA,
                      IRQLine* tcompB,
-                     PinAtPort* outB,
+                     const PinAtPort& outB,
                      IRQLine* tcompC,
-                     PinAtPort* outC,
+                     const PinAtPort& outC,
                      IRQLine* ticap,
                      ICaptureSource* icapsrc):
     BasicTimerUnit(core, p, unit, tov, ticap, icapsrc, 16),
@@ -921,7 +916,7 @@ HWTimer8_0C::HWTimer8_0C(AvrDevice *core,
                          PrescalerMultiplexer *p,
                          int unit,
                          IRQLine* tov):
-    HWTimer8(core, p, unit, tov, NULL, NULL, NULL, NULL),
+    HWTimer8(core, p, unit, tov, NULL, PinAtPort(), NULL, PinAtPort()),
     tccr_reg(this, "TCCR",
              this, &HWTimer8_0C::Get_TCCR, &HWTimer8_0C::Set_TCCR)
 {
@@ -943,8 +938,8 @@ HWTimer8_1C::HWTimer8_1C(AvrDevice *core,
                          int unit,
                          IRQLine* tov,
                          IRQLine* tcompA,
-                         PinAtPort* outA):
-    HWTimer8(core, p, unit, tov, tcompA, outA, NULL, NULL),
+                         const PinAtPort& outA):
+    HWTimer8(core, p, unit, tov, tcompA, outA, NULL, PinAtPort()),
     tccr_reg(this, "TCCR",
              this, &HWTimer8_1C::Get_TCCR, &HWTimer8_1C::Set_TCCR) {}
 
@@ -978,9 +973,9 @@ HWTimer8_2C::HWTimer8_2C(AvrDevice *core,
                          int unit,
                          IRQLine* tov,
                          IRQLine* tcompA,
-                         PinAtPort* outA,
+                         const PinAtPort& outA,
                          IRQLine* tcompB,
-                         PinAtPort* outB):
+                         const PinAtPort& outB):
     HWTimer8(core, p, unit, tov, tcompA, outA, tcompB, outB),
     tccra_reg(this, "TCCRA",
              this, &HWTimer8_2C::Get_TCCRA, &HWTimer8_2C::Set_TCCRA),
@@ -1048,10 +1043,10 @@ HWTimer16_1C::HWTimer16_1C(AvrDevice *core,
                            int unit,
                            IRQLine* tov,
                            IRQLine* tcompA,
-                           PinAtPort* outA,
+                           const PinAtPort& outA,
                            IRQLine* ticap,
                            ICaptureSource* icapsrc):
-    HWTimer16(core, p, unit, tov, tcompA, outA, NULL, NULL, NULL, NULL, ticap, icapsrc),
+    HWTimer16(core, p, unit, tov, tcompA, outA, NULL, PinAtPort(), NULL, PinAtPort(), ticap, icapsrc),
     tccra_reg(this, "TCCRA",
               this, &HWTimer16_1C::Get_TCCRA, &HWTimer16_1C::Set_TCCRA),
     tccrb_reg(this, "TCCRB",
@@ -1111,13 +1106,13 @@ HWTimer16_2C2::HWTimer16_2C2(AvrDevice *core,
                              int unit,
                              IRQLine* tov,
                              IRQLine* tcompA,
-                             PinAtPort* outA,
+                             const PinAtPort& outA,
                              IRQLine* tcompB,
-                             PinAtPort* outB,
+                             const PinAtPort& outB,
                              IRQLine* ticap,
                              ICaptureSource* icapsrc,
                              bool is_at8515):
-    HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, NULL, NULL, ticap, icapsrc),
+    HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, NULL, PinAtPort(), ticap, icapsrc),
     at8515_mode(is_at8515),
     tccra_reg(this, "TCCRA",
               this, &HWTimer16_2C2::Get_TCCRA, &HWTimer16_2C2::Set_TCCRA),
@@ -1192,12 +1187,12 @@ HWTimer16_2C3::HWTimer16_2C3(AvrDevice *core,
                              int unit,
                              IRQLine* tov,
                              IRQLine* tcompA,
-                             PinAtPort* outA,
+                             const PinAtPort& outA,
                              IRQLine* tcompB,
-                             PinAtPort* outB,
+                             const PinAtPort& outB,
                              IRQLine* ticap,
                              ICaptureSource* icapsrc):
-    HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, NULL, NULL, ticap, icapsrc),
+    HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, NULL, PinAtPort(), ticap, icapsrc),
     tccra_reg(this, "TCCRA",
               this, &HWTimer16_2C3::Get_TCCRA, &HWTimer16_2C3::Set_TCCRA),
     tccrb_reg(this, "TCCRB",
@@ -1252,11 +1247,11 @@ HWTimer16_3C::HWTimer16_3C(AvrDevice *core,
                            int unit,
                            IRQLine* tov,
                            IRQLine* tcompA,
-                           PinAtPort* outA,
+                           const PinAtPort& outA,
                            IRQLine* tcompB,
-                           PinAtPort* outB,
+                           const PinAtPort& outB,
                            IRQLine* tcompC,
-                           PinAtPort* outC,
+                           const PinAtPort& outC,
                            IRQLine* ticap,
                            ICaptureSource* icapsrc):
     HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, tcompC, outC, ticap, icapsrc),
@@ -1326,11 +1321,11 @@ HWTimerTinyX5::HWTimerTinyX5(AvrDevice *core,
         IOSpecialReg *pllcsr,
         IRQLine* tov,
         IRQLine* tocra,
-        PinAtPort* ocra_out,
-        PinAtPort* ocra_outinv,
+        const PinAtPort& ocra_out,
+        const PinAtPort& ocra_outinv,
         IRQLine* tocrb,
-        PinAtPort* ocrb_out,
-        PinAtPort* ocrb_outinv):
+        const PinAtPort& ocrb_out,
+        const PinAtPort& ocrb_outinv):
     Hardware(core),
     TraceValueRegister(core, "TIMER1"),
     ocra_unit(ocra_out, ocra_outinv),
@@ -1384,15 +1379,10 @@ HWTimerTinyX5::HWTimerTinyX5(AvrDevice *core,
     Reset();
 }
 
-HWTimerTinyX5::~HWTimerTinyX5() {
-    delete dTPrescalerTrace;
-    delete prescalerTrace;
-    delete counterTrace;
-}
-
 void HWTimerTinyX5::Reset() {
     counter = 0;
     tcnt_out_val = tcnt_in_val = 0;
+    tcnt_set_flag = false;
     tov_internal_flag = tocra_internal_flag = tocrb_internal_flag = false;
     prescaler = 0;
     dtprescaler = 0;
@@ -1752,7 +1742,7 @@ void HWTimerTinyX5::TransferOutputValues(void) {
     }
 }
 
-TimerTinyX5_OCR::TimerTinyX5_OCR(PinAtPort* pinOut, PinAtPort* pinOutInv) {
+TimerTinyX5_OCR::TimerTinyX5_OCR(const PinAtPort& pinOut, const PinAtPort& pinOutInv) {
     outPin = pinOut;
     outPinInv = pinOutInv;
 
@@ -1774,9 +1764,9 @@ void TimerTinyX5_OCR::DTClockCycle() {
         if(dtCounter == 0) {
             // dead time arrived, set output or inverted output
             if(ocrOut)
-                outPin->SetAlternatePort(ocrOut);
+                outPin.SetAlternatePort(ocrOut);
             else
-                outPinInv->SetAlternatePort(!ocrOut);
+                outPinInv.SetAlternatePort(!ocrOut);
         }
     }
 }
@@ -1784,23 +1774,23 @@ void TimerTinyX5_OCR::DTClockCycle() {
 void TimerTinyX5_OCR::SetOCRMode(bool isPWM, int comMode) {
     // if switch output on, then get value of out pin (for toggle function)
     if((ocrComMode == 0) && (comMode != 0)) {
-        ocrOut = outPin->GetPort();
+        ocrOut = outPin.GetPort();
     }
     // enable/disable alternate port pin
     if(ocrComMode != comMode) {
         if(comMode > 0) {
             // connect normal pin
-            outPin->SetUseAlternatePortIfDdrSet(true);
-            outPin->SetAlternatePort(ocrOut);
+            outPin.SetUseAlternatePortIfDdrSet(true);
+            outPin.SetAlternatePort(ocrOut);
             if(isPWM && comMode == 1) {
                 // connect inverted pin
-                outPinInv->SetUseAlternatePortIfDdrSet(true);
-                outPinInv->SetAlternatePort(!ocrOut);
+                outPinInv.SetUseAlternatePortIfDdrSet(true);
+                outPinInv.SetAlternatePort(!ocrOut);
             }
         } else {
             // disconnect both pins
-            outPin->SetUseAlternatePortIfDdrSet(false);
-            outPinInv->SetUseAlternatePortIfDdrSet(false);
+            outPin.SetUseAlternatePortIfDdrSet(false);
+            outPinInv.SetUseAlternatePortIfDdrSet(false);
         }
     }
     // store values
@@ -1888,22 +1878,22 @@ void TimerTinyX5_OCR::SetDeadTime(bool pwmValue) {
                 dtCounter = dtHigh + 1;
             else {
                 // no dead time, set output immediately
-                outPin->SetAlternatePort(pwmValue);
+                outPin.SetAlternatePort(pwmValue);
             }
-            outPinInv->SetAlternatePort(!pwmValue);
+            outPinInv.SetAlternatePort(!pwmValue);
         } else if(!pwmValue && ocrOut) {
             // falling edge
             if(dtLow > 0)
                 dtCounter = dtLow + 1;
             else {
                 // no dead time, set inverted output immediately
-                outPinInv->SetAlternatePort(!pwmValue);
+                outPinInv.SetAlternatePort(!pwmValue);
             }
-            outPin->SetAlternatePort(pwmValue);
+            outPin.SetAlternatePort(pwmValue);
         }
     } else
         // set output immediately
-        outPin->SetAlternatePort(pwmValue);
+        outPin.SetAlternatePort(pwmValue);
     ocrOut = pwmValue;
 }
 

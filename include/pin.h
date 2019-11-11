@@ -166,7 +166,7 @@ class Pin {
 class PortPin: public Pin {
 
     private:
-        int regCount; //!< register counter
+        unsigned int regCount; //!< register counter
 
     protected:
         unsigned char DDOE;

@@ -102,6 +102,7 @@ class SystemConsoleHandler {
         std::ostream *wrnStream; //!< Stream, where warning and error messages are sent to
         std::ostream *traceStream; //!< Stream for trace output
         std::ostream *nullStream; //!< /dev/null! ;-)
+        std::ofstream *fileTraceStream; //!< open file stream for trace
         bool traceEnabled; //!< flag, true if trace is enabled
         bool traceToFile; //!< flag, true if trace writes to filestream
         std::string traceFilename; //!< file name for trace file (will be appended with file count!)

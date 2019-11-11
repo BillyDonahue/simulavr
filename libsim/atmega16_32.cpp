@@ -46,12 +46,9 @@ AvrDevice_atmega16_32::~AvrDevice_atmega16_32() {
     delete timer1;
     delete inputCapture1;
     delete timer0;
+    delete timer012irq;
     delete usart;
     delete wado;
-    delete prescaler2;
-    delete prescaler01;
-    delete assr_reg;
-    delete sfior_reg;
     delete extirq;
     delete mcucsr_reg;
     delete mcucr_reg;
@@ -62,10 +59,6 @@ AvrDevice_atmega16_32::~AvrDevice_atmega16_32() {
     delete aref;
     delete admux;
     delete spmRegister;
-    delete portd;
-    delete portc;
-    delete portb;
-    delete porta;
     delete osccal_reg;
     delete stack;
     delete eeprom;
@@ -80,7 +73,18 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     AvrDevice(64 ,          // I/O space above General Purpose Registers
               ram_bytes,    // RAM size
               0,            // External RAM size
-              flash_bytes)  // Flash Size
+              flash_bytes), // Flash Size
+    porta(this, "A"),
+    portb(this, "B"),
+    portc(this, "C"),
+    portd(this, "D"),
+    assr_reg(&coreTraceGroup, "ASSR"),
+    sfior_reg(&coreTraceGroup, "SFIOR"),
+    prescaler01(this, "01", &sfior_reg, 0),
+    prescaler2(this, "2", PinAtPort(&portc, 6), &assr_reg, 3, &sfior_reg, 1),
+    premux0(&prescaler01, PinAtPort(&portb, 0)),
+    premux1(&prescaler01, PinAtPort(&portb, 1)),
+    premux2(&prescaler2)
 {
     fuses->SetFuseConfiguration(16, 0x99e1);
     fuses->SetBootloaderConfig(nrww_start, (flash_bytes >> 1) - nrww_start, 9, 8);
@@ -88,27 +92,21 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     eeprom = new HWEeprom(this, irqSystem, ee_bytes, atmega16 ? 15 : 17);
     stack = new HWStackSram(this, atmega16 ? 11 : 12);
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V3);
-    porta = new HWPort(this, "A");
-    portb = new HWPort(this, "B");
-    portc = new HWPort(this, "C");
-    portd = new HWPort(this, "D");
     spmRegister = new FlashProgramming(this, 64, nrww_start, FlashProgramming::SPM_MEGA_MODE);
 
     // TWI/I2C not implemented yet, vectors 17/19
     // Analog Comparator not implemented yet, vectors 16/18
     // Store Program Memory Ready not implemented yet, vectors 21/21
 
-    sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
-
-    admux = new HWAdmuxM16(this, &porta->GetPin(0), &porta->GetPin(1), &porta->GetPin(2),
-                                 &porta->GetPin(3), &porta->GetPin(4), &porta->GetPin(5),
-                                 &porta->GetPin(6), &porta->GetPin(7));
+    admux = new HWAdmuxM16(this, &porta.GetPin(0), &porta.GetPin(1), &porta.GetPin(2),
+                                 &porta.GetPin(3), &porta.GetPin(4), &porta.GetPin(5),
+                                 &porta.GetPin(6), &porta.GetPin(7));
     aref = new HWARef4(this, HWARef4::REFTYPE_NOBG);
-    ad = new HWAd_SFIOR(this, HWAd::AD_M16, irqSystem, atmega16 ? 14 : 16, admux, aref, sfior_reg);
+    ad = new HWAd_SFIOR(this, HWAd::AD_M16, irqSystem, atmega16 ? 14 : 16, admux, aref, &sfior_reg);
 
     spi = new HWSpi(this, irqSystem,
-                    PinAtPort(portb, 5), PinAtPort(portb, 6), PinAtPort(portb, 7),
-                    PinAtPort(portb, 4),/*irqvec*/ atmega16 ? 10 : 12, true);
+                    PinAtPort(&portb, 5), PinAtPort(&portb, 6), PinAtPort(&portb, 7),
+                    PinAtPort(&portb, 4),/*irqvec*/ atmega16 ? 10 : 12, true);
 
     gicr_reg = new IOSpecialReg(&coreTraceGroup, "GICR");
     gifr_reg = new IOSpecialReg(&coreTraceGroup, "GIFR");
@@ -119,53 +117,48 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     extirq->registerIrq(2, 7, new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3")));  // INT1
     extirq->registerIrq(atmega16 ? 18 : 3, 5, new ExternalIRQSingle(mcucsr_reg, 6, 1, GetPin("B2")));  // INT2
     
-    assr_reg = new IOSpecialReg(&coreTraceGroup, "ASSR");
-    prescaler01 = new HWPrescaler(this, "01", sfior_reg, 0);
-    prescaler2 = new HWPrescalerAsync(this, "2", PinAtPort(portc, 6),
-                                      assr_reg, 3, sfior_reg, 1);
-    
     wado = new HWWado(this);
 
     usart = new HWUsart(this, irqSystem,
-                        PinAtPort(portd,1), PinAtPort(portd,0), PinAtPort(portb, 0),
+                        PinAtPort(&portd,1), PinAtPort(&portd,0), PinAtPort(&portb, 0),
                         atmega16 ? 11 : 13, atmega16 ? 12 : 14, atmega16 ? 13 : 15);
 
     timer012irq = new TimerIRQRegister(this, irqSystem);
-    timer012irq->registerLine(0, new IRQLine("TOV0",  atmega16 ? 9 : 11));  // Timer/Counter0 Overflow
-    timer012irq->registerLine(1, new IRQLine("OCF0",  atmega16 ? 19 : 10));  // Timer/Counter0 Compare Match
-    timer012irq->registerLine(2, new IRQLine("TOV1",  atmega16 ? 8 : 9));  // Timer/Counter1 Overflow
-    timer012irq->registerLine(3, new IRQLine("OCF1B", atmega16 ? 7 : 8));  // Timer/Counter1 Compare Match B
-    timer012irq->registerLine(4, new IRQLine("OCF1A", atmega16 ? 6 : 7));  // Timer/Counter1 Compare Match A
-    timer012irq->registerLine(5, new IRQLine("ICF1",  atmega16 ? 5 : 6));  // Timer/Counter1 Capture Even
-    timer012irq->registerLine(6, new IRQLine("TOV2",  atmega16 ? 4 : 5));  // Timer/Counter2 Overflow
-    timer012irq->registerLine(7, new IRQLine("OCF2",  atmega16 ? 3 : 4));  // Timer/Counter2 Compare Match
+    timer012irq->registerLine(0, IRQLine("TOV0",  atmega16 ? 9 : 11));  // Timer/Counter0 Overflow
+    timer012irq->registerLine(1, IRQLine("OCF0",  atmega16 ? 19 : 10));  // Timer/Counter0 Compare Match
+    timer012irq->registerLine(2, IRQLine("TOV1",  atmega16 ? 8 : 9));  // Timer/Counter1 Overflow
+    timer012irq->registerLine(3, IRQLine("OCF1B", atmega16 ? 7 : 8));  // Timer/Counter1 Compare Match B
+    timer012irq->registerLine(4, IRQLine("OCF1A", atmega16 ? 6 : 7));  // Timer/Counter1 Compare Match A
+    timer012irq->registerLine(5, IRQLine("ICF1",  atmega16 ? 5 : 6));  // Timer/Counter1 Capture Even
+    timer012irq->registerLine(6, IRQLine("TOV2",  atmega16 ? 4 : 5));  // Timer/Counter2 Overflow
+    timer012irq->registerLine(7, IRQLine("OCF2",  atmega16 ? 3 : 4));  // Timer/Counter2 Compare Match
     
     timer0 = new HWTimer8_1C(this,
-                             new PrescalerMultiplexerExt(prescaler01, PinAtPort(portb, 0)),
+                             &premux0,
                              0,
                              timer012irq->getLine("TOV0"),
                              timer012irq->getLine("OCF0"),
-                             new PinAtPort(portb, 3));
-    inputCapture1 = new ICaptureSource(PinAtPort(portd, 6));
+                             PinAtPort(&portb, 3));
+    inputCapture1 = new ICaptureSource(PinAtPort(&portd, 6));
     timer1 = new HWTimer16_2C2(this,
-                               new PrescalerMultiplexerExt(prescaler01, PinAtPort(portb, 1)),
+                               &premux1,
                                1,
                                timer012irq->getLine("TOV1"),
                                timer012irq->getLine("OCF1A"),
-                               new PinAtPort(portd, 5),
+                               PinAtPort(&portd, 5),
                                timer012irq->getLine("OCF1B"),
-                               new PinAtPort(portd, 4),
+                               PinAtPort(&portd, 4),
                                timer012irq->getLine("ICF1"),
                                inputCapture1,
                                false);
     timer2 = new HWTimer8_1C(this,
-                             new PrescalerMultiplexer(prescaler2),
+                             &premux2,
                              2,
                              timer012irq->getLine("TOV2"),
                              timer012irq->getLine("OCF2"),
-                             new PinAtPort(portd, 7));
+                             PinAtPort(&portd, 7));
     
-    acomp = new HWAcomp(this, irqSystem, PinAtPort(portb, 2), PinAtPort(portb, 3), atmega16 ? 16 : 18, ad, timer1, sfior_reg);
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(&portb, 2), PinAtPort(&portb, 3), atmega16 ? 16 : 18, ad, timer1, &sfior_reg);
 
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
@@ -182,7 +175,7 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     rw[0x53]= & timer0->tccr_reg;
     rw[0x52]= & timer0->tcnt_reg;
     rw[0x51]= osccal_reg; // Attention! OCDR register isn't simulated!
-    rw[0x50]= sfior_reg;
+    rw[0x50]= & sfior_reg;
     rw[0x4f]= & timer1->tccra_reg; 
     rw[0x4e]= & timer1->tccrb_reg;
     rw[0x4d]= & timer1->tcnt_h_reg;
@@ -196,25 +189,25 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     rw[0x45]= & timer2->tccr_reg;
     rw[0x44]= & timer2->tcnt_reg;
     rw[0x43]= & timer2->ocra_reg;
-    rw[0x42]= assr_reg;
+    rw[0x42]= & assr_reg;
     rw[0x41]= & wado->wdtcr_reg;
     rw[0x40]= & usart->ucsrc_ubrrh_reg;
     rw[0x3f]= & eeprom->eearh_reg;
     rw[0x3e]= & eeprom->eearl_reg;
     rw[0x3d]= & eeprom->eedr_reg;
     rw[0x3c]= & eeprom->eecr_reg;
-    rw[0x3b]= & porta->port_reg;
-    rw[0x3a]= & porta->ddr_reg;
-    rw[0x39]= & porta->pin_reg;
-    rw[0x38]= & portb->port_reg;
-    rw[0x37]= & portb->ddr_reg;
-    rw[0x36]= & portb->pin_reg;
-    rw[0x35]= & portc->port_reg;
-    rw[0x34]= & portc->ddr_reg;
-    rw[0x33]= & portc->pin_reg;
-    rw[0x32]= & portd->port_reg;
-    rw[0x31]= & portd->ddr_reg;
-    rw[0x30]= & portd->pin_reg;
+    rw[0x3b]= & porta.port_reg;
+    rw[0x3a]= & porta.ddr_reg;
+    rw[0x39]= & porta.pin_reg;
+    rw[0x38]= & portb.port_reg;
+    rw[0x37]= & portb.ddr_reg;
+    rw[0x36]= & portb.pin_reg;
+    rw[0x35]= & portc.port_reg;
+    rw[0x34]= & portc.ddr_reg;
+    rw[0x33]= & portc.pin_reg;
+    rw[0x32]= & portd.port_reg;
+    rw[0x31]= & portd.ddr_reg;
+    rw[0x30]= & portd.pin_reg;
     rw[0x2f]= & spi->spdr_reg;
     rw[0x2e]= & spi->spsr_reg;
     rw[0x2d]= & spi->spcr_reg;

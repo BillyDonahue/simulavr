@@ -7,6 +7,8 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_executable(simulavr ${appSrcs})
 target_link_libraries(simulavr sim)
+#target_compile_options(simulavr PRIVATE -Wall -Wextra)
+target_compile_options(simulavr PRIVATE -Wall)
 
 install(TARGETS simulavr DESTINATION "bin")
 

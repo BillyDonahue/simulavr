@@ -3,15 +3,16 @@ import pysimulavr
 
 class XPin(pysimulavr.Pin):
   
-  def __init__(self, dev, sim, name):
+  def __init__(self, dev, name):
     pysimulavr.Pin.__init__(self)
-    self.ct = sim.getCurrentTime
-    self.name = name
     # hold the connecting net here, must not be destroyed till deleting XPin
     self.__net = pysimulavr.Net()
     self.__net.Add(self)
     self.__net.Add(dev.GetPin(name))
     
+  def __del__(self):
+    del self.__net
+        
 class TestCaseBase(SimTestCase):
   
   extpin = dict()
@@ -102,7 +103,7 @@ class TestCase(TestCaseBase):
     # skip initialisation
     self.assertInitDone()
     # create Pin
-    p = XPin(self.dev, self.sim, self.extpin[self.processorName])
+    p = XPin(self.dev, self.extpin[self.processorName])
     # check port value
     self.assertPortValue(self.portin[self.processorName])
     # ext pin = low
@@ -133,7 +134,7 @@ class TestCase(TestCaseBase):
     # skip initialisation
     self.assertInitDone()
     # create Pin
-    p = XPin(self.dev, self.sim, self.extpin[self.processorName])
+    p = XPin(self.dev, self.extpin[self.processorName])
     # check port value
     self.assertPortValue(self.portin[self.processorName])
     # ext pin = high
@@ -164,7 +165,7 @@ class TestCase(TestCaseBase):
     # skip initialisation
     self.assertInitDone()
     # create Pin
-    p = XPin(self.dev, self.sim, self.extpin[self.processorName])
+    p = XPin(self.dev, self.extpin[self.processorName])
     # check port value
     self.assertPortValue(self.portin[self.processorName])
     # ext pin = low
@@ -201,7 +202,7 @@ class TestCase(TestCaseBase):
     # skip initialisation
     self.assertInitDone()
     # create Pin
-    p = XPin(self.dev, self.sim, self.extpin[self.processorName])
+    p = XPin(self.dev, self.extpin[self.processorName])
     # check port value
     self.assertPortValue(self.portin[self.processorName])
     # ext pin = high

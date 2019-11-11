@@ -7,7 +7,11 @@ from distutils.core import Extension
 
 extension = Extension("_pysimulavr",
                       ["pysimulavr.i"],
-                      define_macros = [("HAVE_CONFIG_H", None)])
+                      library_dirs = ["../libsim"],
+                      include_dirs = ["../../include"],
+                      libraries = ["sim_static"],
+                      extra_compile_args = ["-std=c++11"],
+                      swig_opts = ["-c++", "-I../../include"])
 
 setup(name = "pysimulavr",
       version = "@VERSION@",

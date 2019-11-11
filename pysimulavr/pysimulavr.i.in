@@ -24,6 +24,9 @@
   #include "hwstack.h"
   #include "avrsignature.h"
   #include "specialmem.h"
+  #include "hwtimer/timerprescaler.h"
+  #include "hwtimer/prescalermux.h"
+  #include "hwtimer/icapturesrc.h"
 
   // to get devices registered (automatically on linux, but necessary on windows)
   #include "atmega128.h"
@@ -185,6 +188,9 @@ namespace std {
 }
 
 %include "avrsignature.h"
+%include "hwtimer/timerprescaler.h"
+%include "hwtimer/prescalermux.h"
+%include "hwtimer/icapturesrc.h"
 
 %include "avrerror.h"
 

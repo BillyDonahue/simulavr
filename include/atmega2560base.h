@@ -59,6 +59,12 @@ protected:
     IOSpecialReg        assr_reg;    //!< ASSR IO register
     HWPrescaler         prescaler1;  //!< prescaler unit for timer 0, 1, 3, 4 and 5
     HWPrescalerAsync    prescaler2;  //!< prescaler unit for timer 2
+    PrescalerMultiplexerExt premux0; //!< prescaler multiplexer for timer 0
+    PrescalerMultiplexerExt premux1; //!< prescaler multiplexer for timer 1
+    PrescalerMultiplexer premux2;    //!< prescaler multiplexer for timer 2
+    PrescalerMultiplexerExt premux3; //!< prescaler multiplexer for timer 3
+    PrescalerMultiplexerExt premux4; //!< prescaler multiplexer for timer 4
+    PrescalerMultiplexerExt premux5; //!< prescaler multiplexer for timer 5
     ExternalIRQHandler* extirq;      //!< external interrupt support for INT0 to INT7
     IOSpecialReg*       eicra_reg;   //!< EICRA IO register
     IOSpecialReg*       eicrb_reg;   //!< EICRB IO register

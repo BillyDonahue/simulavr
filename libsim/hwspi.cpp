@@ -192,8 +192,8 @@ HWSpi::HWSpi(AvrDevice *_c,
 }
 
 void HWSpi::Reset() {
-    SetSPCR(0);
     spsr=0;
+    SetSPCR(0);
     data_write=data_read=shift_in=0;
 }
 

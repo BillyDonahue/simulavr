@@ -59,6 +59,10 @@ class AvrDevice_at90canbase: public AvrDevice {
         IOSpecialReg        assr_reg;    //!< ASSR IO register
         HWPrescaler         prescaler013; //!< prescaler unit for timer 0 and 1
         HWPrescalerAsync    prescaler2;  //!< prescaler unit for timer 2
+        PrescalerMultiplexerExt premux0; //!< prescaler multiplexer for timer 0
+        PrescalerMultiplexer premux1;    //!< prescaler multiplexer for timer 0
+        PrescalerMultiplexer premux2;    //!< prescaler multiplexer for timer 0
+        PrescalerMultiplexerExt premux3; //!< prescaler multiplexer for timer 0
         ExternalIRQHandler* extirq01;    //!< external interrupt support for INT0, INT1, INT2, INT3, INT4, INT5, INT6, INT7
         IOSpecialReg*       eicra_reg;   //!< EICRA IO register
         IOSpecialReg*       eicrb_reg;   //!< EICRA IO register

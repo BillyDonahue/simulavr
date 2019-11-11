@@ -3,16 +3,17 @@ import pysimulavr
 
 class XPin(pysimulavr.Pin):
   
-  def __init__(self, dev, sim, name, state = None):
+  def __init__(self, dev, name, state = None):
     pysimulavr.Pin.__init__(self)
-    self.ct = sim.getCurrentTime
-    self.name = name
     if state is not None: self.SetPin(state)
     # hold the connecting net here, it have not be destroyed, if we leave this method
     self.__net = pysimulavr.Net()
     self.__net.Add(self)
     self.__net.Add(dev.GetPin(name))
-    
+
+  def __del__(self):
+    del self.__net
+        
 class TestCase(SimTestCase):
   
   def setPinAndCheck(self, pin, state, runtime, label, value):
@@ -32,7 +33,7 @@ class TestCase(SimTestCase):
     # check timer_ticks after initialisation
     self.assertWordValue("timer_ticks", 0)
     # connect pin, set to state before edge
-    x = XPin(self.dev, self.sim, "D6", self._state_0)
+    x = XPin(self.dev, "D6", self._state_0)
     self.setPinAndCheck(x, self._state_0, 10000, "timer_ticks", 0)
     # set to state after edge
     self.setPinAndCheck(x, self._state_1, 10000, "timer_ticks", 1)

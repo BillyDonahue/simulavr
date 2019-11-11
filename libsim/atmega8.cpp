@@ -41,7 +41,17 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
             0, // External RAM size
             8 * 1024), // Flash Size
     adc6(),
-    adc7()
+    adc7(),
+    portb(this, "B"),
+    portc(this, "C", false, 7),
+    portd(this, "D"),
+    assr_reg(&coreTraceGroup, "ASSR"),
+    sfior_reg(&coreTraceGroup, "SFIOR"),
+    prescaler01(this, "01", &sfior_reg, 0),
+    prescaler2(this, "2", PinAtPort(&portb, 6), &assr_reg, 3, &sfior_reg, 1),
+    premux0(&prescaler01, PinAtPort(&portd, 4)),
+    premux1(&prescaler01, PinAtPort(&portd, 5)),
+    premux2(&prescaler2)
 {
     fuses->SetFuseConfiguration(16, 0xd9e1);
     fuses->SetBootloaderConfig(0xc00, 0x400, 9, 8);
@@ -49,23 +59,18 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
     eeprom = new HWEeprom(this, irqSystem, 512, 15);
     stack = new HWStackSram(this, 11); // Stack Pointer data space used 11 Bit wide.
     osccal_reg = new OSCCALRegister(this, &coreTraceGroup, OSCCALRegister::OSCCAL_V3);
-    portb = new HWPort(this, "B");
-    portc = new HWPort(this, "C", false, 7);
-    portd = new HWPort(this, "D");
 
     spmRegister = new FlashProgramming(this,
             32, // 32 words per page * 2 bytes per page * 128 pages = 8192 Bytes
             0xC00, // No Read-While-Write section starts at 0xC00
             FlashProgramming::SPM_MEGA_MODE);
 
-    sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
-
-    admux = new HWAdmuxM8(this, &portc->GetPin(0), // ADC0
-                                &portc->GetPin(1), // ADC1
-                                &portc->GetPin(2), // ADC2
-                                &portc->GetPin(3), // ADC3
-                                &portc->GetPin(4), // ADC4
-                                &portc->GetPin(5), // ADC5
+    admux = new HWAdmuxM8(this, &portc.GetPin(0), // ADC0
+                                &portc.GetPin(1), // ADC1
+                                &portc.GetPin(2), // ADC2
+                                &portc.GetPin(3), // ADC3
+                                &portc.GetPin(4), // ADC4
+                                &portc.GetPin(5), // ADC5
                                 &adc6,             // ADC6 only TQFP version
                                 &adc7);            // ADC7 only TQFP version
 
@@ -75,10 +80,10 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
 
     spi = new HWSpi(this,
             irqSystem,
-            PinAtPort(portb, 3), // MOSI
-            PinAtPort(portb, 4), // MISO
-            PinAtPort(portb, 5), // SCK
-            PinAtPort(portb, 2), // SS
+            PinAtPort(&portb, 3), // MOSI
+            PinAtPort(&portb, 4), // MISO
+            PinAtPort(&portb, 5), // SCK
+            PinAtPort(&portb, 2), // SS
             10, // Interrupt Vector Serial Transfer Complete
             true);
 
@@ -107,77 +112,52 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
             7, // GICR Bit 7 - INT1: External Interrupt Request 1 Enable
             new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3"))); // INT1
 
-    assr_reg = new IOSpecialReg(&coreTraceGroup,
-            "ASSR");
-
-    prescaler01 = new HWPrescaler(this,
-            "01",
-            sfior_reg,
-            0);
-
-    prescaler2 = new HWPrescalerAsync(this,
-            "2",
-            PinAtPort(portb, 6),
-            assr_reg,
-            3,
-            sfior_reg,
-            1);
-
     wado = new HWWado(this);
 
     usart = new HWUsart(this,
             irqSystem,
-            PinAtPort(portd, 1), // TX
-            PinAtPort(portd, 0), // RX
-            PinAtPort(portd, 4), // XCK
+            PinAtPort(&portd, 1), // TX
+            PinAtPort(&portd, 0), // RX
+            PinAtPort(&portd, 4), // XCK
             11, // USART, RX Complete
             12, // USART Data Register Empty
             13); // USART, TX Complete
 
     timer012irq = new TimerIRQRegister(this, irqSystem);
-
-    timer012irq->registerLine(0, new IRQLine("TOV0", 9));
-
-    timer012irq->registerLine(2, new IRQLine("TOV1", 8));
-
-    timer012irq->registerLine(3, new IRQLine("OCF1B", 7));
-
-    timer012irq->registerLine(4, new IRQLine("OCF1A", 6));
-
-    timer012irq->registerLine(5, new IRQLine("ICF1", 5));
-
-    timer012irq->registerLine(6, new IRQLine("TOV2", 4));
-
-    timer012irq->registerLine(7, new IRQLine("OCF2", 3));
+    timer012irq->registerLine(0, IRQLine("TOV0", 9));
+    timer012irq->registerLine(2, IRQLine("TOV1", 8));
+    timer012irq->registerLine(3, IRQLine("OCF1B", 7));
+    timer012irq->registerLine(4, IRQLine("OCF1A", 6));
+    timer012irq->registerLine(5, IRQLine("ICF1", 5));
+    timer012irq->registerLine(6, IRQLine("TOV2", 4));
+    timer012irq->registerLine(7, IRQLine("OCF2", 3));
 
     timer0 = new HWTimer8_0C(this,
-            new PrescalerMultiplexerExt(prescaler01,
-            PinAtPort(portd, 4)), // T0
-            0,
-            timer012irq->getLine("TOV0"));
+                             &premux0,
+                             0,
+                             timer012irq->getLine("TOV0"));
 
-    inputCapture1 = new ICaptureSource(PinAtPort(portb, 0)); // ICP1
+    inputCapture1 = new ICaptureSource(PinAtPort(&portb, 0)); // ICP1
 
     timer1 = new HWTimer16_2C2(this,
-            new PrescalerMultiplexerExt(prescaler01,
-            PinAtPort(portd, 5)), // T1
-            1,
-            timer012irq->getLine("TOV1"),
-            timer012irq->getLine("OCF1A"),
-            new PinAtPort(portb, 1), // OC1A
-            timer012irq->getLine("OCF1B"),
-            new PinAtPort(portb, 2), // OC1B
-            timer012irq->getLine("ICF1"),
-            inputCapture1, false);
+                               &premux1,
+                               1,
+                               timer012irq->getLine("TOV1"),
+                               timer012irq->getLine("OCF1A"),
+                               PinAtPort(&portb, 1), // OC1A
+                               timer012irq->getLine("OCF1B"),
+                               PinAtPort(&portb, 2), // OC1B
+                               timer012irq->getLine("ICF1"),
+                               inputCapture1, false);
 
     timer2 = new HWTimer8_1C(this,
-            new PrescalerMultiplexer(prescaler2),
-            2,
-            timer012irq->getLine("TOV2"),
-            timer012irq->getLine("OCF2"),
-            new PinAtPort(portb, 3)); // OC2
+                             &premux2,
+                             2,
+                             timer012irq->getLine("TOV2"),
+                             timer012irq->getLine("OCF2"),
+                             PinAtPort(&portb, 3)); // OC2
 
-    acomp = new HWAcomp(this, irqSystem, PinAtPort(portd, 6), PinAtPort(portd, 7), 16, ad, timer1, sfior_reg);
+    acomp = new HWAcomp(this, irqSystem, PinAtPort(&portd, 6), PinAtPort(&portd, 7), 16, ad, timer1, &sfior_reg);
 
     rw[0x5f] = statusRegister;
     rw[0x5e] = &((HWStackSram *)stack)->sph_reg;
@@ -194,7 +174,7 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
     rw[0x53] = &timer0->tccr_reg;
     rw[0x52] = &timer0->tcnt_reg;
     rw[0x51] = osccal_reg;
-    rw[0x50] = sfior_reg;
+    rw[0x50] = &sfior_reg;
     rw[0x4f] = &timer1->tccra_reg;
     rw[0x4e] = &timer1->tccrb_reg;
     rw[0x4d] = &timer1->tcnt_h_reg;
@@ -208,7 +188,7 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
     rw[0x45] = &timer2->tccr_reg;
     rw[0x44] = &timer2->tcnt_reg;
     rw[0x43] = &timer2->ocra_reg;
-    rw[0x42] = assr_reg;
+    rw[0x42] = &assr_reg;
     rw[0x41] = &wado->wdtcr_reg;
     rw[0x40] = &usart->ucsrc_ubrrh_reg;
     rw[0x3f] = &eeprom->eearh_reg;
@@ -218,15 +198,15 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
 //  rw[0x3b] Reserved
 //  rw[0x3a] Reserved
 //  rw[0x39] Reserved
-    rw[0x38] = &portb->port_reg;
-    rw[0x37] = &portb->ddr_reg;
-    rw[0x36] = &portb->pin_reg;
-    rw[0x35] = &portc->port_reg;
-    rw[0x34] = &portc->ddr_reg;
-    rw[0x33] = &portc->pin_reg;
-    rw[0x32] = &portd->port_reg;
-    rw[0x31] = &portd->ddr_reg;
-    rw[0x30] = &portd->pin_reg;
+    rw[0x38] = &portb.port_reg;
+    rw[0x37] = &portb.ddr_reg;
+    rw[0x36] = &portb.pin_reg;
+    rw[0x35] = &portc.port_reg;
+    rw[0x34] = &portc.ddr_reg;
+    rw[0x33] = &portc.pin_reg;
+    rw[0x32] = &portd.port_reg;
+    rw[0x31] = &portd.ddr_reg;
+    rw[0x30] = &portd.pin_reg;
     rw[0x2f] = &spi->spdr_reg;
     rw[0x2e] = &spi->spsr_reg;
     rw[0x2d] = &spi->spcr_reg;
@@ -253,11 +233,9 @@ AvrDevice_atmega8::~AvrDevice_atmega8() {
     delete timer1;
     delete inputCapture1;
     delete timer0;
+    delete timer012irq;
     delete usart;
     delete wado;
-    delete prescaler2;
-    delete prescaler01;
-    delete assr_reg;
     delete extirq;
     delete mcucsr_reg;
     delete mcucr_reg;
@@ -267,11 +245,7 @@ AvrDevice_atmega8::~AvrDevice_atmega8() {
     delete ad;
     delete aref;
     delete admux;
-    delete sfior_reg;
     delete spmRegister;
-    delete portd;
-    delete portc;
-    delete portb;
     delete osccal_reg;
     delete stack;
     delete eeprom;

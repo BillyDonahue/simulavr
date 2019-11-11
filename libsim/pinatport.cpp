@@ -26,11 +26,20 @@
 #include "pinatport.h"
 #include "hwport.h"
 
-PinAtPort::PinAtPort( HWPort *p, unsigned char pn)
-{
+PinAtPort::PinAtPort() {
+    port = NULL;
+    pinNo = 255;
+    regID = -1;
+}
+
+PinAtPort::PinAtPort(HWPort *p, unsigned char pn) {
     port = p;
     pinNo = pn;
     regID = port->p[pn].RegisterAlternateUse();
+}
+
+bool PinAtPort::active() {
+    return port != NULL;
 }
 
 Pin& PinAtPort::GetPin() {

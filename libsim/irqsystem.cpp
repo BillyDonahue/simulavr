@@ -188,6 +188,8 @@ HWIrqSystem::HWIrqSystem(AvrDevice* _core, int bytes, int tblsize):
     bytesPerVector(bytes),
     vectorTableSize(tblsize),
     irqTrace(tblsize),
+    irqStack(tblsize, NULL),
+    irqStackSize(0),
     core(_core),
     irqStatistic(_core),
     debugInterruptTable(tblsize, (Hardware*)NULL)
@@ -200,23 +202,25 @@ HWIrqSystem::HWIrqSystem(AvrDevice* _core, int bytes, int tblsize):
     }
 }
 
-bool HWIrqSystem::IsIrqPending()
-{
-    return ( irqPartnerList.size() != 0); // if any interrupt is in the list, return true
+HWIrqSystem::~HWIrqSystem() {
+    for(unsigned int i = 0; i < vectorTableSize; i++) {
+        UnregisterTraceValue(irqTrace[i]);
+        irqTrace[i] = NULL;
+    }
+}
+
+bool HWIrqSystem::IsIrqPending() {
+    return irqStackSize > 0; // if any interrupt is in the list, return true
 }
 
 unsigned int HWIrqSystem::GetNewPc(unsigned int &actualVector) {
     unsigned int newPC = 0xffffffff;
 
-    static map<unsigned int, Hardware *>::iterator ii;
-    static map<unsigned int, Hardware *>::iterator end;
-    end = irqPartnerList.end();
-
-    //a map is always sorted, so the priority of the irq vector is known and handled correctly
-    for(ii = irqPartnerList.begin(); ii != end; ii++) {
-        Hardware* second = ii->second;
-        unsigned int index = ii->first;
-        assert(index < vectorTableSize);
+    //this vector is implicit sorted, so the priority of the irq vector is known and handled correctly
+    for(unsigned int index = 0; index < vectorTableSize; index++) {
+        if(irqStack[index] == NULL)
+            continue;
+        Hardware* second = irqStack[index];
 
         if(second->IsLevelInterrupt(index)) {
             second->ClearIrqFlag(index);
@@ -238,24 +242,29 @@ unsigned int HWIrqSystem::GetNewPc(unsigned int &actualVector) {
 
 void HWIrqSystem::SetIrqFlag(Hardware *hwp, unsigned int vector) {
     assert(vector < vectorTableSize);
-    irqPartnerList[vector]=hwp;
+    
+    irqStack[vector] = hwp;
+    irqStackSize++;
+
     if (core->trace_on) {
         traceOut << core->GetFname() << " interrupt on index " << vector << " is pending" << endl;
     }
 
-    if ( irqStatistic.entries[vector].actual.flagSet==0) { //the actual entry was not used before... fine!
-        irqStatistic.entries[vector].actual.flagSet=SystemClock::Instance().GetCurrentTime();
+    if ( irqStatistic.entries[vector].actual.flagSet == 0) { // the actual entry was not used before... fine!
+        irqStatistic.entries[vector].actual.flagSet = SystemClock::Instance().GetCurrentTime();
     } 
 }
 
 void HWIrqSystem::ClearIrqFlag(unsigned int vector) {
-    irqPartnerList.erase(vector);
+    irqStack[vector] = NULL;
+    irqStackSize--;
+
     if (core->trace_on) {
         traceOut << core->GetFname() << " interrupt on index " << vector << "cleared" << endl;
     }
 
-    if (irqStatistic.entries[vector].actual.flagCleared==0) {
-        irqStatistic.entries[vector].actual.flagCleared=SystemClock::Instance().GetCurrentTime();
+    if (irqStatistic.entries[vector].actual.flagCleared == 0) {
+        irqStatistic.entries[vector].actual.flagCleared = SystemClock::Instance().GetCurrentTime();
     }
 
     irqStatistic.entries[vector].CheckComplete();

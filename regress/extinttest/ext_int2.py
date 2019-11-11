@@ -13,7 +13,7 @@ class TestCase(ext_int0.TestCaseBase):
     # skip initialisation
     self.assertInitDone()
     # create Pin
-    p = ext_int0.XPin(self.dev, self.sim, "B2")
+    p = ext_int0.XPin(self.dev, "B2")
     # check port value
     self.assertPortValue(0xff)
     # ext pin = low
@@ -44,7 +44,7 @@ class TestCase(ext_int0.TestCaseBase):
     # skip initialisation
     self.assertInitDone()
     # create Pin
-    p = ext_int0.XPin(self.dev, self.sim, "B2")
+    p = ext_int0.XPin(self.dev, "B2")
     # check port value
     self.assertPortValue(0xff)
     # ext pin = high
