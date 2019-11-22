@@ -713,7 +713,6 @@ void DumpManager::save(ostream &os) const {
         for(TraceSet::const_iterator i = s->begin(); i != s->end(); i++) {
             TraceValue& tv = *(*i);
             if (tv.index() >= 0) {
-                TraceSet::const_iterator j = i;
                 int c = tv.index();
                 
                 while(((*i)->barename() == tv.barename()) &&
