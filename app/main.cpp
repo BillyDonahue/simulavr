@@ -32,12 +32,7 @@ using namespace std;
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifndef _MSC_VER
-#  include <getopt.h>
-#else
-#  include "../getopt/getopt.h"
-#  define VERSION "(git-snapshot)"
-#endif
+#include <getopt.h>
 
 #include "config.h"
 
@@ -86,52 +81,128 @@ const char *SplitOffsetFile(const char *arg,
     return end;
 }
 
-const char Usage[] = 
-    "AVR-Simulator Version " VERSION "\n"
-    "-u                    run with user interface for external pin\n"
-    "                      handling at port 7777\n"
-    "-f --file <name>      load elf-file <name> for simulation in simulated target\n"
-    "-d --device <name>    simulate device <name> \n"
-    "-g --gdbserver        listen for GDB connection on TCP port defined by -p\n"
-    "-G --gdb-debug        listen for GDB connection and write debug info\n"
-    "   --gdb-stdin        for use with GDB as 'target remote | ./simulavr'\n"
-    "-m  <nanoseconds>     maximum run time of <nanoseconds>\n"
-    "-M                    disable messages for bad I/O and memory references\n"
-    "-p  <port>            use <port> for gdb server\n"
-    "-t --trace <file>     enable trace outputs to <file>\n"
-    "-l --linestotrace <number>\n"
-    "                      maximum number of lines in each trace file.\n"
-    "                      0 means endless. Attention: if you use gdb & trace, please use always 0!\n"
-    "-n --nogdbwait        do not wait for gdb connection\n"
-    "-F --cpufrequency     set the cpu frequency to <Hz> \n"
-    "-s --irqstatistic     prints statistic informations about irq usage after simulation\n"
-    "                      is stopped\n"
-    "-W --writetopipe <offset>,<file>\n"
-    "                      add a special pipe register to device at\n"
-    "                      IO-Offset and opens <file> for writing\n"
-    "-R --readfrompipe <offset>,<file>\n"
-    "                      add a special pipe register to device at IO-offset\n"
-    "                      and opens <file> for reading\n"
-    "-a --writetoabort <offset>\n"
-    "                      add a special register at IO-offset\n"
-    "                      which aborts simulator run\n"
-    "-e --writetoexit <offset>\n"
-    "                      add a special register at IO-offset\n"
-    "                      which exits simulator run\n"
-    "-C --core-dump <name> dump a core memory image <name> to file on exit\n"
-    "-v --verbose          output some hints to console\n"
-    "-T --terminate <label> or <address>\n"
-    "                      stops simulation if PC runs on <label> or <address>\n"
-    "-B --breakpoint <label> or <address>\n"
-    "                      same as -T for backward compatibility\n"
-    "-c <tracing-option>   Enables a tracer with a set of options. The format for\n"
-    "                      <tracing-option> is:\n"
-    "                      <tracer>[:further-options ...]\n"
-    "-o <trace-value-file> Specifies a file into which all available trace value names\n"
-    "                      will be written.\n"
-    "-V --version          print out version and exit immediately\n"
-    "-h --help             print this help\n"
-    "\n";
+typedef pair<string, string> string_pair_t;
+vector<string_pair_t> newUsage = {
+    {".",
+     "Common options"},
+    {"-V, --version",
+     "print out version and exit immediately"},
+    {"-h, --help",
+     "print this help"},
+    {"-v, --verbose",
+     "output some hints to console"},
+     
+    {".",
+     "Simulation options"},
+    {"-d <name>, --device <name>",
+     "simulate device <name>, see below for simulated devices"},
+    {"-f <name>, --file <name>",
+     "load elf-file <name> for simulation in simulated target"},
+    {"-F <Hz>, --cpufrequency <Hz>",
+     "set the cpu frequency to <Hz>"},
+    {"-t <file>, --trace <file>",
+     "enable trace outputs to <file>"},
+    {"-s, --irqstatistic",
+     "prints statistic informations about irq usage after simulation is stopped"},
+    {"-C <name>, --core-dump <name>",
+     "dump a core memory image <name> to file on exit"},
+     
+    {".",
+     "GDB options"},
+    {"-g, --gdbserver",
+     "listen for GDB connection on TCP port defined by -p"},
+    {"-G, --gdb-debug",
+     "listen for GDB connection and write debug info"},
+    {"--gdb-stdin",
+     "for use with GDB as 'target remote | ./simulavr'"},
+    {"-p  <port>",
+     "use <port> for gdb server (default is port 1212)"},
+    {"-n, --nogdbwait",
+     "do not wait for gdb connection"},
+
+    {".",
+     "Control options"},
+    {"-m  <nanoseconds>",
+     "maximum run time of <nanoseconds>"},
+    {"-W <offset_file>, --writetopipe <offset_file>",
+     "add a special pipe register to device at IO-Offset and opens file for writing, write argument as 'offset,file', file can be '-' to write to standard output"},
+    {"-R <offset_file>, --readfrompipe <offset_file>",
+     "add a special pipe register to device at IO-Offset and opens file for reading, write argument as 'offset,file', file can be '-' to write to standard input"},
+    {"-a <offset>, --writetoabort <offset>",
+     "add a special register at IO-offset which aborts simulator run"},
+    {"-e <offset>, --writetoexit <offset>",
+     "add a special register at IO-offset which exits simulator run"},
+    {"-T <label>, --terminate <label>",
+     "stops simulation if PC runs on <label>, <label> is a text label or a address"},
+    {"-B <label>, --breakpoint <label>",
+     "same as -T for backward compatibility"},
+    {"-M",
+     "disable messages for bad I/O and memory references"},
+    {"-l <number>, --linestotrace <number>",
+     "maximum number of lines in each trace file. 0 means endless. Attention: if you use gdb & trace, please use always 0!"},
+
+    {".",
+     "VCD trace options"},
+    {"-c <tracing-option>",
+     "Enables a tracer with a set of options. The format for <tracing-option> is: <tracer>[:further-options ...]"},
+    {"-o <trace-value-file>",
+     "Specifies a file into which all available trace value names will be written. Use '-' for standard output"},
+
+    {".",
+     "TCL ui option"},
+    {"-u",
+     "run with user interface for external pin handling at port 7777"},
+};
+
+void doCommonUsageItem(const string &first, const string &second) {
+   if(first[0] == '.')
+       cout << endl << second << ":" << endl;
+   else {
+       cout << first << endl;
+       cout << "\t" << second << endl;
+   }
+}
+
+void doRSTUsageItem(const string &first, const string &second) {
+   if(first[0] == '.') {
+       string ul(second.size(), '-');
+       cout << second << endl << ul << endl << endl;
+   } else {
+       cout << ".. option:: " << first << endl << endl;
+       cout << "  " << second << endl << endl;
+   }
+}
+
+void doUsage(void) {
+    bool usage = getenv("SIMULAVR_DOC_RST") == NULL;
+    
+    if(usage) {
+        cout << "AVR-Simulator Version " VERSION << endl << endl;
+
+        cout << "simulavr {options}" << endl;
+    }
+    
+    for(vector<string_pair_t>::iterator iter = newUsage.begin(); iter != newUsage.end(); ++iter) {
+        if(usage)
+            doCommonUsageItem(iter->first, iter->second);
+        else
+            doRSTUsageItem(iter->first, iter->second);
+    }
+
+    vector<string> avrlist = AvrFactory::supportedDevices();
+    if(usage) {
+        cout << endl << "Supported devices:" << endl;
+        for(unsigned int i = 0; i < avrlist.size(); i++) {
+            cout << avrlist[i] << endl;
+        }
+    } else {
+        cout << "Supported devices" << endl << "-----------------" << endl << endl;
+        cout << ".. hlist::" << endl << "   :columns: 5" << endl << endl;
+        for(unsigned int i = 0; i < avrlist.size(); i++) {
+            cout << "   * " << avrlist[i] << endl;
+        }
+    }
+}
 
 int main(int argc, char *argv[]) {
     int c;
@@ -334,9 +405,7 @@ int main(int argc, char *argv[]) {
                 break;
             
             default:
-                cout << Usage
-                     << "Supported devices:" << endl
-                     << AvrFactory::supportedDevices() << endl;
+                doUsage();
                 exit(0);
         }
     }

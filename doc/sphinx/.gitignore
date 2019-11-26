@@ -1,3 +1,5 @@
 # git ignore file
-conf.py
+config.py
+usage.txt
+download.txt
 # EOF

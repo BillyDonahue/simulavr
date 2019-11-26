@@ -4,37 +4,31 @@ ToDo
 .. note::
 
   This page is taken from TODO file in source root. Some points are maybe obsolete
-  or done. This is to check!
+  or done. This have to be checked!
   
 General
 -------
 
 - Running simulavr as part of the WinAVR tool chain.
-- Grouping of identical AVR hardware, such as: What kind of timers
-  are around 8bit vs. 16bit, functions, PWM...
 - Export additional hardware (LCDs etc.) to verilog
-- Proper teardown:
-  Currently, there are various points in the simulator where a simple
-  exit(x) is performed. This may hurt additional instrumentation software
-  which may need to close files or it may hurt any external program
-  which is controlling simulavr.
 - State saving support:
   Saving/restoring the complete state of the simulation (this needs
   a lot of infrastructure) *Is this needed?*
-- Clean up the private/protected/public declaration scopes
-  for the various classes. This is quite inconsistent.
+- Waiting at a breakpoint for a GDB user input: the active wait-loop should
+  be replaced by something using less CPU power. (maybe solved?)
   
 Host specific issues
 --------------------
 
-- Cygwin: Basic Simulator Functionality Works.  Need to check Tcl/X.
+- In the moment no support on Windows and Mac OS. Question is: is this maybe
+  obsolete by using docker?
 
 Feature parity with avrtest
 ---------------------------
 
 Known issues:
 
-- Verify gcc test suite can be run with avrtest
+- Verify gcc test suite can be run with avrtest (maybe solved?)
   
 Feature parity with old simulavr
 --------------------------------
@@ -55,11 +49,7 @@ Known issues:
 Configure issues
 ----------------
 
-- Joel's Cygwin has texi2pdf but not a valid TeX install.  It configures
-  OK but fails when building documentation.
-- libiconv.a and libintl.a are not needed on Fedora 10 but required on
-  Cygwin.  They are forced in on Cygwin now.  Can we know dynamically
-  if these are needed?
+Should be ok with cmake scripts. If not, please help us with a comment on bug list!
   
 Known limitations of current CPU models
 ---------------------------------------
@@ -88,13 +78,12 @@ Known limitation of other/new CPU models
   names but different functions. Therefore adding a new CPU needs a detailed
   analysis of the functions of each IO-subsystem
 - CPUs with 24bit program counter are not supported
-- USI-subsystem is missing
 - CAN-subsystem is missing
 - USB subsystem is missing
 - X-Mega specifics are missing
 
-Known issues of the simulator
------------------------------
+Known issues of the TCL simulator part
+--------------------------------------
 
 - LCD subsystem is simlified to
 
@@ -119,9 +108,6 @@ Known issues of the simulator
   - only 8 bit data transmission is supported
   - 9 bit handling (MPM) is not supported
 
-- Waiting at a breakpoint for a GDB user input: the active wait-loop should
-  be replaced by something using less CPU power.
-  
 Testing
 -------
 
@@ -139,4 +125,3 @@ Tracing/Dumping
 - Bug, nothing in SREG? Why SREG twice?
 - Have an optional constraint on the number of bits in trace_direct (to e.g.
   only trace the necessary stack bits).
-

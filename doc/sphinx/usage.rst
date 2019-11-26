@@ -5,51 +5,15 @@ Invoke simulavr::
   
   > simulavr {options}
   
-Common options
---------------
+.. include:: usage.txt
 
-``-V, --version``
-  show the software version of simulavr
-  
-``-v, --verbose``
-  output some hints to console
-  
-``-h, --help``
-  show commandline help for simulavr and what devices are supported
-  
-Simulation options
-------------------
+Hints
+-----
 
-``-d <device name>, --device <device name>``
-  tell simulavr, what type of device it has to simulate. The following devices
-  are supported for version 1.0: (to find out, which devices are supported with
-  your current installation, use the ``--help`` option)
-
-  - at90can128
-  - at90can32
-  - at90can64
-  - at90s4433
-  - at90s8515
-  - atmega128
-  - atmega1284a
-  - atmega16
-  - atmega164a
-  - atmega168
-  - atmega32
-  - atmega324a
-  - atmega328
-  - atmega48
-  - atmega644a
-  - atmega8
-  - atmega88
-  - attiny2313
-  - attiny25
-  - attiny45
-  - attiny85
-
-  This option is mandatory, if an elf file isn't given or elf file dosn't contain device
-  signature. To put device signature to elf file you can insert the following line to
-  your source code (but only once!)::
+``Option -d``
+  The option `-d` is mandatory, if an elf file isn't given or elf file dosn't contain
+  device signature. To put device signature to elf file you can insert the following
+  line to your source code (but only once!)::
   
     #include <avr/signature.h>
   
@@ -60,115 +24,25 @@ Simulation options
   **Attention:** some devices doesn't support all peripheral parts of controller. (for
   example CAN peripheral in at90can... devices) Ports and timer are mostly implemented.
 
-``-f <name>, --file <name>``
-  load ELF-file <name> for simulation in simulated target.
-  
-``-F <value>, --cpufrequency <value>``
-  set the CPU frequence to <Hz>. Default is 4MHz.
-  
-``-t <file name>, --trace <file name>``
-  enable trace outputs into <file name>
-  
-``-s, --irqstatistic``
-  Writes IRQ statistic to stdout at the end of simulation.
-
-``-C <name>, --core-dump <name>``
-  write a core dump to file <name> at simulation exit.
-  
-GDB options
------------
-
-.. note::
-
-   Do not run simulavr with `-p`-option unattended and also not with admin rights. This
+``GDB option -g``
+   Do not run simulavr with `-g`-option unattended and also not with admin rights. This
    could be a security hole for your system!
 
-``-g, --gdbserver``
-  running as avr-gdb-server
-  
-``-G``
-  running as avr-gdb-server and write debug info for avr-gdb-connection to stdout.
-  Use it alternative to option ``-g``. **This is only useful, if you want to see,
+``GDB option -G``
+  Use it as a alternative to option ``-g``. **This is only useful, if you want to see,
   what data is sent from gdb to simulavr and back!**
-  
-``-n, --nogdbwait``
-  do not wait for avr-gdb connection. Default is to wait for gdb connection, if
-  option ``-g`` or ``-G`` is given.
-  
-``-p <port>``
-  change <port> for avr-gdb server to port. Default is port 1212.
-  
-``--gdb-stdin``
-  for use with GDB as ``target remote | ./simulavr``
-  
-Control options
----------------
 
-``-m  <nanoseconds>``
-  maximum run time of <nanoseconds>
-  
-``-R <offset>,<file>, --readfrompipe <offset>,<file>``
-  add a special pipe register to device at IO-offset and opens <file>
-  for reading
-  
-``-T <label or address>, --terminate <label or address>``
-  stops simulation if PC runs on <label> or <address>. If this parameter
-  is omitted, simulavr has to be terminated manually.
-  For <label> you can use any label listed in the map-file of the linker -
-  no matter if it is ever reached or not.
+``Options -R / -W / -a / -e``
+  The commands -R / -W / -a / -e are not AVR-hardware related. Here you can link
+  an address within the address space of the AVR to an input or output
+  pipe. This is a simple way to create a "printf"- debugger, e.g. after
+  leaving the debugging phase and running the AVR-Software in the simulator or to
+  abort/exit a simulation on a specified situation inside of your program.
+  For more details see the example in the directory :file:`examples/simple_ex1` or
+  :ref:`here <intro-simple-ex>`.
 
-``-B <label> or <address>, --breakpoint <label> or <address>``
-  same as -T for backward compatibility
-  
-``-W <offset>,<file>, --writetopipe <offset>,<file>``
-  add a special pipe register to device at IO-Offset and opens <file> for writing
-  
-``-a <offset>, --writetoabort <offset>``
-  add a special register to device at IO-Offset which aborts simulation
-  
-``-e <offset>, --writetoexit <offset>``
-  add a special register to device at IO-Offset which exits simulation (if you
-  write to this IO-Offset, then the written value will be given back as exit value
-  of the simulator!)
-
-``-M``
-  disable messages for bad I/O and memory references
-  
-``-l <number> --linestotrace <number>``
-  maximum number of lines in each trace file. 0 means endless. **Attention:** if
-  you use gdb & trace, please use always 0!
-  
-``-M``
-  disable messages for bad I/O and memory references
-  
-The commands -R / -W / -a / -e are not AVR-hardware related. Here you can link
-an address within the address space of the AVR to an input or output
-pipe. This is a simple way to create a "printf"- debugger, e.g. after
-leaving the debugging phase and running the AVR-Software in the simulator or to
-abort/exit a simulation on a specified situation inside of your program.
-For more details see the example in the directory :file:`examples/simple_ex1` or
-:ref:`here <intro-simple-ex>`.
-
-VCD trace options
------------------
-
-``-o <filename|->``
-  Writes all available VCD trace sources for a device to <filename> or to stdout,
-  if <-> is given.
-  
-``-c <trace-params>``
-  Enable a trace dump, for valid <trace-params> see below.
-  
-Special options
----------------
-
-``-u``
-  run with user interface for external pin handling at port 7777. This
-  does not open any graphics but activates the interface to communicate
-  with the TCL environment simulation.
-  
-Examples
---------
+Example usage
+-------------
 
 Using the simulator with avr-gdb is very simple. Start simulavr with::
 
@@ -290,4 +164,3 @@ another ELF-file via the avr-gdb interface to the simulator the symbols
 for tracing could not be updated which means that the label information
 in the trace output is wrong. That is not a bug, this is related to the
 possibilities of the avr-gdb interface.
-

@@ -25,7 +25,7 @@ option(CHECK_VALGRIND "run gtest regression test with valgrind" OFF)
 
 # find tools
 # find python executable, for Python3 you need a virtual env, which links python to python3 executable!
-find_package(PythonInterp 3.4)
+find_package(PythonInterp 3.5)
 execute_process(COMMAND ${PYTHON_EXECUTABLE}
                         -c "import sys; print('%s.%s' % (sys.version_info.major, sys.version_info.minor))"
                         OUTPUT_VARIABLE PYTHON_VERSION

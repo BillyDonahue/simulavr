@@ -1,16 +1,21 @@
+.. only:: html
+
+  Table of contents
+  =================
+
 .. toctree::
    :maxdepth: 2
 
-   copyright
    intro
+   copyright
    features
-   download
+   simple_ex
    usage
-   tclgui
+   download
    build
-   verilog
    examples
-   platform
+   tclgui
+   verilog
    limitations
    helpwanted
    license

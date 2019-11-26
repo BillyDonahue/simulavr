@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 #
-# Sphinx documentation build configuration file
+# This file is execfile()d with the current directory set to its containing dir.
+# All configuration values have a default; values that are commented out
+# serve to show the default.
+import sys
+sys.path.insert(0, '..')
 
-import sys, os, re
+from config import *
+
+# conditional texts
+tags.add('website')
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.addons.*') or your custom ones.
@@ -18,19 +25,14 @@ source_suffix = '.rst'
 master_doc = 'contents'
 
 # List of documents that shouldn't be included in the build.
-unused_docs = ['index', 'tclgui', 'helpwanted', 'platform', 'examples',
-               'limitations', 'verilog', 'manual', 'copyright', 'build']
+exclude_patterns = ['index.rst', 'tclgui.rst', 'helpwanted.rst',
+                    'platform.rst', 'examples.rst', 'limitations.rst',
+                    'verilog.rst', 'copyright.rst', 'build.rst']
 
-# General substitutions.
-project = 'Simulavr'
-copyright = '2004-2019, Bill Rivet, Thomas Klepp'
-
-# The default replacements for |version| and |release|, also used in various
-# other places throughout the built documents.
-# The full version, including alpha/beta/rc tags.
-release = '@PACKAGE_VERSION@'
-# The short X.Y version.
-version = re.match(r"(\d+\.\d+)*", release).group(1)
+# General information about the project. -> see config.py
+# The version info for the project you're documenting, acts as replacement for
+# |version| and |release|, also used in various other places throughout the
+# built documents.
 
 # Show author directives in the output.
 show_authors = True
@@ -54,15 +56,15 @@ html_static_path = ['../_static']
 # using the given strftime format.
 html_last_updated_fmt = '%b %d, %Y'
 
-# Content template for the index page.
-html_index = 'index.html'
-
-# Custom sidebar templates, maps page names to templates.
-html_sidebars = {'index': 'indexsidebar.html'}
-
 # Additional templates that should be rendered to pages, maps page names to
 # templates.
 html_additional_pages = {'index': 'index.html'}
+
+# Custom sidebar templates, maps page names to templates.
+html_sidebars = {
+   '**': ['globaltoc.html', 'searchbox.html'],
+   'index': ['globaltoc.html', 'indexsidebar.html', 'searchbox.html'],
+}
 
 # If false, no index is generated.
 html_use_index = False
@@ -72,4 +74,3 @@ html_show_sourcelink = False
 
 # Put TODOs into the output.
 #todo_include_todos = True
-

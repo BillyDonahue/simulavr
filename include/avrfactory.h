@@ -52,7 +52,7 @@ class AvrFactory {
         
         /*! Gives a list of all supported devices, which can be supplied
           to makeDevice() as is. */
-        static std::string supportedDevices();
+        static std::vector<std::string> &supportedDevices();
     
         //! Register a creation static method with the factory
         static void reg(const std::string name,

@@ -26,6 +26,7 @@
 #include <map>
 #include <iostream>
 #include <cstdlib>
+#include <vector>
 #include "config.h"
 #include "avrfactory.h"
 #include "avrerror.h"
@@ -60,12 +61,12 @@ AvrDevice* AvrFactory::makeDevice(const char *in) {
     return devmap[devname]();
 }
 
-std::string AvrFactory::supportedDevices() {
-    std::string ret;
+std::vector<std::string> &AvrFactory::supportedDevices() {
+    static std::vector<std::string> ret;
     AVRDeviceMap & devmap = instance().devmap;
 
     for(AVRDeviceMap::iterator i = devmap.begin(); i != devmap.end(); i++)
-        ret += i->first + "\n";
+        ret.push_back(i->first);
     return ret;
 }
 

@@ -72,8 +72,10 @@ if(PYTHON_EXECUTABLE)
 
   find_python_module(sphinx)
   find_python_module(rst2pdf)
+  find_python_module(bs4)
+  find_python_module(requests)
 
-  if(PY_SPHINX AND PY_RST2PDF)
+  if(PY_SPHINX AND PY_RST2PDF AND PY_BS4 AND PY_REQUESTS)
 
     add_subdirectory(sphinx)
 

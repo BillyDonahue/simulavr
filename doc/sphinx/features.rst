@@ -9,7 +9,7 @@ What features are new:
 * Connect multiple AVR core pins to other devices like LCD, LED and
   others. (environment)
 * Connect multiple AVR cores to multiple avr-gdb instances. (each on its
-  own socket/port number, but see first point for running multiple avr cores)
+  own socket/port number, but see first point for running multiple AVR cores)
 * Write simulation scripts in Tcl/Tk or Python, other languages could be
   added by simply adding swig scripts!
 * Tracing the execution of the program, these traces support all debugging
@@ -34,6 +34,6 @@ What features are new:
 * External IO pins which are not ports are also available. (E.g. ADC7 and
   ADC8 on ATmega8 in TQFP package.)
 * External I/O and some internal states of hardware units (link prescaler
-  counter and interrupt states) can be dumped ot into a VCD trace to analyse I/O
-  behaviour and timing. Or you can use it for tests.
+  counter and interrupt states) can be dumped out into a VCD trace to analyze I/O
+  behavior and timing. Or you can use it for tests.
 

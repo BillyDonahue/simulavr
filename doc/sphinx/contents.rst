@@ -1,15 +1,16 @@
 .. _contents:
 
-Read more ...
-=============
+Table of contents
+=================
 
 .. toctree::
    :maxdepth: 2
 
    intro
    features
+   build_simple
+   simple_ex
    usage
    download
-   build_simple
    todo
    license

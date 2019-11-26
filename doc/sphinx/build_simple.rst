@@ -1,110 +1,100 @@
-Building and Installing
-=======================
+Build simulavr
+==============
 
 .. note::
 
-  Examples in this chapter refer to a version 1.0.0, please replace this with your
-  current version!
+  Examples in this chapter refer to a version X.Y.Z, please replace this with your
+  current version, for example |release|!
   
-This chapter describes, how you can build an install simulavr from a tarball under
-linux or other posix environment.
+This chapter describes, how you can build simulavr.
 
-**For more informations about special options, how to build it on other platforms
-and so one, how to build from git repository (for that you have to run autotools)
-please read our developers guide!**
+.. attention::
+
+  The build scripts with cmake aren't prepared to work with Windows or Mac OS,
+  even if cmake itself is able to create build configuration for this platforms!
+
+**For more informations about special options and other targets please read our
+manual!**
 
 Prerequisites
 -------------
 
-In short, you need gcc, swig (for interfaces to interpreter languages and such),
-make, python (at least 2.4, for regression tests, some examples, python interface),
-tcl/tk (for tcl interface and some examples), doxygen (if you want to generate
-api documentation), verilog (if you want to build verilog interface).
+To build simulavr you need:
 
-Here is a short list of tools, which are necessary to run configure script and to
-build and install simulavr: (for more see manual)
+* cmake (at least version 3.5 or newer)
+* make
+* gcc (at least a version, which supports c++11)
+* git
+* python (at least version 3.5 or newer)
 
-- make (all not to old versions should work, known to work with 3.81, ubuntu 10.04)
-- libtool (version >= 2.2, known to work with 2.2.6b, ubuntu 10.04)
-- gcc (version known to work with 4.4.3, ubuntu 10.04)
-- makeinfo (version known to work with 4.13, ubuntu 10.04)
+Of course, docker have to be installed, if you want to build it with docker!
 
+On debian (or also ubuntu) you have to install the following packages::
+
+  > apt-get install g++ make cmake git python3
+  
 Do the build
 ------------
 
-Assume, that you have downloaded ``simulavr-1.0.0.tar.gz``, unpack it::
+The conventional way on linux
++++++++++++++++++++++++++++++
 
-  tar zxvf simulavr-1.0.0.tar.gz
-  cd simulavr-1.0.0
+At first, you have to clone the repository and change to the cloned repository::
+
+  > git clone https://git.savannah.nongnu.org/git/simulavr.git
+  > cd simulavr
+
+If you want to produce a dedicated release, you have to change to the release tag::
+
+  > git checkout rel-X.Y.Z
+
+Now you are ready to build simulavr::
+
+  > make build
+
+After the build was successful without a error, you can find the built program in
+*build/app*, shared lib is in *build/libsim*.
+
+To check, if the program is working, you can start regression test::
+
+  > make check
+
+Build in docker (recommended)
++++++++++++++++++++++++++++++
+
+.. note::
+
+  This is also working on Windows or Mac OS! But the resulting program will only work on
+  linux!
+
+Load and create a ubuntu container in docker::
+
+  > docker run -it -p 1212:1212 --name simulavr-build ubuntu:bionic
+
+After the image from docker hub is loaded and the container *simulavr-build* is started, you see
+the container prompt::
+
+  root@f07fe9ded53b:/#
   
-Now you are ready to run ``configure``::
-  
-  ./configure --prefix=/usr
-  
-This will create Makefiles for building simulavr commandline application only.
-Prefix option determines, where simulavr will be installed, default is
-``/usr/local``. If you hav installed python (at least 2.4), then you can enable
-python to build python interface too::
-  
-  ./configure --enable-python
-  
-Enabeling TCL interface is a little bit more difficult, you have to locate
-``tclConfig.sh`` script, which will be installed with your tcl package. Assume,
-path to ``tclConfig.sh`` is ``/usr/lib/tcl8.4``::
-  
-  ./configure --with-tclconfig=/usr/lib/tcl8.4
-  
-To be able to build doxygen api (with installed doxygen)::
-  
-  ./configure --enable-doxygen-doc
-  
-Enable building verilog interface::
-  
-  ./configure --enable-verilog
-  
-You can mix this options together, if you want this. After configure you can run
-``make`` and ``make istall`` as usual::
+No worry if you see something other as "f07fe9ded53b", it's normal. "f07fe9ded53b" is the container
+hash id. And this id is is for every container unique! Following I'll not show the prompt.::
 
-  make
-  make install
+  # first, we update the package list and do package updates, if necessary
+  apt-get update
+  apt-get upgrade -y
+  # next we have to install the packages needed for building simulavr
+  apt-get install -y g++ make cmake git python3
+  # clone the repository
+  cd /root
+  git clone -b master https://git.savannah.nongnu.org/git/simulavr.git
+  cd simulavr
+  # optional, if you want to build a dedicated release (uncomment the hash)
+  #git checkout rel-X.Y.Z
+  # now we build the program
+  make build
+  # optional, just to check the build (uncomment the hash)
+  #make check
 
-This will build ``simulavr`` and, if switched on by configure options,
-some extension modules and libraries. It installs simulavr itself, libraries and
-some examples and the ``simulavr.info`` in documentation directory
-``$prefix/share/doc/simulavr``.
+Now the build is complete. For the moment we leave the docker container with the exit command::
 
-If you want to install ``simulavr.pdf`` too, you can do that after the normal
-installation::
-
-  make install-pdf
-
-To install simulavr documentation as html::
-
-  make install-html
-
-Installing doxygen documentation is also possible, if doxygen is installed and
-switched on by configure option::
-
-  make install-doxygen
-
-Same is possible for the verilog extension. avr.vpi will be installed in
-``$prefix/lib/ivl`` if switched on by configure option::
-
-  make install-vpi
-
-Python interface will not be installed by ``make-install...``, because a right
-installation depends on the actual python installation. To support the installation
-of python module there is a ``setup.py`` in ``src`` directory::
-
-  cd simulavr-1.0.0/src
-  python setup.py install
-
-If you want to create a egg-package from this python module, you have to install
-python's setuptools package first. Then run::
-
-  python setup.py build bdist_egg
-
-For more possibilities on installing python interface, please see python
-documentation (distutils package) and documentation for setuptools python
-package.
-
+  exit
