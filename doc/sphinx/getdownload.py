@@ -15,11 +15,6 @@ def readArgs():
   return parser.parse_args()
 
 def loadHTML(url):
-  #f = open("../../http_download.savannah.nongnu.org_releases_simulavr.html", "r")
-  #t = f.read()
-  #f.close()
-  #return t
-  
   try:
     res = requests.get(url)
   except Exception as e:
@@ -91,6 +86,14 @@ def writeRST(out, title, items, opts):
     out.write("\n")
     out.write("     - {}\n".format(i.created.strftime("%b %d %Y, %H:%M")))
   out.write("\n")
+
+def is_download(href):
+  if href.startswith("manual"): return True
+  if href.startswith("simulavr"): return True
+  if href.startswith("pysimulavr"): return True
+  if href.startswith("libsim"): return True
+  if href.startswith("python3-simulavr"): return True
+  return False
   
 if __name__ == "__main__":
 
@@ -104,9 +107,8 @@ if __name__ == "__main__":
   signatures = list()
   
   for link in soup.find_all("a"):
-    if link.get("href").startswith("?"): continue
-    if link.get("href").startswith("/"): continue
     href = link.get("href")
+    if not is_download(href): continue
     dt, tm, sz = link.next_element.next_element.strip().split()
     dt = datetime.datetime.strptime(dt + " " + tm, "%d-%b-%Y %H:%M")
     if href.endswith(".sig"):
