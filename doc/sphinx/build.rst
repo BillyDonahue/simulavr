@@ -183,3 +183,75 @@ the destination, as you want. As example (you need root permission)::
 
   cd <root_of_repo>/build/install
   cp -r usr /
+
+Build using docker
+------------------
+
+If docker is installed, then you can create docker images to build simulavr in a stable
+and defined environment and independent from what's installed on your computer.
+
+Step 1: create a docker image
++++++++++++++++++++++++++++++
+
+There are docker scripts and a small script to create a image::
+
+  cd <root_of_repo>/docker
+  ./mkimage buildscripts/bionic.build.Dockerfile
+  
+This will create a docker image with name "simulavrbuild" and version "bionic". (e.g.
+Ubuntu 18:04)You can check it with::
+
+  docker images
+  
+There you should find the new created image in the list. **Attention:** because of the
+installed packages in this image, the resulting image size is about 1G! There is also
+a docker script for ubuntu 16:04, called "xenial.build.Dockerfile".
+
+Now, after the image is ready, you can create the build container::
+
+  docker run -it -u buildbudy --name <container_name> simulavrbuild:bionic
+  buildbudy@e1694c8b9f26:/
+
+You stay now in your new created container, the second line is the bash prompt. You have
+created a container with name "<container_name>" (replace this to a name, which is useful
+for you!) from the new built image and running with user "buildbudy". If you omit the "-u"
+option, then you'll be root inside your container. Because this could be dangerous in some
+cases and normally not needed, it's better to run with a normal user with normal privileges
+also inside the container!
+
+You can now leave the container on every time with "exit" command and come back with::
+
+  docker start -i <container_name>
+  
+In this container you can now start the build::
+
+  cd # to come to buildbudy's home directory
+  git clone -b master https://git.savannah.nongnu.org/git/simulavr.git simulavr
+  cd simulavr
+  make all # to switch on all config options exept debug option
+  make build
+  
+After that is finished, you've build sucessful simulavr and all extensions.
+
+If you don't want to clone from official repository, as described before, you could also
+clone from a local repository (maybe where you've written some new code). In this case the
+container have to created with a extra option::
+
+  docker run -it -u buildbudy --name <container_name> -v /local/path:/repo simulavrbuild:bionic
+
+Replace (as before) "<container_name> with a useful name and /local/path with a path,
+where your local repository is hold. For example /home/user/simulavr is the repository, then
+ypu could give "-v /home/user:/repo". Inside the container you will find then a new directory
+`/repo`, where you see your repository. Then the clone command could be::
+
+  cd
+  git clone -b your_branch /repo/simulavr simulavr_local
+  
+To get out your build artefacts, you can user "docker cp" command (and after you leaved
+the container)::
+
+  docker cp <container_name>:/home/buildbudy/simulavr/build/app/simulavr .
+  docker cp <container_name>:/home/buildbudy/simulavr/build/libsim/libsim.so .
+  
+This copies the simulavr tool itself and the simulavr library, which is needed, simulavr to
+run.

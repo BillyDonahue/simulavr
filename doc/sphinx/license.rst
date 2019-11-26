@@ -2,7 +2,7 @@ License
 =======
 
 Simulavr is released under GPLv2, this is a copy of the license text (you can
-find this copy too on http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)::
+find this copy too on https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)::
   
                       GNU GENERAL PUBLIC LICENSE
                          Version 2, June 1991

@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: simulavr
 Upstream-Contact: Simulavr Devel List <simulavr-devel@nongnu.org>
-Source: http://savannah.nongnu.org/projects/simulavr/
+Source: https://savannah.nongnu.org/projects/simulavr/
 
 Files: *
 Copyright: 2001 - 2019 Theodore A. Roth, Klaus Rudolph and others

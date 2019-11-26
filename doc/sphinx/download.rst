@@ -1,7 +1,7 @@
 Download
 ========
 
-Project homepage is available at http://savannah.nongnu.org/projects/simulavr.
+Project homepage is available at https://savannah.nongnu.org/projects/simulavr.
 There you'll find also a link to download area. If you want to download other
 versions, please use the link to download area!
 
