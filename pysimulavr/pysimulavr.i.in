@@ -129,6 +129,10 @@ namespace std {
     char c = *$self;
     return c;
   }
+  char toBool() {
+    bool c = *$self;
+    return c;
+  }
   void SetPin(const char c) {
     *$self = c;
   }

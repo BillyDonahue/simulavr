@@ -1,8 +1,0 @@
-# files to ignore by git
-
-# files created by configure
-check.tcl
-
-# files created by make
-spi.elf
-

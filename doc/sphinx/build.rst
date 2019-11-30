@@ -1,3 +1,5 @@
+.. _build_chapter:
+
 Building and Installing
 =======================
 

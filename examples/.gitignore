@@ -1,0 +1,4 @@
+simulavr.tcl
+gui.tcl
+*.elf
+*.vcd

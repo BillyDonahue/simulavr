@@ -1,3 +1,5 @@
+.. _usage_chapter:
+
 Usage
 =====
 

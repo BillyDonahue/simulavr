@@ -1,0 +1,22 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Sat Nov 30 11:30:39 2019
+[*]
+[dumpfile] "/home/thomas/development/simulavr/simulavr-cmake.git/examples/python/ex_pinout.vcd"
+[dumpfile_mtime] "Sat Nov 30 11:26:31 2019"
+[dumpfile_size] 632
+[savefile] "/home/thomas/development/simulavr/simulavr-cmake.git/examples/python/ex_pinout.sav"
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*-22.171703 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 225
+[signals_width] 102
+[sst_expanded] 1
+[sst_vpaned_height] 160
+@28
+IRQ.VECTOR9
+@22
+PORTA.PORT[7:0]
+[pattern_trace] 1
+[pattern_trace] 0
