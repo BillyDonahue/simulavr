@@ -92,7 +92,9 @@ float HWARef8::GetRefValue(int select, float vcc) {
 
 void HWAdmux::SetMuxSelect(int select) {
     int oldSelect = muxSelect;
-    muxSelect = select & 0x7; // only values 0..7 allowed!
+    muxSelect = select & 0xf; // only values 0..15 allowed!
+    if(numPins < 9)
+        muxSelect &= 0x7; // only values 0..7 allowed!
     if(numPins < 6)
         muxSelect &= 0x3; // only values 0..3 allowed!
     if((notifyClient != NULL) && (oldSelect != muxSelect))
@@ -298,6 +300,107 @@ bool HWAdmuxT25::IsDifferenceChannel(int select) {
     return (adChannel >= 4) && (adChannel < 12);
 }
 
+HWAdmuxM2560::HWAdmuxM2560(AvrDevice* c, Pin*  _ad0,
+                                         Pin*  _ad1,
+                                         Pin*  _ad2,
+                                         Pin*  _ad3,
+                                         Pin*  _ad4,
+                                         Pin*  _ad5,
+                                         Pin*  _ad6,
+                                         Pin*  _ad7,
+                                         Pin*  _ad8,
+                                         Pin*  _ad9,
+                                         Pin*  _ad10,
+                                         Pin*  _ad11,
+                                         Pin*  _ad12,
+                                         Pin*  _ad13,
+                                         Pin*  _ad14,
+                                         Pin*  _ad15):
+    HWAdmux(c, 16) {
+    ad[0] = _ad0;
+    _ad0->RegisterCallback(this);
+    ad[1] = _ad1;
+    _ad1->RegisterCallback(this);
+    ad[2] = _ad2;
+    _ad2->RegisterCallback(this);
+    ad[3] = _ad3;
+    _ad3->RegisterCallback(this);
+    ad[4] = _ad4;
+    _ad4->RegisterCallback(this);
+    ad[5] = _ad5;
+    _ad5->RegisterCallback(this);
+    ad[6] = _ad6;
+    _ad6->RegisterCallback(this);
+    ad[7] = _ad7;
+    _ad7->RegisterCallback(this);
+    ad[8] = _ad8;
+    _ad8->RegisterCallback(this);
+    ad[9] = _ad9;
+    _ad9->RegisterCallback(this);
+    ad[10] = _ad10;
+    _ad10->RegisterCallback(this);
+    ad[11] = _ad11;
+    _ad11->RegisterCallback(this);
+    ad[12] = _ad12;
+    _ad12->RegisterCallback(this);
+    ad[13] = _ad13;
+    _ad13->RegisterCallback(this);
+    ad[14] = _ad14;
+    _ad14->RegisterCallback(this);
+    ad[15] = _ad15;
+    _ad15->RegisterCallback(this);
+}
+
+float HWAdmuxM2560::GetValue(int select, float vcc) {
+    bool high_channel = ((select & 0x20) == 0x20);
+    int adChannel = select & 0x1f; // bit 4:0 is multiplexer selector
+    if(adChannel == 31) {
+        if(high_channel) {
+            avr_warning("ADC channel 63 invalid");
+            return 0.0;
+        }
+        return 0.0;                            // GND channel
+    }
+    if(adChannel == 30) {
+        if(high_channel) {
+            avr_warning("ADC channel 62 invalid");
+            return 0.0;
+        }
+        return core->v_bandgap.GetRawAnalog(); // BG channel
+    }
+    if(adChannel < 8) {                          // single channel
+        int sel = adChannel + (high_channel ? 8 : 0);
+        float val = ad[sel]->GetAnalogValue(vcc);
+        return val;
+    }
+    if(adChannel >= 24) {
+        float neg = ad[2 + (high_channel ? 8 : 0)]->GetAnalogValue(vcc); // channel 2 is negative difference channel, gain is 1
+        return ad[adChannel - 24 + (high_channel ? 8 : 0)]->GetAnalogValue(vcc) - neg;
+    }
+    if(adChannel >= 16) {
+        float neg = ad[1 + (high_channel ? 8 : 0)]->GetAnalogValue(vcc); // channel 1 is negative difference channel, gain is 1
+        return ad[adChannel - 16 + (high_channel ? 8 : 0)]->GetAnalogValue(vcc) - neg;
+    }
+    if((adChannel == 8) || (adChannel == 9) || (adChannel == 12) || (adChannel == 13)) {
+        float neg = ad[((adChannel > 9) ? 2 : 0) + (high_channel ? 8 : 0)]->GetAnalogValue(vcc); // channel 0/2 is negative difference channel, gain is 10
+        if(adChannel == 8)
+            return (ad[0 + (high_channel ? 8 : 0)]->GetAnalogValue(vcc) - neg) * 10.0;
+        if(adChannel == 9)
+            return (ad[1 + (high_channel ? 8 : 0)]->GetAnalogValue(vcc) - neg) * 10.0;
+        if(adChannel == 12)
+            return (ad[2 + (high_channel ? 8 : 0)]->GetAnalogValue(vcc) - neg) * 10.0;
+        return (ad[3 + (high_channel ? 8 : 0)]->GetAnalogValue(vcc) - neg) * 10.0;
+    }
+    float neg = ad[((adChannel > 11) ? 2 : 0) + (high_channel ? 8 : 0)]->GetAnalogValue(vcc); // channel 0/2 is negative difference channel, gain is 200
+    if(adChannel == 10)
+        return (ad[0 + (high_channel ? 8 : 0)]->GetAnalogValue(vcc) - neg) * 200.0;
+    if(adChannel == 11)
+        return (ad[1 + (high_channel ? 8 : 0)]->GetAnalogValue(vcc) - neg) * 200.0;
+    if(adChannel == 14)
+        return (ad[2 + (high_channel ? 8 : 0)]->GetAnalogValue(vcc) - neg) * 200.0;
+    return (ad[3 + (high_channel ? 8 : 0)]->GetAnalogValue(vcc) - neg) * 200.0;
+}
+
 HWAd::HWAd(AvrDevice *c, int _typ, HWIrqSystem *i, unsigned int iv, HWAdmux *a, HWARef *r):
     Hardware(c),
     TraceValueRegister(c, "AD"),
@@ -383,6 +486,9 @@ void HWAd::SetAdcsrB(unsigned char val) {
         val &= 0xe7; // reset bit4,3
     else if(adType == AD_M64)
         val &= 0x07; // reset bit7,6,5,4,3
+    else if(adType == AD_M2560) {
+        val &= 0x4f; // reset bit7,5,4 (to pass MUX5)
+    }
     else
         val &= 0x47; // reset bit7,5,4,3
     adcsrb = val;
@@ -397,7 +503,8 @@ void HWAd::SetAdmux(unsigned char val) {
     else if((adType == AD_M8) || (adType == AD_M48))
         val &= 0xef; // reset bit4
     admux = val;
-    mux->SetMuxSelect((int)admux);
+    bool high_channel = ((adcsrb & MUX5) == MUX5);
+    mux->SetMuxSelect((int)admux + (high_channel ? 8 : 0));
 }
 
 void HWAd::ClearIrqFlag(unsigned int vector){
@@ -536,9 +643,14 @@ unsigned int HWAd::CpuCycle() {
 
             case RUNNING:
                 if(conversionState == ((1 * 2) + 1)) { // sample time
+                    bool high_channel = ((adcsrb & MUX5) == MUX5);
                     float vcc = core->v_supply.GetRawAnalog();
                     float adref = aref->GetRefValue(adMuxConfig, vcc);
-                    float muxval = mux->GetValue(adMuxConfig, vcc);
+                    int fullMux = adMuxConfig;
+                    if (high_channel) {
+                        fullMux = fullMux | 0x20;
+                    }
+                    float muxval = mux->GetValue(fullMux, vcc);
                     if(mux->IsDifferenceChannel(adMuxConfig)) {
                         if(adType == AD_T25) {
                             if((adcsrb & BIN) == BIN)

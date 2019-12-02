@@ -90,7 +90,7 @@ class HWARef8: public HWARef {
 class HWAdmux: public HasPinNotifyFunction {
 
     protected:
-        Pin* ad[8]; // 4 to 8 pins selectable from the mux
+        Pin* ad[16]; // 4 to 16 pins selectable from the mux
         AnalogSignalChange *notifyClient;
         int muxSelect; //! Multiplexer channel, can't be used for ADC sampling because of buffering on conversion start!
         int numPins;
@@ -105,6 +105,7 @@ class HWAdmux: public HasPinNotifyFunction {
     { }
         virtual ~HWAdmux() { }
 
+        // select bit 5 = MUX5 = use upper channels (if supported, see datasheet table 26-4)
         virtual float GetValue(int select, float vcc) = 0;
         virtual float GetValueAComp(int select, float vcc) { return 0.0; }
         virtual bool IsDifferenceChannel(int select) { return false; }
@@ -176,6 +177,29 @@ class HWAdmuxT25: public HWAdmuxM8 {
         virtual bool IsDifferenceChannel(int select);
 };
 
+class HWAdmuxM2560: public HWAdmux {
+
+    public:
+        HWAdmuxM2560(AvrDevice* c, Pin*  _ad0,
+                                   Pin*  _ad1,
+                                   Pin*  _ad2,
+                                   Pin*  _ad3,
+                                   Pin*  _ad4,
+                                   Pin*  _ad5,
+                                   Pin*  _ad6,
+                                   Pin*  _ad7,
+                                   Pin*  _ad8,
+                                   Pin*  _ad9,
+                                   Pin*  _ad10,
+                                   Pin*  _ad11,
+                                   Pin*  _ad12,
+                                   Pin*  _ad13,
+                                   Pin*  _ad14,
+                                   Pin*  _ad15);
+
+        virtual float GetValue(int select, float vcc);
+};
+
 /** Analog-digital converter (ADC) */
 class HWAd: public Hardware, public TraceValueRegister, public AnalogSignalChange {
 
@@ -218,6 +242,7 @@ class HWAd: public Hardware, public TraceValueRegister, public AnalogSignalChang
             IPR   = 0x20,
             ADIF  = 0x10,
             ADIE  = 0x08,
+            MUX5  = 0x08, // for selecting high ADC channels in ADCSRB
             ADPS  = 0x07,
             ADTS  = 0x07
         };
@@ -234,10 +259,11 @@ class HWAd: public Hardware, public TraceValueRegister, public AnalogSignalChang
             AD_M8,   //!< ADC type M8: ADC on atmega8
             AD_M16,  //!< ADC type M16: ADC on atmega16 and atmega32
             AD_M64,  //!< ADC type M64: ADC on atmega64
-            AD_M128, //!< ADC type M16: ADC on atmega128
+            AD_M128, //!< ADC type M128: ADC on atmega128
             AD_M48,  //!< ADC type M48: ADC on atmega48/88/168/328
             AD_M164, //!< ADC type M164: ADC on atmega164/324/644/1284 and at90can32/64/128
-            AD_T25   //!< ADC type T25: ADC on attiny25/45/85
+            AD_T25,  //!< ADC type T25: ADC on attiny25/45/85
+            AD_M2560 //!< ADC type M2560: ADC on atmega2560
         };
 
         IOReg<HWAd> adch_reg,
