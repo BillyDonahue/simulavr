@@ -136,7 +136,6 @@ vector<string_pair_t> newUsage = {
      "stops simulation if PC runs on <label>, <label> is a text label or a address"},
     {"-B <label>, --breakpoint <label>",
      "same as -T for backward compatibility"},
-    // TODO: useless in the moment, not implemented. Have to be re-implemented!
     {"-M",
      "disable messages for bad I/O and memory references"},
     {"-l <number>, --linestotrace <number>",
@@ -212,13 +211,14 @@ int main(int argc, char *argv[]) {
     string filename("unknown");
     string devicename("unknown");
     string tracefilename("unknown");
+    unsigned long long linestotrace = 1000000;
+    bool trace_flag = false;
     unsigned long global_gdbserver_port = 1212;
     int global_gdb_debug = 0;
     bool globalWaitForGdbConnection = true; //please wait for gdb connection
     int userinterface_flag = 0;
     unsigned long long fcpu = 4000000;
     unsigned long long maxRunTime = 0;
-    unsigned long long linestotrace = 1000000;
     UserInterface *ui;
     
     unsigned long writeToPipeOffset = 0x20;
@@ -262,7 +262,11 @@ int main(int argc, char *argv[]) {
             {0, 0, 0, 0}
         };
         
-        c = getopt_long(argc, argv, "a:e:f:d:gGm:p:t:uxyzhvnisF:R:W:VT:B:c:C:o:l:", long_options, &option_index);
+        c = getopt_long(argc,
+                        argv,
+                        "a:e:f:d:gGMm:p:t:uxyzhvnisF:R:W:VT:B:c:C:o:l:",
+                        long_options,
+                        &option_index);
         if(c == -1)
             break;
         
@@ -314,7 +318,6 @@ int main(int argc, char *argv[]) {
                            fcpu/1000000.0, fcpu);
                 break;
 
-            // TODO: if -l option isn't given before -t option, it will not be used!
             case 'l':
                 if(!StringToUnsignedLongLong( optarg, &linestotrace, NULL, 10)) {
                     cerr << "linestotrace is not a number" << endl;
@@ -368,11 +371,13 @@ int main(int argc, char *argv[]) {
                 avr_message("Running on port: %ld", global_gdbserver_port);
                 break;
             
+            case 'M':
+                global_suppress_memory_warnings = true;
+                break;
+            
             case 't':
-                avr_message("Running in Trace Mode with maximum %lld lines per file",
-                            linestotrace);
-
-                sysConHandler.SetTraceFile(optarg, linestotrace);
+                trace_flag = true;
+                tracefilename = optarg;
                 break;
             
             case 'V':
@@ -411,7 +416,13 @@ int main(int argc, char *argv[]) {
                 exit(0);
         }
     }
-    
+
+    /* initialize trace file, if needed */
+    if(trace_flag) {
+        avr_message("Running in Trace Mode with maximum %lld lines per file", linestotrace);
+        sysConHandler.SetTraceFile(tracefilename.c_str(), linestotrace);
+    }
+        
     /* get dump manager and inform it, that we have a single device application */
     DumpManager *dman = DumpManager::Instance();
     dman->SetSingleDeviceApp();

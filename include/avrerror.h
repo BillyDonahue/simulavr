@@ -120,9 +120,10 @@ extern SystemConsoleHandler sysConHandler;
 // redirect old definition ostream traceOut to SystemConsoleHandler.traceStream
 #define traceOut sysConHandler.traceOutStream()
 
-// moved from trace.h
 //! Verbose enable flag
 extern int global_verbose_on;
+//! flag to suppress invalid memory usage warnings
+extern bool global_suppress_memory_warnings;
 
 // moved from trace.h
 //! Helper function for writing trace (trace IO access)

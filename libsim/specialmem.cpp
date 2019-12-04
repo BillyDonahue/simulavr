@@ -48,7 +48,8 @@ void RWWriteToFile::set(unsigned char val) {
 }
 
 unsigned char RWWriteToFile::get() const {
-    avr_warning("Invalid read access to RWWriteToFile register.");
+    if(!global_suppress_memory_warnings)
+        avr_warning("Invalid read access to RWWriteToFile register.");
     return value;
 } 
 
@@ -63,7 +64,8 @@ RWReadFromFile::RWReadFromFile(TraceValueRegister *registry,
 }
 
 void RWReadFromFile::set(unsigned char val) {
-    avr_warning("Invalid write access to RWReadFromFile register with value %d.", (int)val);
+    if(!global_suppress_memory_warnings)
+        avr_warning("Invalid write access to RWReadFromFile register with value %d.", (int)val);
 }
 
 unsigned char RWReadFromFile::get() const { 

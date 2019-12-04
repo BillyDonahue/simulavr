@@ -56,7 +56,7 @@ SystemConsoleHandler::SystemConsoleHandler() {
     msgStream = &std::cout;
     wrnStream = &std::cerr;
     traceStream = nullStream;
-    fileTraceStream = NULL;
+    fileTraceStream = nullptr;
     traceEnabled = false;
     traceToFile = false;
 }
@@ -96,10 +96,10 @@ void SystemConsoleHandler::SetTraceFile(const char *name, unsigned int maxlines)
 void SystemConsoleHandler::SetTraceStream(std::ostream *s) {
     StopTrace();
     traceStream = s;
-    if(fileTraceStream != NULL) {
+    if(fileTraceStream != nullptr) {
         fileTraceStream->close();
         delete fileTraceStream;
-        fileTraceStream = NULL;
+        fileTraceStream = nullptr;
     }
     traceEnabled = true;
     traceToFile = false;
@@ -111,7 +111,7 @@ void SystemConsoleHandler::StopTrace(void) {
     if(traceToFile) {
         fileTraceStream->close();
         delete fileTraceStream;
-        fileTraceStream = NULL;
+        fileTraceStream = nullptr;
     }
     traceStream = nullStream;
     traceEnabled = false;
@@ -201,14 +201,7 @@ void SystemConsoleHandler::vffatal(const char *file, int line, const char *fmt, 
 
 void SystemConsoleHandler::AbortApplication(int code) {
     if(useExitAndAbort) {
-#if defined(HAVE_SYS_MINGW) || defined(_MSC_VER)
-        /* TODO: changed because of problems on windows7 with abort call, with abort it will bring up a
-           message box and break regression test. It will also irritate user. There is a call _set_abort_behavior
-           reported on MSDN, which could help, but in the moment not available in my MSys. */
-        exit(3);
-#else
         abort();
-#endif
     } else {
         throw -code;
     }
@@ -241,6 +234,7 @@ char* SystemConsoleHandler::getFormatString(const char *prefix,
 SystemConsoleHandler sysConHandler;
 
 int global_verbose_on = 0;
+bool global_suppress_memory_warnings = false;
 
 void trioaccess(const char *t, unsigned char val) {
     sysConHandler.traceOutStream() << t << "=" << HexChar(val) << " ";

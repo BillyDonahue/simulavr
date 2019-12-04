@@ -217,7 +217,8 @@ unsigned char InvalidMem::get() const {
     unsigned int r = core->GetMemIOSize() + core->GetMemRegisterSize() + core->GetMemIRamSize() + core->GetMemERamSize();
     if(core->abortOnInvalidAccess)
         avr_error("%s", s.c_str());
-    avr_warning("%s", s.c_str());
+    if(!global_suppress_memory_warnings)
+        avr_warning("%s", s.c_str());
     if(a < r)
         return value;
     return 0;
@@ -230,7 +231,8 @@ void InvalidMem::set(unsigned char c) {
     unsigned int r = core->GetMemIOSize() + core->GetMemRegisterSize() + core->GetMemIRamSize() + core->GetMemERamSize();
     if(core->abortOnInvalidAccess)
         avr_error("%s", s.c_str());
-    avr_warning("%s", s.c_str());
+    if(!global_suppress_memory_warnings)
+        avr_warning("%s", s.c_str());
     if(a < r)
         value = c;
 }
@@ -240,12 +242,14 @@ NotSimulatedRegister::NotSimulatedRegister(const char * oname, const char * rnam
       reg_name(rname)  {}
 
 unsigned char NotSimulatedRegister::get() const {
-    avr_warning("%s register %s not simulated (read from register)", obj_name, reg_name);
+    if(!global_suppress_memory_warnings)
+        avr_warning("%s register %s not simulated (read from register)", obj_name, reg_name);
     return 0;
 }
 
 void NotSimulatedRegister::set(unsigned char c) {
-    avr_warning("%s register %s not simulated (write 0x%02x to register)", obj_name, reg_name, (unsigned)c);
+    if(!global_suppress_memory_warnings)
+        avr_warning("%s register %s not simulated (write 0x%02x to register)", obj_name, reg_name, (unsigned)c);
 }
 
 NotSimulatedRegister NSR_TWI_TWAMR = NotSimulatedRegister("TWI", "TWAMR");
