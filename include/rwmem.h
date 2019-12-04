@@ -64,6 +64,27 @@ class RWMemoryMember {
         unsigned char operator=(const RWMemoryMember &mm);
 #endif
         virtual ~RWMemoryMember() {}
+
+        /*! Set only a single bit in register, required by SBI instruction 
+          Registers with secial behavior on single bit access must override
+          this method */
+        virtual void set_bit( unsigned int bitaddr ) {
+            // default as before SBI instruction rework
+            unsigned char val = this->get();
+            val |= 1 << bitaddr;
+            this->set(val);
+        }
+
+        /*! Clear only a single bit in register, required by CBI instruction
+          Registers with secial behavior on single bit access must override
+          this method */
+        virtual void clear_bit( unsigned int bitaddr ) {
+            // default as before rework of CBI instruction
+            unsigned char val = this->get();
+            val &= ~(1 << bitaddr);
+            this->set(val);
+        }
+
         const std::string &GetTraceName(void) { return tracename; }
         bool IsInvalid(void) const { return isInvalid; } 
 
@@ -208,6 +229,9 @@ class InvalidMem : public RWMemoryMember {
     protected:
         unsigned char get() const;
         void set(unsigned char);
+
+    private:
+        unsigned char value;
 };
 
 //! An IO register which is not simulated in the moment. Reads and writes are ignored and produce warning.
@@ -264,6 +288,8 @@ class IOReg: public RWMemoryMember {
     public:
         typedef unsigned char(P::*getter_t)();
         typedef void (P::*setter_t)(unsigned char);
+        typedef unsigned char(P::*getter_bit_t)(unsigned int);
+        typedef void (P::*setter_bit_t)(bool,unsigned int);
         /*! Creates an IO control register for controlling hardware units
           \param _p: pointer to object this will be part of
           \param _g: pointer to get method
@@ -272,11 +298,15 @@ class IOReg: public RWMemoryMember {
               const std::string &tracename,
               P *_p,
               getter_t _g=0,
-              setter_t _s=0):
+              setter_t _s=0,
+              getter_bit_t _gb=0,
+              setter_bit_t _sb=0):
             RWMemoryMember(registry, tracename),
             p(_p),
             g(_g),
-            s(_s)
+            s(_s),
+            gb(_gb),
+            sb(_sb)
         {
             // 'undefined state' doesn't really make sense for IO registers 
             if (tv)
@@ -293,7 +323,39 @@ class IOReg: public RWMemoryMember {
                 tv = NULL;
             }
         }
-        
+
+        /*! bitwise access to IOReg from SBI
+          */
+        virtual void set_bit( unsigned int bitaddr ) {
+            if (sb) {
+                (p->*sb)( 1, bitaddr);
+            } else { // default to byte access
+                if (g && s) {
+                    unsigned char val = (p->*g)();
+                    val|= 1<<bitaddr;
+                    (p->*s)(val);
+                } else {
+                    avr_warning("Bitwise access of '%s' is not supported.", tv->name().c_str());
+                }
+            }
+        }
+
+        /*! bitwise access to IOReg from CBI
+          */
+        virtual void clear_bit( unsigned int bitaddr ) {
+            if (sb) {
+                (p->*sb)( 0, bitaddr);
+            } else { // default to byte access
+                if (g && s) {
+                    unsigned char val = (p->*g)();
+                    val&= ~(1<<bitaddr);
+                    (p->*s)(val);
+                } else {
+                    avr_warning("Bitwise access of '%s' is not supported.", tv->name().c_str());
+                }
+            }
+        }
+
     protected:
         unsigned char get() const {
             if (g)
@@ -315,6 +377,8 @@ class IOReg: public RWMemoryMember {
         P *p;
         getter_t g;
         setter_t s;
+        getter_bit_t gb;
+        setter_bit_t sb;
 };
 
 class IOSpecialReg;

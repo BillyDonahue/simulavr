@@ -122,7 +122,7 @@ static bool checkHandle(int h) {
     tf_data.calltf    = name ## _tf;            \
     tf_data.compiletf = 0;                  \
     tf_data.sizetf    = 0;                  \
-    tf_data.user_data = "$" #name;              \
+    tf_data.user_data = (PLI_BYTE8 *)"$" #name;              \
     vpi_register_systf(&tf_data);               \
     }
 
@@ -134,7 +134,7 @@ static bool checkHandle(int h) {
     tf_data.calltf    = name ## _tf;            \
     tf_data.compiletf = 0;                  \
     tf_data.sizetf    = 0;                  \
-    tf_data.user_data = "$" #name;              \
+    tf_data.user_data = (PLI_BYTE8 *)"$" #name;              \
     vpi_register_systf(&tf_data);               \
     }
 

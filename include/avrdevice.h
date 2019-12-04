@@ -94,6 +94,7 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         /// When mupti-cycle instruction is "processed" this holds its address, PC holds the next instruction.
         unsigned int cPC;
         const unsigned int PC_size;
+        unsigned int dataAddressMask; //!< which bits in address are significant
         AvrFlash *Flash;
         FlashProgramming *spmRegister;
         AvrFuses *fuses;
@@ -207,11 +208,10 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         //! Set a value to IO register (without offset of 0x20!)
         bool SetIOReg(unsigned addr, unsigned char val);
         //! Set a bit value to lower IO register (without offset of 0x20!)
-        /*! \todo Have to be reimplemented, if IO bit set feature is implemented.
-            Compare differences in datasheets, for example ATMega16 and ATMega48,
-            on CBI and SBI usage at IO registers, which have special behaviour, if
-            bit will be set to 1 */
-        bool SetIORegBit(unsigned addr, unsigned bitaddr, bool val);
+        bool SetIORegBit(unsigned addr, unsigned bitaddr);
+        //! Clear a bit value to lower IO register (without offset of 0x20!)
+        bool ClearIORegBit(unsigned addr, unsigned bitaddr);
+
         //! Get value of X register (16bit)
         unsigned GetRegX(void);
         //! Get value of Y register (16bit)

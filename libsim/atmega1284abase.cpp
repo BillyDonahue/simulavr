@@ -35,6 +35,11 @@ AVR_REGISTER(atmega324A, AvrDevice_atmega324A)
 AVR_REGISTER(atmega644A, AvrDevice_atmega644A)
 AVR_REGISTER(atmega1284A, AvrDevice_atmega1284A)
 
+AVR_REGISTER(atmega164P, AvrDevice_atmega164A)
+AVR_REGISTER(atmega324P, AvrDevice_atmega324A)
+AVR_REGISTER(atmega644P, AvrDevice_atmega644A)
+AVR_REGISTER(atmega1284P, AvrDevice_atmega1284A)
+
 AVR_REGISTER(atmega164, AvrDevice_atmega164A)
 AVR_REGISTER(atmega324, AvrDevice_atmega324A)
 AVR_REGISTER(atmega644, AvrDevice_atmega644A)

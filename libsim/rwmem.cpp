@@ -208,22 +208,31 @@ void RAM::set(unsigned char v) { value=v; }
 InvalidMem::InvalidMem(AvrDevice* _c, int _a):
     RWMemoryMember(),
     core(_c),
-    addr(_a) {}
+    addr(_a),
+    value(0xAA) {}
 
 unsigned char InvalidMem::get() const {
     string s = "Invalid read access from IO[0x" + int2hex(addr) + "], PC=0x" + int2hex(core->PC * 2);
+    unsigned int a = addr & core->dataAddressMask;
+    unsigned int r = core->GetMemIOSize() + core->GetMemRegisterSize() + core->GetMemIRamSize() + core->GetMemERamSize();
     if(core->abortOnInvalidAccess)
         avr_error("%s", s.c_str());
     avr_warning("%s", s.c_str());
+    if(a < r)
+        return value;
     return 0;
 }
 
 void InvalidMem::set(unsigned char c) {
     string s = "Invalid write access to IO[0x" + int2hex(addr) +
         "]=0x" + int2hex(c) + ", PC=0x" + int2hex(core->PC * 2);
+    unsigned int a = addr & core->dataAddressMask;
+    unsigned int r = core->GetMemIOSize() + core->GetMemRegisterSize() + core->GetMemIRamSize() + core->GetMemERamSize();
     if(core->abortOnInvalidAccess)
         avr_error("%s", s.c_str());
     avr_warning("%s", s.c_str());
+    if(a < r)
+        value = c;
 }
 
 NotSimulatedRegister::NotSimulatedRegister(const char * oname, const char * rname)
@@ -304,6 +313,7 @@ void IOSpecialReg::set(unsigned char val) {
     for(size_t i = 0; i < clients.size(); i++)
         val = clients[i]->set_from_reg(this, val);
     value = val;
+    hardwareChange(value);
 }
 
 // EOF
