@@ -34,20 +34,22 @@ RWWriteToFile::RWWriteToFile(TraceValueRegister *registry,
                              const string &tracename,
                              const string &filename):
     RWMemoryMember(registry, tracename),
-    os(filename=="-" ? cout : ofs)
+    os(filename=="-" ? cout : ofs),
+    value(0)
 {
     if(filename != "-")
         ofs.open(filename.c_str());
 }
 
 void RWWriteToFile::set(unsigned char val) {
+    value = val;
     os << val;
     os.flush();
 }
 
 unsigned char RWWriteToFile::get() const {
     avr_warning("Invalid read access to RWWriteToFile register.");
-    return 0;
+    return value;
 } 
 
 RWReadFromFile::RWReadFromFile(TraceValueRegister *registry,

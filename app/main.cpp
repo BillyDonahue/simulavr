@@ -136,6 +136,7 @@ vector<string_pair_t> newUsage = {
      "stops simulation if PC runs on <label>, <label> is a text label or a address"},
     {"-B <label>, --breakpoint <label>",
      "same as -T for backward compatibility"},
+    // TODO: useless in the moment, not implemented. Have to be re-implemented!
     {"-M",
      "disable messages for bad I/O and memory references"},
     {"-l <number>, --linestotrace <number>",
@@ -313,6 +314,7 @@ int main(int argc, char *argv[]) {
                            fcpu/1000000.0, fcpu);
                 break;
 
+            // TODO: if -l option isn't given before -t option, it will not be used!
             case 'l':
                 if(!StringToUnsignedLongLong( optarg, &linestotrace, NULL, 10)) {
                     cerr << "linestotrace is not a number" << endl;
@@ -517,7 +519,8 @@ int main(int argc, char *argv[]) {
                  << "number of cpu cycles simulated: " << dec << steps << endl;
         } else {                                           // limited
             steps = SystemClock::Instance().Run(maxRunTime);
-            cout << "Ran too long.  Terminated after " << dec << maxRunTime
+            cout << "Run finished.  Terminated at " << dec
+                 << SystemClock::Instance().GetCurrentTime()
                  << " ns (simulated) and " << endl 
                  << dec << steps << " cpu cycles" << endl;
         }

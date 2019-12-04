@@ -57,6 +57,7 @@ HWPort::HWPort(AvrDevice *core, const string &name, bool portToggle, int size):
         // connect to output pin
         p[tt].mask = 1 << tt;
         p[tt].pinOfPort= &pin;
+        p[tt].pinRegOfPort= &pin_reg;
         // register pin output trace
         string tname = GetTraceValuePrefix() + name + (char)('0' + tt) + "-Out";
         pintrace[tt] = new TraceValueOutput(tname);
@@ -101,6 +102,7 @@ void HWPort::CalcOutputs(void) { // Calculate the new output value to be transmi
         pintrace[actualBitNo]->change(p[actualBitNo].outState);
     }
     pin = tmpPin;
+    pin_reg.hardwareChange(pin);
 }
 
 string HWPort::GetPortString(void) {

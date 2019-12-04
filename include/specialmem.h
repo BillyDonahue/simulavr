@@ -37,18 +37,24 @@
   accesses to the given (FIFO) file. The output
   format in the file is binary. */
 class RWWriteToFile: public RWMemoryMember {
- public:
-    /*! The output filename can be '-' which will
-      make this object use cout then. */
-    RWWriteToFile(TraceValueRegister *registry,
-                  const std::string &tracename,
-                  const std::string &filename);
- protected:
-    unsigned char get() const;
-    void set(unsigned char);
 
-    std::ostream &os;
-    std::ofstream ofs;
+    public:
+        /*! The output filename can be '-' which will
+          make this object use cout then. */
+     RWWriteToFile(TraceValueRegister *registry,
+                   const std::string &tracename,
+                   const std::string &filename);
+
+     protected:
+        unsigned char get() const;
+        void set(unsigned char);
+
+        std::ostream &os;
+        std::ofstream ofs;
+
+    private:
+        unsigned char value;
+        
 };
 
 //! FIFO read memory
@@ -56,18 +62,21 @@ class RWWriteToFile: public RWMemoryMember {
   a byte drawn from a given (FIFO) file. The input
   format is binary. */
 class RWReadFromFile: public RWMemoryMember {
- public:
-    /*! The input filename can be '-' which will
-      make this object use cin then. */
-    RWReadFromFile(TraceValueRegister *registry,
-                   const std::string &tracename,
-                   const std::string &filename);
- protected:
-    unsigned char get() const;
-    void set(unsigned char);
 
-    std::istream &is;
-    mutable std::ifstream ifs;
+     public:
+        /*! The input filename can be '-' which will
+          make this object use cin then. */
+        RWReadFromFile(TraceValueRegister *registry,
+                       const std::string &tracename,
+                       const std::string &filename);
+
+     protected:
+        unsigned char get() const;
+        void set(unsigned char);
+
+        std::istream &is;
+        mutable std::ifstream ifs;
+        
 };
 
 //! exit() on access memory
@@ -75,21 +84,27 @@ class RWReadFromFile: public RWMemoryMember {
   If a byte is written, it will be return code of the simulavr
   process. If a byte is being read, the exit code is 0x00. */
 class RWExit: public RWMemoryMember {
- public:
-    RWExit(TraceValueRegister *registry, const std::string &tracename="");
- protected:
-    unsigned char get() const;
-    void set(unsigned char);
+
+     public:
+        RWExit(TraceValueRegister *registry, const std::string &tracename="");
+
+     protected:
+        unsigned char get() const;
+        void set(unsigned char);
+
 };
 
 //! abort() on access memory
 /*! Any access to this memory will instantly stop simulavr. */
 class RWAbort: public RWMemoryMember {
- public:
-    RWAbort(TraceValueRegister *registry, const std::string &tracename="");
- protected:
-    unsigned char get() const;
-    void set(unsigned char);
+
+     public:
+        RWAbort(TraceValueRegister *registry, const std::string &tracename="");
+
+     protected:
+        unsigned char get() const;
+        void set(unsigned char);
+
 };
 
 #endif

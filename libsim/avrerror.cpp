@@ -123,7 +123,7 @@ void SystemConsoleHandler::TraceNextLine(void) {
         return;
 
     traceLines++;
-    if( ( traceLinesOnFile ) && ( traceLines >= traceLinesOnFile)) {
+    if(traceLinesOnFile && (traceLines >= traceLinesOnFile)) {
         traceFileCount++;
         traceLines = 0;
         
@@ -131,8 +131,12 @@ void SystemConsoleHandler::TraceNextLine(void) {
         delete fileTraceStream;
         
         std::ostringstream n;
-        int idx = traceFilename.rfind('.');
-        n << traceFilename.substr(0, idx) << "_" << traceFileCount << traceFilename.substr(idx);
+        std::size_t idx = (int)traceFilename.rfind('.');
+        if(idx == std::string::npos) {
+            n << traceFilename << "_" << traceFileCount;
+        } else {
+            n << traceFilename.substr(0, idx) << "_" << traceFileCount << traceFilename.substr(idx);
+        }
         fileTraceStream = new std::ofstream();
         fileTraceStream->open(n.str().c_str());
         

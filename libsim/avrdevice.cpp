@@ -136,6 +136,8 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     eRamSize(ERamSize),
     devSignature(numeric_limits<unsigned int>::max()),
     PC_size(pcSize),
+    rampz(nullptr),
+    eind(nullptr),
     abortOnInvalidAccess(false),
     coreTraceGroup(this),
     deferIrq(false),
@@ -152,7 +154,8 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     flagMOVWInstruction(true),
     flagTiny10(false),
     flagTiny1x(false),
-    flagXMega(false)
+    flagXMega(false),
+    wado(nullptr)
 {
     dumpManager = DumpManager::Instance();
     dumpManager->registerAvrDevice(this);
@@ -166,10 +169,6 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     lockbits = new AvrLockBits;
     data = new Data; //only the symbol container
 
-    // placeholder for RAMPZ and EIND register
-    rampz = NULL;
-    eind = NULL;
-    
     // memory space for all RW-Memory addresses + shadow store for invalid cells
     unsigned invalidSize = totalIoSpace - registerSpaceSize - IRamSize - ERamSize; 
     rw = new RWMemoryMember* [totalIoSpace];
@@ -188,18 +187,18 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
 
     // the status register is generic to all devices
     status = new HWSreg();
-    if(status == NULL)
+    if(status == nullptr)
         avr_error("Not enough memory for HWSreg in AvrDevice::AvrDevice");
     statusRegister = new RWSreg(&coreTraceGroup, status);
-    if(statusRegister == NULL)
+    if(statusRegister == nullptr)
         avr_error("Not enough memory for RWSreg in AvrDevice::AvrDevice");
 
     // placeholder for SPM register
-    spmRegister = NULL;
+    spmRegister = nullptr;
     
     // create the flash area with specified size
     Flash = new AvrFlash(this, flashSize);
-    if(Flash == NULL)
+    if(Flash == nullptr)
         avr_error("Not enough memory for Flash in AvrDevice::AvrDevice");
 
     // create all registers
@@ -208,7 +207,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
 
     for(unsigned ii = 0; ii < registerSpaceSize; ii++) {
         rw[currentOffset] = new RAM(&coreTraceGroup, "r", ii, registerSpaceSize);
-        if(rw[currentOffset] == NULL)
+        if(rw[currentOffset] == nullptr)
             avr_error("Not enough memory for registers in AvrDevice::AvrDevice");
         currentOffset++;
     }      
@@ -220,7 +219,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
        feature or reserved register. */
     for(unsigned ii = 0; ii < ioSpaceSize; ii++) {
         invalidRW[invalidRWOffset] = new InvalidMem(this, currentOffset);
-        if(invalidRW[invalidRWOffset] == NULL)
+        if(invalidRW[invalidRWOffset] == nullptr)
             avr_error("Not enough memory for io space in AvrDevice::AvrDevice");
         rw[currentOffset] = invalidRW[invalidRWOffset];
         currentOffset++;
@@ -230,7 +229,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     // create the internal ram handlers 
     for(unsigned ii = 0; ii < IRamSize; ii++ ) {
         rw[currentOffset] = new RAM(&coreTraceGroup, "IRAM", ii, IRamSize);
-        if(rw[currentOffset] == NULL)
+        if(rw[currentOffset] == nullptr)
             avr_error("Not enough memory for IRAM in AvrDevice::AvrDevice");
         currentOffset++;
     }
@@ -239,7 +238,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     // mcucr available here
     for(unsigned ii = 0; ii < ERamSize; ii++ ) {
         rw[currentOffset] = new RAM(&coreTraceGroup, "ERAM", ii, ERamSize);
-        if(rw[currentOffset] == NULL)
+        if(rw[currentOffset] == nullptr)
             avr_error("Not enough memory for io space in AvrDevice::AvrDevice");
         currentOffset++;
     }
@@ -248,7 +247,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     // fill the rest of the address space with error handlers
     for(; currentOffset < totalIoSpace; currentOffset++, invalidRWOffset++) {
         invalidRW[invalidRWOffset] = new InvalidMem(this, currentOffset);
-        if(invalidRW[invalidRWOffset] == NULL)
+        if(invalidRW[invalidRWOffset] == nullptr)
             avr_error("Not enough memory for fill address space in AvrDevice::AvrDevice");
         rw[currentOffset] = invalidRW[invalidRWOffset];
     }
@@ -256,7 +255,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
 
 // do a single core step, (0)->a real hardware step, (1) until the uC finish the opcode!
 int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_ns) {
-    if (cpuCycles<=0)
+    if(cpuCycles <= 0)
         cPC=PC;
 
     if(trace_on == 1) {
@@ -265,14 +264,14 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
 
         string sym(Flash->GetSymbolAtAddress(cPC));
         traceOut << sym << " ";
-        for (int len = sym.length(); len < 30;len++)
+        for(int len = sym.length(); len < 30;len++)
             traceOut << " " ;
     }
 
     bool hwWait = false;
     for(unsigned i = 0; i < hwCycleList.size(); i++) {
         Hardware * p = hwCycleList[i];
-        if (p->CpuCycle() > 0)
+        if(p->CpuCycle() > 0)
             hwWait = true;
     }
 
@@ -285,8 +284,8 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
             if(BP.end() != find(BP.begin(), BP.end(), PC)) {
                 if(trace_on)
                     traceOut << "Breakpoint found at 0x" << hex << PC << dec << endl;
-                if(nextStepIn_ns != 0)
-                    *nextStepIn_ns=clockFreq;
+                if(nextStepIn_ns != nullptr)
+                    *nextStepIn_ns = clockFreq;
                 untilCoreStepFinished = !(cpuCycles > 0);
                 dumpManager->cycle();
                 return BREAK_POINT;
@@ -299,7 +298,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                 return 0;
             }
 
-            if( deferIrq ) {
+            if(deferIrq) {
                 /* Every IRQ is delayed of one cycle. Normally this happens (see datasheet)
                  * only after a SEI instruction or after a RETI. But because of
                  * "pipelining" (first cycle is fetch instruction, second is processing)
@@ -374,7 +373,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
         cpuCycles--;
     }
 
-    if(nextStepIn_ns != NULL)
+    if(nextStepIn_ns != nullptr)
         *nextStepIn_ns = clockFreq;
 
     if(trace_on == 1) {
@@ -426,14 +425,10 @@ bool AvrDevice::ReplaceMemRegister(unsigned int offset, RWMemoryMember *newMembe
 RWMemoryMember* AvrDevice::GetMemRegisterInstance(unsigned int offset) {
     if(offset < totalIoSpace)
         return rw[offset];
-    return NULL;
+    return nullptr;
 }
 
 void AvrDevice::RegisterTerminationSymbol(const char *symbol) {
-#ifdef _MSC_VER
-    fprintf(stderr, "Fatal: Cannot specify terminating symbol. Loading symbols from ELF file is not implemented\n");
-    assert(false);  // TODO: Implement loading symbols from ELF file
-#endif
     unsigned int epa = Flash->GetAddressAtSymbol(symbol);
     EP.push_back(epa);
 }

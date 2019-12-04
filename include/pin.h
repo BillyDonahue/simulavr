@@ -31,6 +31,8 @@
 #include "pinnotify.h"
 
 class Net;
+class HWPort;
+template<typename T> class IOReg;
 
 #define REL_FLOATING_POTENTIAL 0.55
 
@@ -96,11 +98,12 @@ class AnalogValue {
 class Pin {
     
     protected:
-        unsigned char *pinOfPort; //!< points to HWPort::pin or NULL
+        unsigned char *pinOfPort; //!< points to HWPort::pin or nullptr
+        IOReg<HWPort> *pinRegOfPort; //!< points to PIN io register of port or nullptr
         unsigned char mask; //!< byte mask for HWPort::pin
         AnalogValue analogVal; //!< "real" analog voltage value
 
-        Net *connectedTo; //!< the connection to other pins (NULL, if not connected)
+        Net *connectedTo; //!< the connection to other pins (nullptr, if not connected)
 
     public:
 
@@ -153,8 +156,8 @@ class Pin {
         output value to own input value. Otherwise it calls Net::CalcNet method */
         bool CalcPin(void);
 
-        bool isPortPin(void) { return pinOfPort != NULL; } //!< True, if it's a port pin
-        bool isConnected(void) { return connectedTo != NULL; } //!< True, if it's connected to other pins
+        bool isPortPin(void) { return pinOfPort != nullptr; } //!< True, if it's a port pin
+        bool isConnected(void) { return connectedTo != nullptr; } //!< True, if it's connected to other pins
         bool hasListener(void) { return notifyList.size() != 0; } //!< True, if there change listeners
 
         friend class HWPort;
