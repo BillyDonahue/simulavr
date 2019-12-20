@@ -77,9 +77,6 @@ class HWSpi: public Hardware, public TraceValueRegister {
         /*! Main clock cycles (will be divided to yield SPI clock cycles) */
         unsigned clkcnt;
         
-        /* Counter which counts SPI cycles, which is main clk / clkDiv. */
-        int spi_cycles;
-    
         /*!
           mega mode: Iff true, the SPI2X option becomes available and SPSR will
           be R/W. */

@@ -50,8 +50,6 @@ class HWUSI: public Hardware, public SimulationMember, public TraceValueRegister
           WM_tablesize
         };
 
-        /*! connected device */
-        AvrDevice *core;
         /*! connected irq system controller */
         HWIrqSystem *irq;
     

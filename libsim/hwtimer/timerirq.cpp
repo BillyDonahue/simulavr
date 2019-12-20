@@ -75,7 +75,6 @@ TimerIRQRegister::TimerIRQRegister(AvrDevice* c,
     Hardware(c),
     TraceValueRegister(c, __hlp2scope("TMRIRQ", regidx)),
     irqsystem(irqsys),
-    core(c),
     lines(8),
     timsk_reg(this, __hlp2name("TIMSK", regidx)),
     tifr_reg(this, __hlp2name("TIFR", regidx))

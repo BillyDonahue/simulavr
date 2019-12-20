@@ -62,7 +62,6 @@ class TimerIRQRegister: public Hardware, public IOSpecialRegClient, public Trace
     
     private:
         HWIrqSystem* irqsystem; //!< pointer to irq system
-        AvrDevice* core; //!< pointer to device
         std::vector<IRQLine> lines; //!< list with IRQ lines
         std::map<std::string, int> name2line; //!< mapping IRQ line name to index
         std::map<int, int> vector2line; //!< mapping IRQ vector to index

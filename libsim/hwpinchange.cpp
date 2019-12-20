@@ -235,7 +235,6 @@ PinChange::PinChange(	Pin&				pin,
 						HWPcmskPinApi&		pcmskPinApi,
 						unsigned			pcmskBit
 						) throw():
-		_pin(pin),
 		_pcmskPinApi(pcmskPinApi),
 		_pcmskBit(pcmskBit),
 		_prevState(true)

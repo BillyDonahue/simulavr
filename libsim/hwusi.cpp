@@ -209,7 +209,7 @@ HWUSI::HWUSI(AvrDevice *_c,
          unsigned int ivec_start,
          unsigned int ivec_ovr):
     Hardware(_c), TraceValueRegister(_c, "USI"),
-    core(_c), irq(_irq),
+    irq(_irq),
     DI(din), DO(dout), SCK(sck),
     irq_start(ivec_start), irq_ovr(ivec_ovr),
     usidr_reg(this, "USIDR", this, &HWUSI::GetUSIDR, &HWUSI::SetUSIDR),

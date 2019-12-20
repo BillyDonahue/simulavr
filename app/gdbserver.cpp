@@ -657,7 +657,7 @@ void GdbServer::gdb_read_memory(const char *pkt) {
     unsigned int addr = 0;
     int   len  = 0;
     byte *buf;
-    int   i;
+    int   i = 0;
     int   is_odd_addr;
 
     pkt += gdb_get_addr_len( pkt, ',', '\0', &addr, &len );
