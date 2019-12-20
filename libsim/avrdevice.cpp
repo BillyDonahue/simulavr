@@ -24,6 +24,9 @@
  */
 
 #include <limits>
+#include <assert.h>
+
+using namespace std;
 
 #include "avrdevice.h"
 #include "traceval.h"
@@ -33,11 +36,9 @@
 #include "avrerror.h"
 #include "avrmalloc.h"
 #include "avrreadelf.h"
-#include <assert.h>
-
-#include "avrdevice_impl.h"
-
-using namespace std;
+#include "flash.h"
+#include "hwsreg.h"
+#include "hwstack.h"
 
 const unsigned int AvrDevice::registerSpaceSize = 32;
 const unsigned int AvrDevice::totalIoSpace = 0x10000;

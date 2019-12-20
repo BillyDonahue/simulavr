@@ -27,21 +27,14 @@
 #ifndef SIM_GDB_H
 #define SIM_GDB_H
 
-#include "config.h"
-
-#if defined(HAVE_SYS_MINGW) || defined(_MSC_VER)
-#   include <winsock2.h>
-#   undef GetCurrentTime  // defined by winbase.h, clashes with SystemClock::GetCurrentTime()
-#   include <sys/types.h>
-#else
-#   include <sys/socket.h>
-#   include <sys/types.h>
-#   include <netinet/in.h>
-#   include <netinet/tcp.h>
-#   include <arpa/inet.h>
-#endif
-
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <arpa/inet.h>
 #include <vector>
+
+#include "config.h"
 #include "avrdevice.h"
 #include "types.h"
 #include "simulationmember.h"
@@ -58,40 +51,14 @@
 //! Interface for server socket wrapper
 class GdbServerSocket {
     public:
-        //GdbServerSocket(int port);
-        virtual void Close(void)=0;
-        virtual int ReadByte(void)=0;
-        virtual void Write(const void* buf, size_t count)=0;
-        virtual void SetBlockingMode(int mode)=0;
-        virtual bool Connect(void)=0;
-        virtual void CloseConnection(void)=0;
-        virtual ~GdbServerSocket(){}
+        virtual void Close(void) = 0;
+        virtual int ReadByte(void) = 0;
+        virtual void Write(const void* buf, size_t count) = 0;
+        virtual void SetBlockingMode(int mode) = 0;
+        virtual bool Connect(void) = 0;
+        virtual void CloseConnection(void) = 0;
+        virtual ~GdbServerSocket() {}
 };
-
-#if defined(HAVE_SYS_MINGW) || defined(_MSC_VER)
-
-//! Interface implementation for server socket wrapper on MingW systems (windows)
-class GdbServerSocketMingW: public GdbServerSocket {
-    
-    private:
-        static void Start();
-        static void End();
-        static int socketCount;
-        SOCKET _socket;
-        SOCKET _conn;
-        
-    public:
-        GdbServerSocketMingW(int port);
-        ~GdbServerSocketMingW();
-        virtual void Close(void);
-        virtual int ReadByte(void);
-        virtual void Write(const void* buf, size_t count);
-        virtual void SetBlockingMode(int mode);
-        virtual bool Connect(void);
-        virtual void CloseConnection(void);
-};
-
-#else
 
 //! Interface implementation for server socket wrapper on unix systems
 class GdbServerSocketUnix: public GdbServerSocket {
@@ -102,7 +69,7 @@ class GdbServerSocketUnix: public GdbServerSocket {
 
     public:
         GdbServerSocketUnix(int port);
-        ~GdbServerSocketUnix();
+        ~GdbServerSocketUnix() {}
         virtual void Close(void);
         virtual int ReadByte(void);
         virtual void Write(const void* buf, size_t count);
@@ -110,8 +77,6 @@ class GdbServerSocketUnix: public GdbServerSocket {
         virtual bool Connect(void);
         virtual void CloseConnection(void);
 };
-
-#endif
 
 //! GDB server instance to give the possibility to debug target by debugger
 class GdbServer: public SimulationMember {

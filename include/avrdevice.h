@@ -26,18 +26,18 @@
 #ifndef AVRDEVICE
 #define AVRDEVICE
 
+#include <string>
+#include <map>
+#include <vector>
+#include <algorithm>
+#include <types.h> // for dword
+
 #include "systemclocktypes.h"
 #include "simulationmember.h"
 #include "pin.h"
 #include "net.h"
 #include "traceval.h"
 #include "flashprog.h"
-
-#include <string>
-#include <map>
-#include <vector>
-#include <algorithm>
-#include "types.h" // for dword
 
 // transfered from global.h
 #define BREAK_POINT    -2

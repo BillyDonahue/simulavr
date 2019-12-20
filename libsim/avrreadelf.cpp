@@ -23,117 +23,17 @@
  *  $Id$
  */
 
-#ifndef _MSC_VER
-    // only, if BFD lib is used
-#   include "config.h"
-#endif
-
-#include "elfio/elfio.hpp"
-
 #include <string>
 #include <map>
 #include <limits>
 
-#include "avrdevice_impl.h"
+#include "elfio/elfio.hpp"
+
+#include "config.h"
+#include "flash.h"
+#include "hweeprom.h"
 
 #include "avrreadelf.h"
-
-#ifdef _MSC_VER
-// Stolen from http://developers.sun.com/solaris/articles/elf.html
-
-#define EI_NIDENT     16
-// Segment types
-#define PT_NULL             0
-#define PT_LOAD             1
-#define PT_NOTE             4
-#define PT_SHLIB            5
-#define PT_PHDR             6
-// Segment flags
-#define PF_X                 1
-#define PF_W                 2
-#define PF_R                 4
-
-typedef uint32_t  Elf32_Addr;
-typedef uint16_t  Elf32_Half;
-typedef uint32_t  Elf32_Off;
-typedef int32_t   Elf32_Sword;
-typedef uint32_t  Elf32_Word;
-
-typedef struct {
-    unsigned char e_ident[EI_NIDENT];    /* ident bytes */
-    Elf32_Half e_type;                   /* file type */
-    Elf32_Half e_machine;                /* target machine */
-    Elf32_Word e_version;                /* file version */
-    Elf32_Addr e_entry;                  /* start address */
-    Elf32_Off e_phoff;                   /* phdr file offset */
-    Elf32_Off e_shoff;                   /* shdr file offset */
-    Elf32_Word e_flags;                  /* file flags */
-    Elf32_Half e_ehsize;                 /* sizeof ehdr */
-    Elf32_Half e_phentsize;              /* sizeof phdr */
-    Elf32_Half e_phnum;                  /* number phdrs */
-    Elf32_Half e_shentsize;              /* sizeof shdr */
-    Elf32_Half e_shnum;                  /* number shdrs */
-    Elf32_Half e_shstrndx;               /* shdr string index */
-} Elf32_Ehdr;
-// Segment header
-typedef struct {
-    Elf32_Word p_type;   /* entry type */
-    Elf32_Off p_offset;  /* file offset */
-    Elf32_Addr p_vaddr;  /* virtual address */
-    Elf32_Addr p_paddr;  /* physical address */
-    Elf32_Word p_filesz; /* file size */
-    Elf32_Word p_memsz;  /* memory size */
-    Elf32_Word p_flags;  /* entry flags */
-    Elf32_Word p_align;  /* memory/file alignment */
-} Elf32_Phdr;
-
-void ELFLoad(const AvrDevice * core) {
-    FILE * f = fopen(core->actualFilename.c_str(), "rb");
-    if(f == NULL)
-        avr_error("Could not open file: %s", core->actualFilename.c_str());
-
-    Elf32_Ehdr header;
-    fread(&header, sizeof(header), 1, f);
-    if(header.e_ident[0] != 0x7F || header.e_ident[1] != 'E'
-        || header.e_ident[2] != 'L' || header.e_ident[3] != 'F')
-        avr_error("File '%s' is not an ELF file", core->actualFilename.c_str());
-    // TODO: fix endianity in header
-    if(header.e_machine != 83)
-        avr_error("ELF file '%s' is not for Atmel AVR architecture (%d)", core->actualFilename.c_str(), header.e_machine);
-
-    for(int i = 0; i < header.e_phnum; i++) {
-        fseek(f, header.e_phoff + i * header.e_phentsize, SEEK_SET);
-        Elf32_Phdr progHeader;
-        fread(&progHeader, sizeof(progHeader), 1, f);
-        // TODO: fix endianity
-        if(progHeader.p_type != PT_LOAD)
-            continue;
-        if((progHeader.p_flags & PF_X ) == 0 || (progHeader.p_flags & PF_R) == 0)
-            continue;  // must be readable and writable
-        if(progHeader.p_vaddr >= 0x80ffff)
-            continue;  // not into a Flash
-        if(progHeader.p_filesz != progHeader.p_memsz) {
-            avr_error("Segment sizes 0x%x and 0x%x in ELF file '%s' must be the same",
-                progHeader.p_filesz, progHeader.p_memsz, core->actualFilename.c_str());
-        }
-        unsigned char * tmp = new unsigned char[progHeader.p_filesz];
-        fseek(f, progHeader.p_offset, SEEK_SET);
-        fread(tmp, progHeader.p_filesz, 1, f);
-
-        core->Flash->WriteMem(tmp, progHeader.p_vaddr, progHeader.p_filesz);
-        delete [] tmp;
-    }
-
-    fclose(f);
-}
-
-unsigned int ELFGetSignature(const char *filename) {
-    return std::numeric_limits<unsigned int>::max();
-}
-
-#endif
-
-#ifndef _MSC_VER
 
 void ELFLoad(const AvrDevice * core) {
     ELFIO::elfio reader;
@@ -304,7 +204,5 @@ unsigned int ELFGetSignature(const char *filename) {
 
     return signature;
 }
-
-#endif
 
 // EOF

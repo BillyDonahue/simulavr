@@ -24,32 +24,27 @@
  */
 
 #include <iostream>
-using namespace std;
+// don't use "using namespace std;" in this unit! It will bring
+// an error for bind system call against std::bind with clang compiler!
 
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#ifndef _MSC_VER
 #include <unistd.h>
-#endif
 #include <fcntl.h>
 #include <time.h>
 #include <signal.h>
 
 #include "avrmalloc.h"
 #include "avrerror.h"
-#include "types.h"
 #include "systemclock.h"
+#include "flash.h"
+#include "hweeprom.h"
+#include "hwsreg.h"
+#include "hwstack.h"
 
-/* only for compilation ... later to be removed */
-#include "avrdevice.h"
-#include "avrdevice_impl.h"
 #include "gdb/gdb.h"
-
-#ifdef _MSC_VER
-#  define snprintf _snprintf
-#endif
 
 #ifndef DOXYGEN /* have doxygen system ignore this. */
 enum {
@@ -74,96 +69,6 @@ enum {
 };
 #endif /* not DOXYGEN */
 
-#if defined(HAVE_SYS_MINGW) || defined(_MSC_VER)
-
-int GdbServerSocketMingW::socketCount = 0;
-
-void GdbServerSocketMingW::Start() {
-    if(socketCount == 0) {
-        WSADATA info;
-        if(WSAStartup(MAKEWORD(2, 2), &info))
-            avr_error("Could not start WSA");
-    }
-    socketCount++;
-}
-
-void GdbServerSocketMingW::End() {
-    WSACleanup();
-}
-
-GdbServerSocketMingW::GdbServerSocketMingW(int port): _socket(0), _conn(0) {
-    sockaddr_in sa;
-    
-    Start();
-    _socket = socket(AF_INET, SOCK_STREAM, 0);
-    if(_socket == INVALID_SOCKET)
-        avr_error("Couldn't create socket: INVALID_SOCKET");
-    
-    u_long arg = 1;
-    ioctlsocket(_socket, FIONBIO, &arg);
-    
-    memset(&sa, 0, sizeof(sa));
-    sa.sin_family = PF_INET;
-    sa.sin_port = htons(port);
-    if(bind(_socket, (sockaddr *)&sa, sizeof(sockaddr_in)) == SOCKET_ERROR) {
-        closesocket(_socket);
-        avr_error("Couldn't bind socket: INVALID_SOCKET");
-    }
-    
-    listen(_socket, 1); // only 1 connection at time
-}
-
-GdbServerSocketMingW::~GdbServerSocketMingW() {
-    Close();
-    socketCount--;
-    if(socketCount == 0)
-        End();
-}
-
-void GdbServerSocketMingW::Close(void) {
-    CloseConnection();
-    closesocket(_socket);
-}
-
-int GdbServerSocketMingW::ReadByte(void) {
-    char buf[1];
-    int rv = recv(_conn, buf, 1, 0);
-    if(rv <= 0)
-        return -1;
-    return buf[0];
-}
-
-void GdbServerSocketMingW::Write(const void* buf, size_t count) {
-    send(_conn, (const char *)buf, count, 0);
-}
-
-void GdbServerSocketMingW::SetBlockingMode(int mode) {
-    u_long arg = 1;
-    if(mode)
-        arg = 0;
-    int res = ioctlsocket(_conn, FIONBIO, &arg);
-    if(res)
-        avr_warning( "fcntl failed: %d\n", WSAGetLastError() );
-}
-
-bool GdbServerSocketMingW::Connect(void) {
-    _conn = accept(_socket, 0, 0);
-    if(_conn == INVALID_SOCKET) {
-        int rc = WSAGetLastError();
-        if(rc == WSAEWOULDBLOCK)
-            return false;
-        else
-            avr_error("Couldn't connect: INVALID_SOCKET");
-    }
-    return true;
-}
-
-void GdbServerSocketMingW::CloseConnection(void) {
-    closesocket(_conn);
-}
-
-#else
-
 GdbServerSocketUnix::GdbServerSocketUnix(int port) {
     conn = -1;        //no connection opened
     
@@ -186,10 +91,6 @@ GdbServerSocketUnix::GdbServerSocketUnix(int port) {
 
     if(listen(sock, 1) < 0)
         avr_error("Can not listen on socket: %s", strerror(errno));
-}
-
-GdbServerSocketUnix::~GdbServerSocketUnix() {
-    // do nothing in the moment
 }
 
 void GdbServerSocketUnix::Close(void) {
@@ -283,8 +184,6 @@ void GdbServerSocketUnix::CloseConnection(void) {
     conn = -1;
 }
 
-#endif
-
 GdbServer::GdbServer(AvrDevice *c, int _port, int debug, int _waitForGdbConnection):
     core(c),
     global_debug_on(debug),
@@ -297,18 +196,14 @@ GdbServer::GdbServer(AvrDevice *c, int _port, int debug, int _waitForGdbConnecti
     connState = false;
     m_gdb_thread_id = 1;  // we start with the first thread already created
 
-#if defined(HAVE_SYS_MINGW) || defined(_MSC_VER)
-    server = new GdbServerSocketMingW(_port);
-#else
     server = new GdbServerSocketUnix(_port);
-#endif
 
     fprintf(stderr, "Waiting on port %d for gdb client to connect...\n", _port);
 
 }
 
 //make the instance of static list of all gdb servers here
-vector<GdbServer*> GdbServer::allGdbServers;
+std::vector<GdbServer*> GdbServer::allGdbServers;
 
 GdbServer::~GdbServer() {
     server->Close();
@@ -792,22 +687,10 @@ void GdbServer::gdb_read_memory(const char *pkt) {
         general purpose registers. This allows gdb to know when a zero
         pointer has been dereferenced. */
 
-        /* FIXME: [TRoth 2002/03/31] This isn't working quite the way I
-        thought it would so I've removed it for now.*/
-
-        /* if ( (addr >= 0) && (addr < 32) ) */
-        if (0)
-        {
-            snprintf( (char*)buf, len*2, "E%02x", EIO );
-        }
-        else
-        {
-            for ( i=0; i<len; i++ )
-            {
-                uint8_t bval = core->GetRWMem(addr + i);
-                buf[i*2]   = HEX_DIGIT[bval >> 4];
-                buf[i*2+1] = HEX_DIGIT[bval & 0xf];
-            }
+        for(i = 0; i < len; i++) {
+            uint8_t bval = core->GetRWMem(addr + i);
+            buf[i*2]   = HEX_DIGIT[bval >> 4];
+            buf[i*2+1] = HEX_DIGIT[bval & 0xf];
         }
     }
     else if ( (addr & MEM_SPACE_MASK) < SRAM_OFFSET)
@@ -934,21 +817,10 @@ void GdbServer::gdb_write_memory(const char *pkt) {
         addr = addr & ~MEM_SPACE_MASK; /* remove the offset bits */
 
         /* Return error. See gdb_read_memory for reasoning. */
-        /* FIXME: [TRoth 2002/03/31] This isn't working quite the way I
-        thought it would so I've removed it for now.*/
-        /* if ( (addr >= 0) && (addr < 32) ) */
-        if (0)
-        {
-            snprintf( reply, sizeof(reply), "E%02x", EIO );
-        }
-        else
-        {
-            for ( i=addr; i < addr+len; i++ )
-            {
-                bval  = hex2nib(*pkt++) << 4;
-                bval += hex2nib(*pkt++);
-                core->SetRWMem(i, bval);
-            }
+        for(i = addr; i < (addr + len); i++) {
+            bval  = hex2nib(*pkt++) << 4;
+            bval += hex2nib(*pkt++);
+            core->SetRWMem(i, bval);
         }
     }
     else if ( (addr & MEM_SPACE_MASK) < SRAM_OFFSET)
@@ -1043,43 +915,30 @@ void GdbServer::gdb_break_point(const char *pkt) {
 
             if (z == 'z') 
             {
-                //cout << "Try to UNSET a software breakpoint" << endl;
-                //cout << "at address :" << addr << " with len " << len << endl;
                 avr_core_remove_breakpoint( addr/2 );
             }
             else
             {
-                //cout << "Try to SET a software breakpoint" << endl;
-                //cout << "at address :" << addr << " with len " << len << endl;
                 avr_core_insert_breakpoint( addr/2 );
             }
             break;
 
         case '1':               /* hardware breakpoint */
-            //cout << "Try to set a hardware breakpoint" << endl;
-            //cout << "at address :" << addr << " with len " << len << endl;
-
             gdb_send_reply( "" );
             return;
             break;
 
         case '2':               /* write watchpoint */
-            //cout << "Try to set a watchpoint" << endl;
-            //cout << "at address :" << addr << " with len " << len << endl;
             gdb_send_reply( "" );
             return;
             break;
 
         case '3':               /* read watchpoint */
-            //cout << "Try to set a read watchpoint" << endl;
-            //cout << "at address :" << addr << " with len " << len << endl;
             gdb_send_reply( "" );
             return;
             break;
 
         case '4':               /* access watchpoint */
-            //cout << "try to set a access watchpoint" << endl;
-            //cout << "at address :" << addr << " with len " << len << endl;
             gdb_send_reply( "" );
             return;             /* unsupported yet */
     }
@@ -1475,7 +1334,7 @@ int GdbServer::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
 
 void GdbServer::IdleStep() {
     int gdbRet=gdb_receive_and_process_packet(GDB_BLOCKING_OFF);
-    cout << "IdleStep Instance" << this << " RunMode:" << dec << runMode << endl;
+    std::cout << "IdleStep Instance" << this << " RunMode:" << std::dec << runMode << std::endl;
 
     if (lastCoreStepFinished) {
         switch(gdbRet) {
@@ -1495,20 +1354,16 @@ void GdbServer::IdleStep() {
                 break;
 
             default:
-                cout << "wondering" << endl;
+                std::cout << "wondering" << std::endl;
         }
     }
 }
 
 int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *timeToNextStepIn_ns) {
-    //cout << "Internal Step entered" << endl;
-    //cout << "RunMode: " << dec << runMode << endl;
-
     if (lastCoreStepFinished) {
         bool leave;
 
         do {
-            //cout << "Loop" << endl;
             int gdbRet=gdb_receive_and_process_packet((runMode==GDB_RET_CONTINUE) ? GDB_BLOCKING_OFF : GDB_BLOCKING_ON);
 
             switch (gdbRet) { //GDB_RESULT TYPES
@@ -1520,17 +1375,14 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
                     break;
 
                 case GDB_RET_CONTINUE:
-                    //cout << "############################################################ gdb continue" << endl;
                     runMode=GDB_RET_CONTINUE;       //lets continue until we receive something from gdb (normal CTRL-C)
                     break;                          //or we run into a break point or illegal instruction
 
                 case GDB_RET_SINGLE_STEP:
-                    //cout << "############################################################# Single Step" << endl;
                     runMode=GDB_RET_SINGLE_STEP;
                     break;
 
                 case GDB_RET_CTRL_C:
-                    //cout << "############################################################# CTRL C" << endl;
                     runMode=GDB_RET_CTRL_C;
                     SendPosition(GDB_SIGINT); //Give gdb an idea where the core is now 
                     break;
@@ -1551,8 +1403,7 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
 
             if(!leave) { //we can't leave the loop so we have to request the other gdb instances now!
                 // step through all gdblist members WITHOUT my self!
-                //cout << "we do not leave and check for gdb events" << endl;
-                vector<GdbServer*>::iterator ii;
+                std::vector<GdbServer*>::iterator ii;
                 for (ii=allGdbServers.begin(); ii!=allGdbServers.end(); ii++) {
                     if (*ii!=this) { //run other instances but not me 
                         (*ii)->IdleStep();
