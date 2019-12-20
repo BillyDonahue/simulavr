@@ -114,6 +114,18 @@ string HWPort::GetPortString(void) {
     return dummy;
 }
 
+void HWPort::SetPort(unsigned char val) {
+    port = val & portMask;
+    CalcOutputs();
+    port_reg.hardwareChange(port);
+}
+
+void HWPort::SetDdr(unsigned char val) {
+    ddr = val & portMask;
+    CalcOutputs();
+    ddr_reg.hardwareChange(ddr);
+}
+
 void HWPort::SetPin(unsigned char val) {
     if(portToggleFeature) {
         port ^= val;

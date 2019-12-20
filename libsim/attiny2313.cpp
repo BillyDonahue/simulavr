@@ -138,7 +138,7 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
     acomp = new HWAcomp(this, irqSystem, PinAtPort(&portb, 0), PinAtPort(&portb, 1), 10, NULL, timer1);
 
     // USI
-    usi = new HWUSI(this, irqSystem, PinAtPort(&portb, 0), PinAtPort(&portb, 1), PinAtPort(&portb, 2), 15, 16);
+    usi = new HWUSI(this, irqSystem, PinAtPort(&portb, 5), PinAtPort(&portb, 6), PinAtPort(&portb, 7), 15, 16);
 
     rw[0x5f]= statusRegister;
     rw[0x5e]= & ((HWStackSram *)stack)->sph_reg;
