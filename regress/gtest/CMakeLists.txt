@@ -101,14 +101,14 @@ if(AVR_CC)
               ${CMAKE_CURRENT_BINARY_DIR}/session_irq_check/check.atmega32.o
               ${session_io_elf} ${session_trace_elf})
   
-  set(dut_sources gtest-1.6.0/src/gtest-all.cc
+  set(dut_sources gtest-1.10.0/src/gtest-all.cc
                   session_001/unittest001.cpp
                   session_irq_check/unittest_irq.cpp
                   session_io_pin/unittest_io_pin.cpp
                   session_trace/unittest_trace.cpp
                   gtest_main.cpp)
                   
-  include_directories(${CMAKE_SOURCE_DIR}/include gtest-1.6.0/include gtest-1.6.0 gtest-1.6.0/include/gtest)
+  include_directories(${CMAKE_SOURCE_DIR}/include gtest-1.10.0/include gtest-1.10.0 gtest-1.10.0/include/gtest)
 
   add_executable(dut ${dut_sources})
   target_link_libraries(dut sim pthread)
