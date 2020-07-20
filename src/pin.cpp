@@ -25,6 +25,12 @@
 
 #include <limits.h> // for INT_MAX
 #include <assert.h>
+#include <unistd.h>
+#include <iostream>
+#include "avrerror.h"
+
+#define traceOut sysConHandler.traceOutStream()
+
 
 #include "pin.h"
 #include "net.h"
@@ -340,9 +346,43 @@ Pin OpenDrain::GetPin() {
         return Pin(TRISTATE);
 }
 
-OpenDrain::OpenDrain(Pin *p) {
-    pin = p;
+
+Pin OpenDrain::operator+= (const Pin& p) {
+    std::cout << __PRETTY_FUNCTION__ << " called by accident!" << std::endl;
+    exit(0);
+//    *pin= *this+p;
+    //return *this;
+    return *this+p;
 }
+
+Pin OpenDrain::operator +(const Pin &p) {
+    Pin dummy;
+    bool parent=(bool)*pin;
+    if (parent==0) dummy=Pin(TRISTATE);    //if the result
+    else dummy=Pin(LOW);
+
+    return dummy+p;
+}
+
+Pin::Pin(const OpenDrain &od) {
+    bool res=(bool) od;
+    if (res==0) {
+        outState=TRISTATE;
+        analogVal=INT_MAX/2;
+    }
+    else {
+        outState=LOW;
+        analogVal=0;
+    }
+}
+
+OpenDrain::operator bool() const
+{
+    return 0;
+}
+
+
+
 
 PortPin::PortPin() {
     regCount = 0;

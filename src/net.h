@@ -27,6 +27,7 @@
 #define NET
 
 #include <vector>
+#include <string>
 
 #include "pin.h"
 
@@ -43,9 +44,13 @@ class Net
         virtual void Delete(Pin *p); //!< Remove a pin from net
          //! Calculate a "electrical potential" on the net and set all pin inputs with this value
         virtual bool CalcNet();
+
+        void SetName( const std::string& n) { name = n; }
+        std::string GetName() const { return name; }
         
     private:
         friend void Pin::RegisterNet(Net*);
+        std::string name;
 };
 
 #endif

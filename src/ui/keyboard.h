@@ -66,6 +66,15 @@ class Keyboard : public SimulationMember, public ExternalType {
         Keyboard(UserInterface *, const char *name, const char *baseWindow);
         void SetClockFreq(SystemClockOffset f);
         virtual ~Keyboard();
+        Pin* GetPin( const std::string& name )
+        {
+            if ( name == "data" )
+            {
+                return &data;
+            }
+            else
+                return &clk;
+        }
 };
 
 #endif

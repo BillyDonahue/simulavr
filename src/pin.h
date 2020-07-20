@@ -27,10 +27,14 @@
 #define PIN
 #include <cstddef>
 #include <vector>
+#include "avrerror.h"
+
+#define traceOut sysConHandler.traceOutStream()
 
 #include "pinnotify.h"
 
 class Net;
+class OpenDrain;
 
 #define REL_FLOATING_POTENTIAL 0.55
 
@@ -44,11 +48,11 @@ class AnalogSignalChange {
 
 //! Implements "real" analog value as float.
 /*! Problem is, that the Vcc level isn't
-    normally not known and so it's not possible to calculate correct value. So, here
-    the value is calculated, if GetAnalogValue method is called. If no analog value
-    is set by SetAnalogValue method, a replacement value is calculated. An analog value
-    set by GetAnalogValue method is valid till it's not rewritten by a "digital"
-    replacement value. */
+  normally not known and so it's not possible to calculate correct value. So, here
+  the value is calculated, if GetAnalogValue method is called. If no analog value
+  is set by SetAnalogValue method, a replacement value is calculated. An analog value
+  set by GetAnalogValue method is valid till it's not rewritten by a "digital"
+  replacement value. */
 class AnalogValue {
 
     private:
@@ -94,7 +98,7 @@ class AnalogValue {
   state of the output stage. Only in case of no connected Net instance (aka no physical
   connection to other sink / source) it's also the real pin state! */
 class Pin {
-    
+
     protected:
         unsigned char *pinOfPort; //!< points to HWPort::pin or NULL
         unsigned char mask; //!< byte mask for HWPort::pin
@@ -120,6 +124,8 @@ class Pin {
             ANALOG_SHORTED
         } T_Pinstate;
 
+        T_Pinstate GetPinState() const { return outState; }
+
         T_Pinstate outState; //!< discrete value of output stage
         std::vector<HasPinNotifyFunction*> notifyList; //!< listeners for change of input value
 
@@ -128,8 +134,9 @@ class Pin {
         Pin(T_Pinstate ps); //!< copy constructor from pin state
         Pin(unsigned char *parentPin, unsigned char mask); //!< constructor for a port pin, only used in UI part!
         Pin(float analog); //!< constructor for analog pin
+        Pin(const OpenDrain &od);
         virtual ~Pin(); //!< pin destructor, breaks save connection to other pins, if necessary
-        
+
 #ifndef SWIG
         operator char() const; //!< return char representation for output stage
         virtual Pin &operator= (char); //!< set output stage to (digital) state, set value for ANALOG state separately
@@ -150,7 +157,7 @@ class Pin {
         void RegisterCallback(HasPinNotifyFunction *); //!< register a listener for input value change
         //! Update input values from output values
         /*! If there is no connection to other pins, then it will reflect the own
-        output value to own input value. Otherwise it calls Net::CalcNet method */
+          output value to own input value. Otherwise it calls Net::CalcNet method */
         bool CalcPin(void);
 
         bool isPortPin(void) { return pinOfPort != NULL; } //!< True, if it's a port pin
@@ -207,8 +214,28 @@ class OpenDrain: public Pin {
         Pin *pin;        // the connected pin, which control input
 
     public:
-        OpenDrain(Pin *p);
+        OpenDrain(Pin *p) { pin=p;}
+#ifndef SWIG
+        virtual operator bool() const;
+        virtual Pin operator+ (const Pin& p);
+        virtual Pin operator+= (const Pin& p);
+#endif
+
         virtual Pin GetPin();
+        void RegisterNet(Net *n) { pin->RegisterNet(n);}
+        virtual ~OpenDrain() {}
+
+        /* Spezialfall:
+         * im OpenDrain Modus sieht der EIGENE Pin, welcher das OpenDrain Element
+         * ansteuert nur den EIGENEN Pegel. Der Pegel hinter dem OpenDrain hat ja hier keine!
+         * Funktion
+         */
+        void SetInState ( const Pin &p)
+        {
+            traceOut << __PRETTY_FUNCTION__ << std::endl;
+            pin-> SetInState(*pin); //Spiegel wie im Mirror Net
+        }
+
 };
 
 #endif

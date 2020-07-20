@@ -145,6 +145,8 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
     static vector<SimulationMember*>::iterator ami;
     static vector<SimulationMember*>::iterator amiEnd;
 
+//    std::cout << "Step" << std::endl;
+
     if(syncMembers.begin() != syncMembers.end()) {
         // take simulation member and current simulation time from time table
         SimulationMember * core = syncMembers.begin()->second;

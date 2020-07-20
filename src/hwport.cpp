@@ -98,7 +98,7 @@ void HWPort::CalcOutputs(void) { // Calculate the new output value to be transmi
             tmpPin |= actualBit;
         pintrace[actualBitNo]->change(p[actualBitNo].outState);
     }
-    pin = tmpPin;
+//    pin = tmpPin; //BUGFIX: OpenDrain reads wrong value from PIN register
 }
 
 string HWPort::GetPortString(void) {

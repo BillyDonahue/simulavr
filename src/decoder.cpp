@@ -31,6 +31,8 @@
 #include "avrerror.h"
 #include "ioregs.h"
 
+#define traceOut sysConHandler.traceOutStream()
+
 static int n_bit_unsigned_to_signed(unsigned int val, int n );
 
 static int get_add_carry( byte res, byte rd, byte rr, int b );
@@ -364,6 +366,8 @@ avr_op_CBI::avr_op_CBI(word opcode, AvrDevice *c):
 
 int avr_op_CBI::operator()() {
     int clks = (core->flagXMega || core->flagTiny10) ? 1 : 2;
+
+    traceOut << "CBI_instr" << std::endl; 
     
     core->SetIORegBit(ioreg, Kbit, false);
     
@@ -731,7 +735,9 @@ avr_op_IN::avr_op_IN(word opcode, AvrDevice *c):
     ioreg(get_A_6(opcode)) {}
 
 int avr_op_IN::operator()() {
-    core->SetCoreReg(R1, core->GetIOReg(ioreg));
+    unsigned char val= core->GetIOReg(ioreg);
+    core->SetCoreReg(R1, val );
+    traceOut << " R" << (unsigned int)R1 << "=0x" << std::hex << (unsigned int)val ;
 
     return 1;
 }
