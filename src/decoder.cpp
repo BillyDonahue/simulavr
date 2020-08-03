@@ -367,7 +367,7 @@ avr_op_CBI::avr_op_CBI(word opcode, AvrDevice *c):
 int avr_op_CBI::operator()() {
     int clks = (core->flagXMega || core->flagTiny10) ? 1 : 2;
 
-    traceOut << "CBI_instr" << std::endl; 
+    //traceOut << "CBI_instr" << std::endl; 
     
     core->SetIORegBit(ioreg, Kbit, false);
     
