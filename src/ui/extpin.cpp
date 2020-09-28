@@ -45,6 +45,18 @@ ExtPin::ExtPin(T_Pinstate ps,
     ui->Write(os.str());
     
     ui->AddExternalType(extName, this);
+
+    // We also want to set the external GUI to represent the initial value
+    // given as first parameter to the ExtPin.
+
+    // Create pin representation as char for gui
+    const char defaultState = *this;
+
+    os.str(""); // make it empty
+    os.clear(); // reset state flags
+
+    os << "setfrombackdoor " << extName << " " << defaultState << endl;
+    ui->Write(os.str());
 }
 
 void ExtPin::SetInState(const Pin &p) {
