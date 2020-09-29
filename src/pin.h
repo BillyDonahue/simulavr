@@ -129,7 +129,7 @@ class Pin {
         T_Pinstate outState; //!< discrete value of output stage
         std::vector<HasPinNotifyFunction*> notifyList; //!< listeners for change of input value
 
-        Pin(void); //!< common constructor, initial output state is tristate
+        Pin(); //!< common constructor, initial output state is tristate
         Pin(const Pin& p); //!< copy constructor, copy values but no refs to Net or HWPort
         Pin(T_Pinstate ps); //!< copy constructor from pin state
         Pin(unsigned char *parentPin, unsigned char mask); //!< constructor for a port pin, only used in UI part!

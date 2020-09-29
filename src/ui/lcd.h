@@ -36,29 +36,52 @@
 #include "ui.h"
 #include "pin.h"
 
-typedef enum {
+enum t_myState {
         IDLE,
         POWER_ON,     // First State after Reset
         PWR_AFTER_FS1,// After first Function Set Cmd no Busy Flag
         PWR_AFTER_FS2,// After second Function Set Cmd no Busy Flag
         PWR_ON_FINISH,// After third Function Set Cmd no Busy Flag. After the next CMD BF is valid
         CMDEXEC       // Executing any command after init
-    } t_myState;
+    } ;
 
 
-/** Simulates a HD44780 character-LCD controller with a 4 bit interface.
+inline void PrintState(t_myState val)
+{
+    switch( val )
+    {
+        case IDLE: std::cerr << "IDLE"; break;
+        case POWER_ON: std::cerr << "POWER_ON"; break;
+        case PWR_AFTER_FS1: std::cerr << "PWR_AFTER_FS1"; break;
+        case PWR_AFTER_FS2: std::cerr << "PWR_AFTER_FS2"; break;
+        case PWR_ON_FINISH: std::cerr << "PWR_ON_FINISH"; break;
+        case CMDEXEC: std::cerr << "CMDEXEC"; break;
+    }
+}
+
+
+
+/** Simulates busyFlaga HD44780 character-LCD controller with a 4 bit interface.
  * This HD-controller is boring slow :-) like some original.
  */
 class Lcd : public SimulationMember {
+    private:
+        void SetPort( unsigned char newValue );
+        void TriStatePort(); 
+
     protected:
         UserInterface *ui;
         std::string name;
-        unsigned char myPortValue;
+        unsigned char portValue;
         std::map<std::string, Pin*> allPins;
         Pin d0;
         Pin d1;
         Pin d2;
         Pin d3;
+        Pin d4;
+        Pin d5;
+        Pin d6;
+        Pin d7;
 
         Pin enable;
         Pin readWrite;
@@ -73,15 +96,17 @@ class Lcd : public SimulationMember {
         int merke_y;
 
         void LcdWriteData(unsigned char data);
-        unsigned int  LcdWriteCommand(unsigned char command);
+        unsigned int LcdWriteCommand(unsigned char command);
+        unsigned char LcdReadData();
+        unsigned char LcdReadCommand();
 
-        std::ofstream debugOut;
         void SendCursorPosition();
+        bool lastEnable;
+        bool busyFlag;
+        bool mode4bit;
 
-        unsigned char lastPortValue;
-        int readLow;
-        unsigned char command;
-        int enableOld;
+        bool lowNibble;  // in 4 bit mode we first receive/send higher 4 bit data
+        unsigned char data;  // if we are running in 4 bit mode, we carry our read values here
 
     public:
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
