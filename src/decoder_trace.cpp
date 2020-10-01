@@ -450,7 +450,7 @@ int avr_op_LPM_Z::Trace() {
     /* Z is R31:R30 */
     unsigned int Z = core->GetRegZ();
     string sym(core->Flash->GetSymbolAtAddress(Z));
-    traceOut << "FLASH[" << hex << Z << dec << "," << sym << "] ";
+    traceOut << "FLASH[0x" << hex << Z << dec << "," << sym << "] ";
 
     return ret;
 }
@@ -462,7 +462,7 @@ int avr_op_LPM::Trace() {
     /* Z is R31:R30 */
     unsigned int Z = core->GetRegZ();
     string sym(core->Flash->GetSymbolAtAddress(Z));
-    traceOut << "FLASH[" << hex << Z << dec << "," << sym << "] ";
+    traceOut << "FLASH[0x" << hex << Z << dec << "," << sym << "] ";
 
     return ret;
 }
@@ -474,7 +474,7 @@ int avr_op_LPM_Z_incr::Trace() {
     int ret = this->operator()();
     
     string sym(core->Flash->GetSymbolAtAddress(Z));
-    traceOut << "FLASH[" << hex << Z << dec << "," << sym << "] ";
+    traceOut << "FLASH[0x" << hex << Z << dec << "," << sym << "] ";
     return ret;
 }
 

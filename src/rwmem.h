@@ -67,14 +67,15 @@ class RWMemoryMember {
         const std::string &GetTraceName(void) { return tracename; }
         bool IsInvalid(void) const { return isInvalid; } 
 
+        /*! This function as the oppposite to get() is
+          expected to read the real byte. */
+        virtual unsigned char get() const=0;
+
     protected:
         /*! This function is the function which will
           be called by the above access operators and
           is expected to do the real work when writing a byte. */
         virtual void set(unsigned char nv)=0;
-        /*! This function as the oppposite to get() is
-          expected to read the real byte. */
-        virtual unsigned char get() const=0;
     
         /*! If non-null, this is the tracing value
           bound to this memory member. All read/write
@@ -181,7 +182,9 @@ class OSCCALRegister: public RWMemoryMember, public Hardware {
 class RAM : public RWMemoryMember {
     
     public:
-        RAM(TraceValueCoreRegister *registry,
+        RAM(AvrDevice* core_,
+            size_t myAddress_,
+            TraceValueCoreRegister *registry,
             const std::string &tracename,
             const size_t number,
             const size_t maxsize);
@@ -191,6 +194,8 @@ class RAM : public RWMemoryMember {
         void set(unsigned char);
         
     private:
+        AvrDevice* core;
+        size_t myAddress;
         unsigned char value;
         TraceValueCoreRegister *corereg;
 };

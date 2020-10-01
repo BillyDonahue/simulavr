@@ -30,28 +30,26 @@
 #include "memory.h"
 #include "avrerror.h"
 
-using namespace std;
+unsigned int Memory::GetAddressAtSymbol(const std::string &s) {
 
-unsigned int Memory::GetAddressAtSymbol(const string &s) {
-  
     // feature: use a number instead of a symbol
     char *dummy;
     char *copy = avr_new(char, s.length() + 1);
     unsigned int retval = 0;
     unsigned int convlen = 0;
-    
+
     strcpy(copy, s.c_str());
     retval = strtoul(copy, &dummy, 16);
     convlen = (unsigned int)(dummy - copy);
     avr_free(copy);
-    
+
     if((retval != 0) && ((unsigned int)s.length() == convlen)) {
         // number found, return this
         return retval;
     }
 
     // isn't a number, try to find symbol ...
-    multimap<unsigned int, string>::iterator ii;
+    std::multimap<unsigned int, std::string>::iterator ii;
 
     for(ii = sym.begin(); ii != sym.end(); ii++) {
         if(ii->second == s) {
@@ -64,43 +62,62 @@ unsigned int Memory::GetAddressAtSymbol(const string &s) {
     return 0; // to avoid warnings, avr_error aborts the program
 }
 
-string Memory::GetSymbolAtAddress(unsigned int add){
-    string lastName;
-    unsigned int lastAddr = 0;
-    multimap<unsigned int, string>::iterator ii;
-    multimap<unsigned int, string>::iterator last_ii;
 
-    ii = sym.begin();
-    last_ii = ii;
-    if(ii == sym.end())
-        return ""; // we have no symbols at all
-    do {
-        if(lastAddr != ii->first) {
-            last_ii = ii;
-            lastName = ii->second;
+std::string Memory::GetSymbolAtAddress( unsigned int add )
+{
+    std::ostringstream os;
+
+    if ( sym.size() )
+    {
+        // get value behind our address
+        auto it = sym.upper_bound( add );
+
+        // take the symbol where the address is equal or lower than the searched one
+        it--;   
+
+        // get all symbols from that address
+        auto p = sym.equal_range( it->first ); 
+
+        // get the offset the the address we search for
+        unsigned int offset = add- p.first->first;
+
+        // if there is a offset...
+        if ( offset ) { os << "("; }
+
+        // try to suppress symbols beginning with '_', but only if others are present
+        unsigned int found = 100;
+        auto tmp = p.first;
+        for ( ; tmp != p.second; tmp++ )
+        {
+            unsigned int comp = tmp->second.find_first_not_of("_");
+            if ( found > comp ) { found = comp; }
         }
-        lastAddr = ii->first;
 
-        if(ii->first == add)
-            break; // found symbol
-        ii++;
-        if((ii != sym.end()) && (ii->first > add))
-            break; // behind the right symbol
-    } while(ii != sym.end());
-    
-    ostringstream os;
+        // run over all symbols for the address
+        bool isFirst = true;
+        for ( ; p.first != p.second; p.first++ )
+        {
+            if ( found >= p.first->second.find_first_not_of("_") )
+            {
+                if ( isFirst )
+                {
+                    isFirst = false;
+                }
+                else
+                { 
+                    os << ",";
+                }
+                os << p.first->second;
+            }
 
-    os << lastName;
-    ii = last_ii;
-    while((++ii) != sym.end()) { 
-        if(lastAddr != ii->first)
-            break;
-        os << "," << ii->second;
-    };
+        }
 
-    unsigned int offset = add - lastAddr;
-    if((offset) != 0) {
-        os << "+0x" << hex << offset;
+        // print the offset if there is one
+        if( offset ) 
+        {
+            os << ")+0x"<< std::hex<< offset;
+        }
+
     }
 
     return os.str();

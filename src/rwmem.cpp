@@ -36,6 +36,8 @@
 #include "avrdevice.h"
 #include "helper.h"
 #include "rwmem.h"
+#include "avrdevice.h"
+#include "memory.h"
 
 using namespace std;
 
@@ -63,11 +65,11 @@ RWMemoryMember::RWMemoryMember(void):
     tracename(""),
     isInvalid(true) {}
 
-RWMemoryMember::operator unsigned char() const {
-    if (tv)
-        tv->read();
-    return get();
-}
+    RWMemoryMember::operator unsigned char() const {
+        if (tv)
+            tv->read();
+        return get();
+    }
 
 unsigned char RWMemoryMember::operator=(unsigned char val) {
     set(val);
@@ -93,18 +95,18 @@ RWMemoryMember::~RWMemoryMember() {
 
 CLKPRRegister::CLKPRRegister(AvrDevice *core,
                              TraceValueRegister *registry):
-        RWMemoryMember(registry, "CLKPR"),
-        Hardware(core),
-        _core(core) {
-    if(_core->fuses->GetFuseBit(AvrFuses::FB_CKDIV8))
-        value = 3;
-    else
-        value = 0;
-    activate = 0;
+    RWMemoryMember(registry, "CLKPR"),
+    Hardware(core),
+    _core(core) {
+        if(_core->fuses->GetFuseBit(AvrFuses::FB_CKDIV8))
+            value = 3;
+        else
+            value = 0;
+        activate = 0;
 
-    // connect to core to get core cycles
-    core->AddToCycleList(this);
-}
+        // connect to core to get core cycles
+        core->AddToCycleList(this);
+    }
 
 void CLKPRRegister::Reset(void) {
     if(_core->fuses->GetFuseBit(AvrFuses::FB_CKDIV8))
@@ -141,9 +143,9 @@ void CLKPRRegister::set(unsigned char v) {
 }
 
 XDIVRegister::XDIVRegister(AvrDevice *core,
-                             TraceValueRegister *registry):
-        RWMemoryMember(registry, "XDIV"), 
-        Hardware(core)
+                           TraceValueRegister *registry):
+    RWMemoryMember(registry, "XDIV"), 
+    Hardware(core)
 {
     Reset();
 }
@@ -166,11 +168,11 @@ void XDIVRegister::set(unsigned char v) {
 }
 
 OSCCALRegister::OSCCALRegister(AvrDevice *core,
-                             TraceValueRegister *registry,
-                             int cal):
-        RWMemoryMember(registry, "OSCCAL"),
-        Hardware(core),
-        cal_type(cal)
+                               TraceValueRegister *registry,
+                               int cal):
+    RWMemoryMember(registry, "OSCCAL"),
+    Hardware(core),
+    cal_type(cal)
 {
     Reset();
 }
@@ -192,7 +194,10 @@ void OSCCALRegister::set(unsigned char v) {
     value = v;
 }
 
-RAM::RAM(TraceValueCoreRegister *_reg, const std::string &name, const size_t number, const size_t maxsize) {
+RAM::RAM(AvrDevice* core_, size_t myAddress_, TraceValueCoreRegister *_reg, const std::string &name, const size_t number, const size_t maxsize):
+    core{ core_},
+    myAddress{ myAddress_ }
+{
     corereg = _reg;
     value = 0xaa;
     if(name.size()) {
@@ -206,22 +211,66 @@ RAM::RAM(TraceValueCoreRegister *_reg, const std::string &name, const size_t num
     }
 }
 
-unsigned char RAM::get() const { return value; }
+unsigned char RAM::get() const 
+{
+    if (core->trace_on==1) 
+    {
+        // fix me: it makes no sense to compare here if we already know during construction that we are register or io or i/e ram
 
-void RAM::set(unsigned char v) { value=v; }
+        if ( myAddress > 0x20 )
+        {
+            traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress+0x800000)<<"]-->"<<HexChar(value)<<dec<<"--> ";
+        }
+    }
+    return value; 
+}
+
+void RAM::set(unsigned char v) 
+{
+    value=v; 
+    if (core->trace_on==1) 
+    {
+        // fix me: it makes no sense to compare here if we already know during construction that we are register or io or i/e ram
+        if ( myAddress > 0x20 )
+        {
+            traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress+0x800000)<<"]="<<HexChar(v)<<dec<<" ";
+        }
+        else  // register
+        {
+            if (core->trace_on==1) {
+                traceOut << "R" << dec<< myAddress << "=" << HexChar(v) << " ";
+
+                switch (myAddress) {
+                    case 26:
+                    case 27:
+                        traceOut << "X=" << HexShort((core->rw[27]->get()<<8) | core->rw[26]->get()) << " " ;
+                        break;
+                    case 28:
+                    case 29:
+                        traceOut << "X=" << HexShort((core->rw[29]->get()<<8) | core->rw[28]->get()) << " " ;
+                        break;
+                    case 30:
+                    case 31:
+                        traceOut << "X=" << HexShort((core->rw[31]->get()<<8) | core->rw[30]->get()) << " " ;
+                        break;
+                } //end of switch
+            }
+        }
+    }
+}
 
 InvalidMem::InvalidMem(AvrDevice* _c, int _a):
     RWMemoryMember(),
     core(_c),
     addr(_a) {}
 
-unsigned char InvalidMem::get() const {
-    string s = "Invalid read access from IO[0x" + int2hex(addr) + "], PC=0x" + int2hex(core->PC * 2);
-    if(core->abortOnInvalidAccess)
-        avr_error("%s", s.c_str());
-    avr_warning("%s", s.c_str());
-    return 0;
-}
+    unsigned char InvalidMem::get() const {
+        string s = "Invalid read access from IO[0x" + int2hex(addr) + "], PC=0x" + int2hex(core->PC * 2);
+        if(core->abortOnInvalidAccess)
+            avr_error("%s", s.c_str());
+        avr_warning("%s", s.c_str());
+        return 0;
+    }
 
 void InvalidMem::set(unsigned char c) {
     string s = "Invalid write access to IO[0x" + int2hex(addr) +
@@ -234,10 +283,10 @@ void InvalidMem::set(unsigned char c) {
 NotSimulatedRegister::NotSimulatedRegister(const char * message_on_access_)
     : message_on_access(message_on_access_)  {}
 
-unsigned char NotSimulatedRegister::get() const {
-    avr_warning("%s (read from register)", message_on_access);
-    return 0;
-}
+    unsigned char NotSimulatedRegister::get() const {
+        avr_warning("%s (read from register)", message_on_access);
+        return 0;
+    }
 
 void NotSimulatedRegister::set(unsigned char c) {
     avr_warning("%s (write 0x%02x to register)", message_on_access, (unsigned)c);

@@ -57,6 +57,12 @@ class DecodedInstruction {
 		virtual unsigned char GetModifiedR() const {return -1;}
 		//! If this instruction modifies a pair of R0-R31 registers then ...
 		virtual unsigned char GetModifiedRHi() const {return -1;}
+
+        //! Helper to trace register values
+        void TraceRegister( unsigned int regnum )
+        {
+            traceOut << " R" << std::dec << regnum << "=0x" << std::hex << std::setfill('0') << std::setw(2) << (unsigned int)core->GetCoreReg(regnum);
+        }
 };
 
 //! Translates an opcode to a instance of DecodedInstruction

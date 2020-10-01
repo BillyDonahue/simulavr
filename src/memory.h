@@ -41,7 +41,6 @@ class Memory {
         unsigned int size; /*!< allocated size (in bytes) of myMemory */
         
     public:
-
         unsigned char *myMemory; /*!< THE memory block content itself */
         
         /*! address to symbol map */

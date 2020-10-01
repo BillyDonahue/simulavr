@@ -283,6 +283,11 @@ void HWIrqSystem::IrqHandlerFinished(unsigned int vector) {
         irqStatistic.entries[vector].actual.handlerFinished=SystemClock::Instance().GetCurrentTime();
     }
     irqStatistic.entries[vector].CheckComplete();
+
+    if ( core->trace_on )
+    {
+        traceOut << irqStatistic << std::endl;
+    }
 }
 
 void HWIrqSystem::DebugVerifyInterruptVector(unsigned int vector, const Hardware* source) {

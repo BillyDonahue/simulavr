@@ -196,7 +196,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     unsigned invalidRWOffset = 0;
 
     for(unsigned ii = 0; ii < registerSpaceSize; ii++) {
-        rw[currentOffset] = new RAM(&coreTraceGroup, "r", ii, registerSpaceSize);
+        rw[currentOffset] = new RAM(this,currentOffset,&coreTraceGroup, "r", ii, registerSpaceSize);
         if(rw[currentOffset] == NULL)
             avr_error("Not enough memory for registers in AvrDevice::AvrDevice");
         currentOffset++;
@@ -218,7 +218,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
 
     // create the internal ram handlers 
     for(unsigned ii = 0; ii < IRamSize; ii++ ) {
-        rw[currentOffset] = new RAM(&coreTraceGroup, "IRAM", ii, IRamSize);
+        rw[currentOffset] = new RAM(this,currentOffset, &coreTraceGroup, "IRAM", ii, IRamSize);
         if(rw[currentOffset] == NULL)
             avr_error("Not enough memory for IRAM in AvrDevice::AvrDevice");
         currentOffset++;
@@ -227,7 +227,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     // create the external ram handlers, TODO: make the configuration from
     // mcucr available here
     for(unsigned ii = 0; ii < ERamSize; ii++ ) {
-        rw[currentOffset] = new RAM(&coreTraceGroup, "ERAM", ii, ERamSize);
+        rw[currentOffset] = new RAM(this,currentOffset,&coreTraceGroup, "ERAM", ii, ERamSize);
         if(rw[currentOffset] == NULL)
             avr_error("Not enough memory for io space in AvrDevice::AvrDevice");
         currentOffset++;
