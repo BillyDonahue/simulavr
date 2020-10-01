@@ -188,13 +188,13 @@ void ELFLoad(const AvrDevice * core) {
                     core->Flash->AddSymbol(p);
                 } else if(value < 0x810000) {
                     // range of ram (.data)
-                    ELFIO::Elf64_Addr offset = value - 0x800000;
+                    ELFIO::Elf64_Addr offset = value; // - 0x800000;
                     std::pair<unsigned int, std::string> p(offset, name);
 
                     core->data->AddSymbol(p);
                 } else if(value < 0x820000) {
                     // range of eeprom (.eeprom)
-                    ELFIO::Elf64_Addr offset = value - 0x810000;
+                    ELFIO::Elf64_Addr offset = value; // - 0x810000;
                     std::pair<unsigned int, std::string> p(offset, name);
 
                     core->eeprom->AddSymbol(p);
