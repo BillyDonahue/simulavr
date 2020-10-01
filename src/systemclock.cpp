@@ -36,13 +36,13 @@
 
 using namespace std;
 
-template<typename Key, typename Value>
+    template<typename Key, typename Value>
 MinHeap<Key, Value>::MinHeap()
 {
     this->reserve(10);  // vector would free&malloc when we keep inserting and removing only 1 element.
 }
 
-template<typename Key, typename Value>
+    template<typename Key, typename Value>
 void MinHeap<Key, Value>::RemoveMinimum()
 {
     assert(!this->empty());
@@ -64,7 +64,7 @@ bool MinHeap<Key, Value>::ContainsValue(Value v) const
     return false;
 }
 
-template<typename Key, typename Value>
+    template<typename Key, typename Value>
 void MinHeap<Key, Value>::InsertInternal(Key k, Value v, unsigned pos)
 {
     for(unsigned i = pos;;) {
@@ -82,7 +82,7 @@ void MinHeap<Key, Value>::InsertInternal(Key k, Value v, unsigned pos)
     }
 }
 
-template<typename Key, typename Value>
+    template<typename Key, typename Value>
 void MinHeap<Key, Value>::RemoveAtPositionAndInsertInternal(Key k, Value v, unsigned pos)
 {
     assert(pos < this->size());
@@ -140,20 +140,25 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
     // 0-> return also if cpu in waitstate 
     // 1-> return if cpu is really finished
     int res = 0; // returns the state from a core step. Needed by gdb-server to
-                 // watch for breakpoints
+    // watch for breakpoints
 
     static vector<SimulationMember*>::iterator ami;
     static vector<SimulationMember*>::iterator amiEnd;
 
-//    std::cout << "Step" << std::endl;
+    //    std::cout << "Step" << std::endl;
 
     if(syncMembers.begin() != syncMembers.end()) {
         // take simulation member and current simulation time from time table
-        SimulationMember * core = syncMembers.begin()->second;
+        SimulationMember* core = syncMembers.begin()->second;
         currentTime = syncMembers.begin()->first;
         SystemClockOffset nextStepIn_ns = -1;
-        
+
         syncMembers.RemoveMinimum();
+
+        if ( sysConHandler.GetTraceState() && core->trace_on )
+        {
+            traceOut << std::dec << FormattedTime( currentTime ) << " ";
+        }
 
         // do a step on simulation member
         int rc = core->Step(untilCoreStepFinished, &nextStepIn_ns);
@@ -166,7 +171,7 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
             nextStepIn_ns += currentTime;
         // if nextStepIn_ns is < 0, it means, that this simulation member will not
         // be called anymore!
-        
+
         if(nextStepIn_ns > 0)
             syncMembers.Insert(nextStepIn_ns, core);
 
@@ -174,6 +179,12 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
         amiEnd = asyncMembers.end();
         for(ami = asyncMembers.begin(); ami != amiEnd; ami++) {
             bool untilCoreStepFinished = false;
+
+            if ( sysConHandler.GetTraceState() && (*ami)->trace_on )
+            {
+                traceOut << std::dec <<  FormattedTime( currentTime ) << " ";
+            }
+
             (*ami)->Step(untilCoreStepFinished, 0);
         }
     }
@@ -218,7 +229,7 @@ long SystemClock::Endless() {
     long steps = 0;
 
     breakMessage = false;        // if we run a second loop, clear break before entering loop
-    
+
     signal(SIGINT, OnBreak);
     signal(SIGTERM, OnBreak);
 
@@ -233,9 +244,9 @@ long SystemClock::Endless() {
 
 long SystemClock::Run(SystemClockOffset maxRunTime) {
     long steps = 0;
-    
+
     breakMessage = false;        // if we run a second loop, clear break before entering loop
-    
+
     signal(SIGINT, OnBreak);
     signal(SIGTERM, OnBreak);
 
@@ -253,12 +264,12 @@ long SystemClock::Run(SystemClockOffset maxRunTime) {
 long SystemClock::RunTimeRange(SystemClockOffset timeRange) {
     long steps = 0;
     bool untilCoreStepFinished;
-    
+
     breakMessage = false;        // if we run a second loop, clear break before entering loop
-    
+
     signal(SIGINT, OnBreak);
     signal(SIGTERM, OnBreak);
-    
+
     timeRange += SystemClock::Instance().GetCurrentTime();
     while((breakMessage == false) && (SystemClock::Instance().GetCurrentTime() < timeRange)) {
         untilCoreStepFinished = false;
@@ -266,7 +277,7 @@ long SystemClock::RunTimeRange(SystemClockOffset timeRange) {
             break;
         steps++;
     }
-    
+
     return steps;
 }
 
@@ -274,3 +285,8 @@ SystemClock& SystemClock::Instance() {
     static SystemClock obj;
     return obj;
 }
+
+SystemClockOffset SystemClock::Now() {
+    return SystemClock::Instance().GetCurrentTime();
+}
+

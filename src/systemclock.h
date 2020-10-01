@@ -114,6 +114,9 @@ class SystemClock
         //! Returns the central SystemClock instance for the application
         /*! There will be only one instance on a application! */
         static SystemClock& Instance();
+
+        static SystemClockOffset Now();
+
         //! Moves the given simulation member to a new place in time table
         /*! The next time, simulation member will be called, is calculated as a
             given offset to current simulation time + 1.
