@@ -60,13 +60,13 @@ void HWStack::SetReturnPoint(unsigned long stackPointer, Funktor *f) {
     returnPointList.insert(make_pair(stackPointer, f));
 }
 
-HWStackSram::HWStackSram(AvrDevice *c, int bs, bool initRE):
-    HWStack(c),
-    TraceValueRegister(c, "STACK"),
+HWStackSram::HWStackSram(AvrDevice *core, int bs, bool initRE):
+    HWStack(core),
+    TraceValueRegister(core, "STACK"),
     initRAMEND(initRE),
-    sph_reg(this, "SPH",
+    sph_reg(core, this, "SPH",
             this, &HWStackSram::GetSph, &HWStackSram::SetSph),
-    spl_reg(this, "SPL",
+    spl_reg(core, this, "SPL",
             this, &HWStackSram::GetSpl, &HWStackSram::SetSpl)
 {
     stackCeil = 1 << bs;  // TODO: The number of bits is unable to acurately represent 0x460 ceiling of ATmega8: has 1024 B RAM (0x400) and 32+64 (0x60) registers.

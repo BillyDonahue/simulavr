@@ -311,4 +311,3 @@ void IOSpecialReg::set(unsigned char val) {
     value = val;
 }
 
-// EOF

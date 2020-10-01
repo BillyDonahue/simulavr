@@ -589,11 +589,11 @@ HWTimer8::HWTimer8(AvrDevice *core,
                    IRQLine* tcompB,
                    PinAtPort* outB):
     BasicTimerUnit(core, p, unit, tov, NULL, NULL, 8),
-    tcnt_reg(this, "TCNT",
+    tcnt_reg(core, this, "TCNT",
              this, &HWTimer8::Get_TCNT, &HWTimer8::Set_TCNT),
-    ocra_reg(this, "OCRA",
+    ocra_reg(core, this, "OCRA",
              this, &HWTimer8::Get_OCRA, &HWTimer8::Set_OCRA),
-    ocrb_reg(this, "OCRB",
+    ocrb_reg(core, this, "OCRB",
              this, &HWTimer8::Get_OCRB, &HWTimer8::Set_OCRB)
 {
     // enable OC units and disable registers
@@ -698,25 +698,25 @@ HWTimer16::HWTimer16(AvrDevice *core,
                      IRQLine* ticap,
                      ICaptureSource* icapsrc):
     BasicTimerUnit(core, p, unit, tov, ticap, icapsrc, 16),
-    tcnt_h_reg(this, "TCNTH",
+    tcnt_h_reg(core, this, "TCNTH",
                this, &HWTimer16::Get_TCNTH, &HWTimer16::Set_TCNTH),
-    tcnt_l_reg(this, "TCNTL",
+    tcnt_l_reg(core, this, "TCNTL",
                this, &HWTimer16::Get_TCNTL, &HWTimer16::Set_TCNTL),
-    ocra_h_reg(this, "OCRAH",
+    ocra_h_reg(core, this, "OCRAH",
                this, &HWTimer16::Get_OCRAH, &HWTimer16::Set_OCRAH),
-    ocra_l_reg(this, "OCRAL",
+    ocra_l_reg(core, this, "OCRAL",
                this, &HWTimer16::Get_OCRAL, &HWTimer16::Set_OCRAL),
-    ocrb_h_reg(this, "OCRBH",
+    ocrb_h_reg(core, this, "OCRBH",
                this, &HWTimer16::Get_OCRBH, &HWTimer16::Set_OCRBH),
-    ocrb_l_reg(this, "OCRBL",
+    ocrb_l_reg(core, this, "OCRBL",
                this, &HWTimer16::Get_OCRBL, &HWTimer16::Set_OCRBL),
-    ocrc_h_reg(this, "OCRCH",
+    ocrc_h_reg(core, this, "OCRCH",
                this, &HWTimer16::Get_OCRCH, &HWTimer16::Set_OCRCH),
-    ocrc_l_reg(this, "OCRCL",
+    ocrc_l_reg(core, this, "OCRCL",
                this, &HWTimer16::Get_OCRCL, &HWTimer16::Set_OCRCL),
-    icr_h_reg(this, "ICRH",
+    icr_h_reg(core, this, "ICRH",
               this, &HWTimer16::Get_ICRH, &HWTimer16::Set_ICRH),
-    icr_l_reg(this, "ICRL",
+    icr_l_reg(core, this, "ICRL",
               this, &HWTimer16::Get_ICRL, &HWTimer16::Set_ICRL)
 {
     // enable OC units and disable registers
@@ -922,7 +922,7 @@ HWTimer8_0C::HWTimer8_0C(AvrDevice *core,
                          int unit,
                          IRQLine* tov):
     HWTimer8(core, p, unit, tov, NULL, NULL, NULL, NULL),
-    tccr_reg(this, "TCCR",
+    tccr_reg(core, this, "TCCR",
              this, &HWTimer8_0C::Get_TCCR, &HWTimer8_0C::Set_TCCR)
 {
     ChangeWGM(WGM_NORMAL);
@@ -945,7 +945,7 @@ HWTimer8_1C::HWTimer8_1C(AvrDevice *core,
                          IRQLine* tcompA,
                          PinAtPort* outA):
     HWTimer8(core, p, unit, tov, tcompA, outA, NULL, NULL),
-    tccr_reg(this, "TCCR",
+    tccr_reg(core, this, "TCCR",
              this, &HWTimer8_1C::Get_TCCR, &HWTimer8_1C::Set_TCCR) {}
 
 void HWTimer8_1C::Set_TCCR(unsigned char val) {
@@ -982,9 +982,9 @@ HWTimer8_2C::HWTimer8_2C(AvrDevice *core,
                          IRQLine* tcompB,
                          PinAtPort* outB):
     HWTimer8(core, p, unit, tov, tcompA, outA, tcompB, outB),
-    tccra_reg(this, "TCCRA",
+    tccra_reg(core, this, "TCCRA",
              this, &HWTimer8_2C::Get_TCCRA, &HWTimer8_2C::Set_TCCRA),
-    tccrb_reg(this, "TCCRB",
+    tccrb_reg(core, this, "TCCRB",
              this, &HWTimer8_2C::Get_TCCRB, &HWTimer8_2C::Set_TCCRB) {}
 
 void HWTimer8_2C::Set_WGM(int val) {
@@ -1052,9 +1052,9 @@ HWTimer16_1C::HWTimer16_1C(AvrDevice *core,
                            IRQLine* ticap,
                            ICaptureSource* icapsrc):
     HWTimer16(core, p, unit, tov, tcompA, outA, NULL, NULL, NULL, NULL, ticap, icapsrc),
-    tccra_reg(this, "TCCRA",
+    tccra_reg(core, this, "TCCRA",
               this, &HWTimer16_1C::Get_TCCRA, &HWTimer16_1C::Set_TCCRA),
-    tccrb_reg(this, "TCCRB",
+    tccrb_reg(core, this, "TCCRB",
               this, &HWTimer16_1C::Get_TCCRB, &HWTimer16_1C::Set_TCCRB) {}
 
 void HWTimer16_1C::Set_WGM(int val) {
@@ -1119,9 +1119,9 @@ HWTimer16_2C2::HWTimer16_2C2(AvrDevice *core,
                              bool is_at8515):
     HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, NULL, NULL, ticap, icapsrc),
     at8515_mode(is_at8515),
-    tccra_reg(this, "TCCRA",
+    tccra_reg(core, this, "TCCRA",
               this, &HWTimer16_2C2::Get_TCCRA, &HWTimer16_2C2::Set_TCCRA),
-    tccrb_reg(this, "TCCRB",
+    tccrb_reg(core, this, "TCCRB",
               this, &HWTimer16_2C2::Get_TCCRB, &HWTimer16_2C2::Set_TCCRB)
 {}
 
@@ -1198,11 +1198,11 @@ HWTimer16_2C3::HWTimer16_2C3(AvrDevice *core,
                              IRQLine* ticap,
                              ICaptureSource* icapsrc):
     HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, NULL, NULL, ticap, icapsrc),
-    tccra_reg(this, "TCCRA",
+    tccra_reg(core, this, "TCCRA",
               this, &HWTimer16_2C3::Get_TCCRA, &HWTimer16_2C3::Set_TCCRA),
-    tccrb_reg(this, "TCCRB",
+    tccrb_reg(core, this, "TCCRB",
               this, &HWTimer16_2C3::Get_TCCRB, &HWTimer16_2C3::Set_TCCRB),
-    tccrc_reg(this, "TCCRC",
+    tccrc_reg(core, this, "TCCRC",
               this, &HWTimer16_2C3::Get_TCCRC, &HWTimer16_2C3::Set_TCCRC) {}
 
 void HWTimer16_2C3::Set_TCCRA(unsigned char val) {
@@ -1260,11 +1260,11 @@ HWTimer16_3C::HWTimer16_3C(AvrDevice *core,
                            IRQLine* ticap,
                            ICaptureSource* icapsrc):
     HWTimer16(core, p, unit, tov, tcompA, outA, tcompB, outB, tcompC, outC, ticap, icapsrc),
-    tccra_reg(this, "TCCRA",
+    tccra_reg(core, this, "TCCRA",
               this, &HWTimer16_3C::Get_TCCRA, &HWTimer16_3C::Set_TCCRA),
-    tccrb_reg(this, "TCCRB",
+    tccrb_reg(core, this, "TCCRB",
               this, &HWTimer16_3C::Get_TCCRB, &HWTimer16_3C::Set_TCCRB),
-    tccrc_reg(this, "TCCRC",
+    tccrc_reg(core, this, "TCCRC",
               this, &HWTimer16_3C::Get_TCCRC, &HWTimer16_3C::Set_TCCRC) {}
 
 void HWTimer16_3C::Set_TCCRA(unsigned char val) {
@@ -1339,21 +1339,21 @@ HWTimerTinyX5::HWTimerTinyX5(AvrDevice *core,
     timerOverflowInt(tov),
     timerOCRAInt(tocra),
     timerOCRBInt(tocrb),
-    tccr_reg(this, "TCCR1",
+    tccr_reg(core, this, "TCCR1",
              this, &HWTimerTinyX5::Get_TCCR, &HWTimerTinyX5::Set_TCCR),
-    tcnt_reg(this, "TCNT1",
+    tcnt_reg(core, this, "TCNT1",
              this, &HWTimerTinyX5::Get_TCNT, &HWTimerTinyX5::Set_TCNT),
-    tocra_reg(this, "OCR1A",
+    tocra_reg(core, this, "OCR1A",
               this, &HWTimerTinyX5::Get_OCRA, &HWTimerTinyX5::Set_OCRA),
-    tocrb_reg(this, "OCR1B",
+    tocrb_reg(core, this, "OCR1B",
               this, &HWTimerTinyX5::Get_OCRB, &HWTimerTinyX5::Set_OCRB),
-    tocrc_reg(this, "OCR1C",
+    tocrc_reg(core, this, "OCR1C",
               this, &HWTimerTinyX5::Get_OCRC, &HWTimerTinyX5::Set_OCRC),
-    dtps1_reg(this, "DTPS1",
+    dtps1_reg(core, this, "DTPS1",
               this, &HWTimerTinyX5::Get_DTPS1, &HWTimerTinyX5::Set_DTPS1),
-    dt1a_reg(this, "DT1A",
+    dt1a_reg(core, this, "DT1A",
              this, &HWTimerTinyX5::Get_DT1A, &HWTimerTinyX5::Set_DT1A),
-    dt1b_reg(this, "DT1B",
+    dt1b_reg(core, this, "DT1B",
              this, &HWTimerTinyX5::Get_DT1B, &HWTimerTinyX5::Set_DT1B)
 {
     // gtccr and pllcsr register

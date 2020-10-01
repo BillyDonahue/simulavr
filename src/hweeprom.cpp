@@ -32,24 +32,24 @@
 
 using namespace std;
 
-HWEeprom::HWEeprom(AvrDevice *_core,
+HWEeprom::HWEeprom(AvrDevice *core_,
                    HWIrqSystem *_irqSystem,
                    unsigned int size,
                    unsigned int irqVec,
                    int devMode):
-    Hardware(_core),
+    Hardware(core_),
     Memory(size),
-    TraceValueRegister(_core, "EEPROM"),
-    core(_core),
+    TraceValueRegister(core_, "EEPROM"),
+    core(core_),
     irqSystem(_irqSystem),
     irqVectorNo(irqVec),
-    eearh_reg(this, "EEARH",
+    eearh_reg(core_, this, "EEARH",
               this, &HWEeprom::GetEearh, &HWEeprom::SetEearh),
-    eearl_reg(this, "EEARL",
+    eearl_reg(core_, this, "EEARL",
               this, &HWEeprom::GetEearl, &HWEeprom::SetEearl),
-    eedr_reg(this, "EEDR",
+    eedr_reg(core_, this, "EEDR",
              this, &HWEeprom::GetEedr, &HWEeprom::SetEedr),
-    eecr_reg(this, "EECR",
+    eecr_reg(core_, this, "EECR",
              this, &HWEeprom::GetEecr, &HWEeprom::SetEecr)
 {
     if(irqSystem)

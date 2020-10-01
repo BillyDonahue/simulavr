@@ -49,15 +49,15 @@ void FlashProgramming::SetRWWLock(unsigned int addr) {
     }
 }
 
-FlashProgramming::FlashProgramming(AvrDevice *c,
+FlashProgramming::FlashProgramming(AvrDevice *core_,
                                    unsigned int pgsz,
                                    unsigned int nrww,
                                    int mode):
-    Hardware(c),
+    Hardware(core_),
     pageSize(pgsz),
     nrww_addr(nrww),
-    core(c),
-    spmcr_reg(c, "SPMCR",
+    core(core_),
+    spmcr_reg(core_, core_, "SPMCR",
               this, &FlashProgramming::GetSpmcr, &FlashProgramming::SetSpmcr)
 {
     // initialize hidden buffer

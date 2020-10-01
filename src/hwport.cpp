@@ -37,11 +37,11 @@ HWPort::HWPort(AvrDevice *core, const string &name, bool portToggle, int size):
     myName(name),
     portSize(size),
     portToggleFeature(portToggle),
-    port_reg(this, "PORT",
+    port_reg(core, this, "PORT"+ name,
              this, &HWPort::GetPort, &HWPort::SetPort),
-    pin_reg(this, "PIN",
+    pin_reg(core, this, "PIN"+ name,
             this, &HWPort::GetPin, &HWPort::SetPin),
-    ddr_reg(this, "DDR",
+    ddr_reg(core, this, "DDR"+ name,
             this, &HWPort::GetDdr, &HWPort::SetDdr)
 {
     assert((portSize >= 1) && (portSize <= sizeof(p)/sizeof(p[0])));

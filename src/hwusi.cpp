@@ -201,20 +201,20 @@ void HWUSI::controlTWI(bool state) {
     SCK.SetUseAlternatePortIfDdrSet(state);
 }
 
-HWUSI::HWUSI(AvrDevice *_c,
+HWUSI::HWUSI(AvrDevice *core_,
          HWIrqSystem *_irq,
          PinAtPort din,
          PinAtPort dout,
          PinAtPort sck,
          unsigned int ivec_start,
          unsigned int ivec_ovr):
-    Hardware(_c), TraceValueRegister(_c, "USI"),
-    core(_c), irq(_irq),
+    Hardware(core_), TraceValueRegister(core_, "USI"),
+    core(core_), irq(_irq),
     DI(din), DO(dout), SCK(sck),
     irq_start(ivec_start), irq_ovr(ivec_ovr),
-    usidr_reg(this, "USIDR", this, &HWUSI::GetUSIDR, &HWUSI::SetUSIDR),
-    usisr_reg(this, "USISR", this, &HWUSI::GetUSISR, &HWUSI::SetUSISR),
-    usicr_reg(this, "USICR", this, &HWUSI::GetUSICR, &HWUSI::SetUSICR)
+    usidr_reg(core_, this, "USIDR", this, &HWUSI::GetUSIDR, &HWUSI::SetUSIDR),
+    usisr_reg(core_, this, "USISR", this, &HWUSI::GetUSISR, &HWUSI::SetUSISR),
+    usicr_reg(core_, this, "USICR", this, &HWUSI::GetUSICR, &HWUSI::SetUSICR)
 {
     irq->DebugVerifyInterruptVector(ivec_start, this);
     irq->DebugVerifyInterruptVector(ivec_ovr, this);
@@ -358,15 +358,15 @@ void HWUSI::fireEvent(int event) {
     }
 }
 
-HWUSI_BR::HWUSI_BR(AvrDevice *_c,
+HWUSI_BR::HWUSI_BR(AvrDevice *core_,
          HWIrqSystem *_irq,
          PinAtPort din,
          PinAtPort dout,
          PinAtPort sck,
          unsigned int ivec_start,
          unsigned int ivec_ovr):
-    HWUSI(_c, _irq, din, dout, sck, ivec_start, ivec_ovr),
-    usibr_reg(this, "USIBR", this, &HWUSI_BR::GetUSIBR, &HWUSI_BR::SetUSIBR)
+    HWUSI(core_, _irq, din, dout, sck, ivec_start, ivec_ovr),
+    usibr_reg(core_, this, "USIBR", this, &HWUSI_BR::GetUSIBR, &HWUSI_BR::SetUSIBR)
 {
     Reset();
 }

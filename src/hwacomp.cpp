@@ -52,7 +52,7 @@ HWAcomp::HWAcomp(AvrDevice *core,
     timerB(_timerB),
     ad(_ad),
     sfior(_sfior),
-    acsr_reg(this, "ACSR", this, &HWAcomp::GetAcsr, &HWAcomp::SetAcsr)
+    acsr_reg(core, this, "ACSR", this, &HWAcomp::GetAcsr, &HWAcomp::SetAcsr)
 {
     // just check right assignment of IRQ vector number
     irqSystem->DebugVerifyInterruptVector(irqVec, this);

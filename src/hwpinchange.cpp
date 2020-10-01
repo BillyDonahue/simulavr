@@ -5,7 +5,7 @@
 
 using namespace std;
 
-HWPcir::HWPcir(	AvrDevice*		avr,
+HWPcir::HWPcir(	AvrDevice*		core,
 				HWIrqSystem&	irqSystem,
 				unsigned		vector0,
 				unsigned		vector1,
@@ -16,7 +16,7 @@ HWPcir::HWPcir(	AvrDevice*		avr,
 				unsigned		vector6,
 				unsigned		vector7
 				) throw():
-		Hardware(avr),
+		Hardware(core),
 		_pcifr(0),
 		_pcicr(0),
 		_irqSystem(irqSystem),
@@ -28,9 +28,9 @@ HWPcir::HWPcir(	AvrDevice*		avr,
 		_vector5(vector5),
 		_vector6(vector6),
 		_vector7(vector7),
-        pcicr_reg(avr, "PINCHANGE.PCICR", this, &HWPcir::getPcicrMask,
+        pcicr_reg(core, core, "PINCHANGE.PCICR", this, &HWPcir::getPcicrMask,
                   &HWPcir::setPcicrMask),
-        pcifr_reg(avr, "PINCHANGE.PCIFR", this, &HWPcir::getPcifrMask,
+        pcifr_reg(core, core, "PINCHANGE.PCIFR", this, &HWPcir::getPcifrMask,
                   &HWPcir::setPcifrMask)
 {
 	assert(false);  // Unreachable. No code ever constructs this class.
@@ -210,7 +210,7 @@ HWPcmsk::HWPcmsk(
 		_pcifrApi(pcifrApi),
 		_pcmsk(0),
 		_pcifrBit(pcifrBit),
-        pcmsk_reg(core, "PINCHANGE.PCMSK",
+        pcmsk_reg(core, core, "PINCHANGE.PCMSK",
                   this, &HWPcmsk::getPcmskMask,
                   &HWPcmsk::setPcmskMask)
 		{

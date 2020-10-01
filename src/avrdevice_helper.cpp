@@ -2,7 +2,7 @@
  ****************************************************************************
  *
  * simulavr - A simulator for the Atmel AVR family of microcontrollers.
- * Copyright (C) 2001, 2002, 2003   Klaus Rudolph		
+ * Copyright (C) 2020   Klaus Rudolph       
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,18 +23,10 @@
  *  $Id$
  */
 
-#include "ioregs.h"
 
-AddressExtensionRegister::AddressExtensionRegister(AvrDevice *core,
-                                                   const std::string &regname,
-                                                   unsigned bitsize):
-    Hardware(core),
-    TraceValueRegister(core, regname),
-    reg_mask((1 << bitsize) - 1),
-    ext_reg(core, this, regname,
-            this, &AddressExtensionRegister::GetRegVal, &AddressExtensionRegister::SetRegVal)
+#include "avrdevice.h"
+
+bool IsTraceOn( AvrDevice* core )
 {
-    Reset();
+    return core->trace_on;
 }
-
-// EOF

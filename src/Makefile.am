@@ -57,7 +57,7 @@ libsim_la_SOURCES = \
   ioregs.cpp irqsystem.cpp ui/keyboard.cpp ui/lcd.cpp memory.cpp \
   ui/mysocket.cpp net.cpp pin.cpp ui/extpin.cpp pinatport.cpp pinmon.cpp \
   rwmem.cpp ui/scope.cpp ui/serialrx.cpp ui/serialtx.cpp spisrc.cpp spisink.cpp \
-  specialmem.cpp string2.cpp systemclock.cpp traceval.cpp ui/ui.cpp 
+  specialmem.cpp string2.cpp systemclock.cpp traceval.cpp ui/ui.cpp avrdevice_helper.cpp
 
 libsim_la_LDFLAGS = -shared -avoid-version -rpath $(libdir)
 libsim_la_LIBADD = $(LIBWSOCK_FLAGS)
