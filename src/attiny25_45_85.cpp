@@ -105,16 +105,16 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
     gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
     gpior2_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR2");
     
-    gimsk_reg = new IOSpecialReg(&coreTraceGroup, "GIMSK");
-    gifr_reg = new IOSpecialReg(&coreTraceGroup, "GIFR");
-    mcucr_reg = new IOSpecialReg(&coreTraceGroup, "MCUCR");
-    pcmsk_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK");
+    gimsk_reg = new IOSpecialReg(this, &coreTraceGroup, "GIMSK");
+    gifr_reg = new IOSpecialReg(this, &coreTraceGroup, "GIFR");
+    mcucr_reg = new IOSpecialReg(this, &coreTraceGroup, "MCUCR");
+    pcmsk_reg = new IOSpecialReg(this, &coreTraceGroup, "PCMSK");
     extirq = new ExternalIRQHandler(this, irqSystem, gimsk_reg, gifr_reg);
     extirq->registerIrq(1, 6, new ExternalIRQSingle(mcucr_reg, 0, 2, GetPin("B2")));
     extirq->registerIrq(2, 5, new ExternalIRQPort(pcmsk_reg, portb));
 
     // GTCCR register and timer 0
-    gtccr_reg = new IOSpecialReg(&coreTraceGroup, "GTCCR");
+    gtccr_reg = new IOSpecialReg(this, &coreTraceGroup, "GTCCR");
     prescaler0 = new HWPrescaler(this, "0", gtccr_reg, 0, 7);
 
     timer01irq = new TimerIRQRegister(this, irqSystem);
@@ -135,7 +135,7 @@ AvrDevice_attinyX5::AvrDevice_attinyX5(unsigned ram_bytes,
                              new PinAtPort(portb, 1));
 
     // PLLCSR register and timer 1
-    pllcsr_reg = new IOSpecialReg(&coreTraceGroup, "PLLCSR");
+    pllcsr_reg = new IOSpecialReg(this, &coreTraceGroup, "PLLCSR");
     timer1 = new HWTimerTinyX5(this,
                                gtccr_reg,
                                pllcsr_reg,

@@ -84,8 +84,8 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
     porte(this, "E", true),
     portf(this, "F", true),
     portg(this, "G", true),
-    gtccr_reg(&coreTraceGroup, "GTCCR"),
-    assr_reg(&coreTraceGroup, "ASSR"),
+    gtccr_reg(this,&coreTraceGroup, "GTCCR"),
+    assr_reg(this,&coreTraceGroup, "ASSR"),
     prescaler013(this, "01", &gtccr_reg, 0, 7),
     prescaler2(this, "2", PinAtPort(&portc, 7), &assr_reg, 5, &gtccr_reg, 1, 7) {
     flagELPMInstructions = true;
@@ -111,10 +111,10 @@ AvrDevice_at90canbase::AvrDevice_at90canbase(unsigned ram_bytes,
 
     rampz = new AddressExtensionRegister(this, "RAMPZ", 1);
 
-    eicra_reg = new IOSpecialReg(&coreTraceGroup, "EICRA");
-    eicrb_reg = new IOSpecialReg(&coreTraceGroup, "EICRB");
-    eimsk_reg = new IOSpecialReg(&coreTraceGroup, "EIMSK");
-    eifr_reg =  new IOSpecialReg(&coreTraceGroup, "EIFR");
+    eicra_reg = new IOSpecialReg(this,&coreTraceGroup, "EICRA");
+    eicrb_reg = new IOSpecialReg(this,&coreTraceGroup, "EICRB");
+    eimsk_reg = new IOSpecialReg(this,&coreTraceGroup, "EIMSK");
+    eifr_reg =  new IOSpecialReg(this,&coreTraceGroup, "EIFR");
     extirq01 = new ExternalIRQHandler(this, irqSystem, eimsk_reg, eifr_reg);
     extirq01->registerIrq(1, 0, new ExternalIRQSingle(eicra_reg, 0, 2, GetPin("D0")));
     extirq01->registerIrq(2, 1, new ExternalIRQSingle(eicra_reg, 2, 2, GetPin("D1")));

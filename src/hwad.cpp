@@ -298,21 +298,21 @@ bool HWAdmuxT25::IsDifferenceChannel(int select) {
     return (adChannel >= 4) && (adChannel < 12);
 }
 
-HWAd::HWAd(AvrDevice *c, int _typ, HWIrqSystem *i, unsigned int iv, HWAdmux *a, HWARef *r):
-    Hardware(c),
-    TraceValueRegister(c, "AD"),
+HWAd::HWAd(AvrDevice* core_, int _typ, HWIrqSystem *i, unsigned int iv, HWAdmux *a, HWARef *r):
+    Hardware(core_),
+    TraceValueRegister(core_, "AD"),
     adType(_typ),
-    core(c),
+    core(core_),
     mux(a),
     aref(r),
     irqSystem(i),
     irqVec(iv),
     notifyClient(NULL),
-    adch_reg(this, "ADCH",  this, &HWAd::GetAdch, 0),
-    adcl_reg(this, "ADCL",  this, &HWAd::GetAdcl, 0),
-    adcsra_reg(this, "ADCSRA", this, &HWAd::GetAdcsrA, &HWAd::SetAdcsrA),
-    adcsrb_reg(this, "ADCSRB", this, &HWAd::GetAdcsrB, &HWAd::SetAdcsrB),
-    admux_reg(this, "ADMUX", this, &HWAd::GetAdmux, &HWAd::SetAdmux) {
+    adch_reg(core_, this, "ADCH",  this, &HWAd::GetAdch, 0),
+    adcl_reg(core_, this, "ADCL",  this, &HWAd::GetAdcl, 0),
+    adcsra_reg(core_, this, "ADCSRA", this, &HWAd::GetAdcsrA, &HWAd::SetAdcsrA),
+    adcsrb_reg(core_, this, "ADCSRB", this, &HWAd::GetAdcsrB, &HWAd::SetAdcsrB),
+    admux_reg(core_, this, "ADMUX", this, &HWAd::GetAdmux, &HWAd::SetAdmux) {
     mux->RegisterNotifyClient(this);
     irqSystem->DebugVerifyInterruptVector(irqVec, this);
     core->AddToCycleList(this);

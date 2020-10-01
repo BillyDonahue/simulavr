@@ -90,9 +90,9 @@ AvrDevice_at90s8515::AvrDevice_at90s8515():
     // analog comparator: no bandgap, no ADC-connection
     acomp = new HWAcomp(this, irqSystem, PinAtPort(portb,2), PinAtPort(portb, 3), 12, NULL, timer1, NULL, NULL, false);
 
-    gimsk_reg = new IOSpecialReg(&coreTraceGroup, "GIMSK");
-    gifr_reg = new IOSpecialReg(&coreTraceGroup, "GIFR");
-    mcucr_reg = new IOSpecialReg(&coreTraceGroup, "MCUCR");
+    gimsk_reg = new IOSpecialReg(this, &coreTraceGroup, "GIMSK");
+    gifr_reg = new IOSpecialReg(this, &coreTraceGroup, "GIFR");
+    mcucr_reg = new IOSpecialReg(this, &coreTraceGroup, "MCUCR");
     extirq = new ExternalIRQHandler(this, irqSystem, gimsk_reg, gifr_reg);
     extirq->registerIrq(1, 6, new ExternalIRQSingle(mcucr_reg, 0, 2, GetPin("D2"), true));
     extirq->registerIrq(2, 7, new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3"), true));

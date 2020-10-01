@@ -86,9 +86,9 @@ AvrDevice_at90s4433::AvrDevice_at90s4433():
     // analog comparator: no ADC-connection
     acomp = new HWAcomp(this, irqSystem, PinAtPort(portd, 6), PinAtPort(portd, 7), 13, NULL, timer1);
 
-    gimsk_reg = new IOSpecialReg(&coreTraceGroup, "GIMSK");
-    gifr_reg = new IOSpecialReg(&coreTraceGroup, "GIFR");
-    mcucr_reg = new IOSpecialReg(&coreTraceGroup, "MCUCR");
+    gimsk_reg = new IOSpecialReg(this, &coreTraceGroup, "GIMSK");
+    gifr_reg = new IOSpecialReg(this, &coreTraceGroup, "GIFR");
+    mcucr_reg = new IOSpecialReg(this, &coreTraceGroup, "MCUCR");
     extirq = new ExternalIRQHandler(this, irqSystem, gimsk_reg, gifr_reg);
     extirq->registerIrq(1, 6, new ExternalIRQSingle(mcucr_reg, 0, 2, GetPin("D2")));
     extirq->registerIrq(2, 7, new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3")));

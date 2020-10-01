@@ -86,17 +86,17 @@ AvrDevice_attiny2313::AvrDevice_attiny2313():
 
     spmRegister = new FlashProgramming(this, 16, 0, FlashProgramming::SPM_TINY_MODE);
     
-    gtccr_reg = new IOSpecialReg(&coreTraceGroup, "GTCCR");
+    gtccr_reg = new IOSpecialReg(this, &coreTraceGroup, "GTCCR");
     prescaler01 = new HWPrescaler(this, "01", gtccr_reg, 0);
     
     gpior0_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR0");
     gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
     gpior2_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR2");
     
-    gimsk_reg = new IOSpecialReg(&coreTraceGroup, "GIMSK");
-    eifr_reg = new IOSpecialReg(&coreTraceGroup, "EIFR");
-    mcucr_reg = new IOSpecialReg(&coreTraceGroup, "MCUCR");
-    pcmsk_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK");
+    gimsk_reg = new IOSpecialReg(this, &coreTraceGroup, "GIMSK");
+    eifr_reg = new IOSpecialReg(this, &coreTraceGroup, "EIFR");
+    mcucr_reg = new IOSpecialReg(this, &coreTraceGroup, "MCUCR");
+    pcmsk_reg = new IOSpecialReg(this, &coreTraceGroup, "PCMSK");
     extirq = new ExternalIRQHandler(this, irqSystem, gimsk_reg, eifr_reg);
     extirq->registerIrq(1, 6, new ExternalIRQSingle(mcucr_reg, 0, 2, GetPin("D2")));
     extirq->registerIrq(2, 7, new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3")));

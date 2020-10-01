@@ -58,7 +58,7 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
             0xC00, // No Read-While-Write section starts at 0xC00
             FlashProgramming::SPM_MEGA_MODE);
 
-    sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
+    sfior_reg = new IOSpecialReg(this, &coreTraceGroup, "SFIOR");
 
     admux = new HWAdmuxM8(this, &portc->GetPin(0), // ADC0
                                 &portc->GetPin(1), // ADC1
@@ -82,22 +82,12 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
             10, // Interrupt Vector Serial Transfer Complete
             true);
 
-    gicr_reg = new IOSpecialReg(&coreTraceGroup,
-            "GICR");
+    gicr_reg = new IOSpecialReg(this, &coreTraceGroup, "GICR");
+    gifr_reg = new IOSpecialReg(this, &coreTraceGroup, "GIFR");
+    mcucr_reg = new IOSpecialReg(this, &coreTraceGroup, "MCUCR");
+    mcucsr_reg = new IOSpecialReg(this, &coreTraceGroup, "MCUCSR");
 
-    gifr_reg = new IOSpecialReg(&coreTraceGroup,
-            "GIFR");
-
-    mcucr_reg = new IOSpecialReg(&coreTraceGroup,
-            "MCUCR");
-
-    mcucsr_reg = new IOSpecialReg(&coreTraceGroup,
-            "MCUCSR");
-
-    extirq = new ExternalIRQHandler(this,
-            irqSystem,
-            gicr_reg,
-            gifr_reg);
+    extirq = new ExternalIRQHandler(this, irqSystem, gicr_reg, gifr_reg);
 
     extirq->registerIrq(1, // INT0 External Interrupt Request 0
             6, // GICR Bit 6 - INT0: External Interrupt Request 0 Enable
@@ -107,8 +97,7 @@ AvrDevice_atmega8::AvrDevice_atmega8() :
             7, // GICR Bit 7 - INT1: External Interrupt Request 1 Enable
             new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3"))); // INT1
 
-    assr_reg = new IOSpecialReg(&coreTraceGroup,
-            "ASSR");
+    assr_reg = new IOSpecialReg(this, &coreTraceGroup, "ASSR");
 
     prescaler01 = new HWPrescaler(this,
             "01",

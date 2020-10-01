@@ -59,16 +59,16 @@ static const std::string __hlp2scope(const std::string p, int i) {
     return p + int2str(i);
 }
 
-TimerIRQRegister::TimerIRQRegister(AvrDevice* c,
+TimerIRQRegister::TimerIRQRegister(AvrDevice* core_,
                                    HWIrqSystem* irqsys,
                                    int regidx):
-    Hardware(c),
-    TraceValueRegister(c, __hlp2scope("TMRIRQ", regidx)),
+    Hardware(core_),
+    TraceValueRegister(core_, __hlp2scope("TMRIRQ", regidx)),
     irqsystem(irqsys),
-    core(c),
+    core(core_),
     lines(8),
-    timsk_reg(this, __hlp2name("TIMSK", regidx)),
-    tifr_reg(this, __hlp2name("TIFR", regidx))
+    timsk_reg(core_,this, __hlp2name("TIMSK", regidx)),
+    tifr_reg(core_,this, __hlp2name("TIFR", regidx))
 {
     timsk_reg.connectSRegClient(this);
     tifr_reg.connectSRegClient(this);

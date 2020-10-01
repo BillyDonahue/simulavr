@@ -358,7 +358,7 @@ class IOSpecialReg: public RWMemoryMember {
 
     public:
         //! Creates a IOSpecialReg instance, see RWMemoryMember for more info
-        IOSpecialReg(TraceValueRegister *registry, const std::string &tracename);
+        IOSpecialReg(AvrDevice* core, TraceValueRegister *registry, const std::string &tracename);
 
         //! Registers a client to this IO register to inform this client on read or write access
         void connectSRegClient(IOSpecialRegClient *c) { clients.push_back(c); }
@@ -386,6 +386,7 @@ class IOSpecialReg: public RWMemoryMember {
 
     private:
         unsigned char value; //!< Internal register value
+        AvrDevice* core;
 };
 
 #endif

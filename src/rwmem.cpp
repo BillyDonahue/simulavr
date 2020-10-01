@@ -292,8 +292,9 @@ void NotSimulatedRegister::set(unsigned char c) {
     avr_warning("%s (write 0x%02x to register)", message_on_access, (unsigned)c);
 }
 
-IOSpecialReg::IOSpecialReg(TraceValueRegister *registry, const std::string &name):
-    RWMemoryMember(registry, name)
+IOSpecialReg::IOSpecialReg(AvrDevice* core_, TraceValueRegister *registry, const std::string &name):
+    RWMemoryMember(registry, name),
+    core( core_ )
 {
     Reset();
 }
@@ -301,13 +302,29 @@ IOSpecialReg::IOSpecialReg(TraceValueRegister *registry, const std::string &name
 unsigned char IOSpecialReg::get() const {
     unsigned char val = value;
     for(size_t i = 0; i < clients.size(); i++)
+    {
         val = clients[i]->get_from_client(this, val);
+    }
+
+    if ( core->trace_on )
+    {
+        traceOut << tracename << "-->" << HexChar(val) << " ";
+    }
+
     return val;
 }
 
 void IOSpecialReg::set(unsigned char val) {
     for(size_t i = 0; i < clients.size(); i++)
+    {
         val = clients[i]->set_from_reg(this, val);
+    }
     value = val;
+
+    if ( core->trace_on )
+    {
+        traceOut << tracename << "=" << HexChar(val) << " ";
+    }
+
 }
 

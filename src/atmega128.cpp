@@ -114,7 +114,7 @@ AvrDevice_atmega128base::AvrDevice_atmega128base(unsigned flash_bytes,
     else
         rampz = NULL;
 
-    sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
+    sfior_reg = new IOSpecialReg(this, &coreTraceGroup, "SFIOR");
 
     admux = new HWAdmuxM16(this, &portf->GetPin(0), &portf->GetPin(1), &portf->GetPin(2),
                                  &portf->GetPin(3), &portf->GetPin(4), &portf->GetPin(5),
@@ -127,10 +127,10 @@ AvrDevice_atmega128base::AvrDevice_atmega128base(unsigned flash_bytes,
             PinAtPort(portb, 2), PinAtPort(portb, 3), PinAtPort(portb, 1),
             PinAtPort(portb, 0),/*irqvec*/ 17, true);
 
-    eicra_reg = new IOSpecialReg(&coreTraceGroup, "EICRA");
-    eicrb_reg = new IOSpecialReg(&coreTraceGroup, "EICRB");
-    eimsk_reg = new IOSpecialReg(&coreTraceGroup, "EIMSK");
-    eifr_reg = new IOSpecialReg(&coreTraceGroup, "EIFR");
+    eicra_reg = new IOSpecialReg(this, &coreTraceGroup, "EICRA");
+    eicrb_reg = new IOSpecialReg(this, &coreTraceGroup, "EICRB");
+    eimsk_reg = new IOSpecialReg(this, &coreTraceGroup, "EIMSK");
+    eifr_reg = new IOSpecialReg(this, &coreTraceGroup, "EIFR");
     extirq = new ExternalIRQHandler(this, irqSystem, eimsk_reg, eifr_reg);
     extirq->registerIrq(1, 0, new ExternalIRQSingle(eicra_reg, 0, 2, GetPin("D0")));
     extirq->registerIrq(2, 1, new ExternalIRQSingle(eicra_reg, 2, 2, GetPin("D1")));
@@ -141,7 +141,7 @@ AvrDevice_atmega128base::AvrDevice_atmega128base(unsigned flash_bytes,
     extirq->registerIrq(7, 6, new ExternalIRQSingle(eicrb_reg, 4, 2, GetPin("E6")));
     extirq->registerIrq(8, 7, new ExternalIRQSingle(eicrb_reg, 6, 2, GetPin("E7")));
   
-    assr_reg = new IOSpecialReg(&coreTraceGroup, "ASSR");
+    assr_reg = new IOSpecialReg(this, &coreTraceGroup, "ASSR");
     prescaler0 = new HWPrescalerAsync(this, "0", PinAtPort(portg, 4), assr_reg, 3, sfior_reg, 1, 7);
     prescaler123 = new HWPrescaler(this, "123", sfior_reg, 0, 7);
     

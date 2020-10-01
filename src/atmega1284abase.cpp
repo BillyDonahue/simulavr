@@ -90,8 +90,8 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
     portb(this, "B", true),
     portc(this, "C", true),
     portd(this, "D", true),
-    gtccr_reg(&coreTraceGroup, "GTCCR"),
-    assr_reg(&coreTraceGroup, "ASSR"),
+    gtccr_reg(this, &coreTraceGroup, "GTCCR"),
+    assr_reg(this, &coreTraceGroup, "ASSR"),
     prescaler01(this, "01", &gtccr_reg, 0, 7),
     prescaler2(this, "2", PinAtPort(&portb, 6), &assr_reg, 5, &gtccr_reg, 1, 7)
 { 
@@ -127,20 +127,20 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
 
     rampz = new AddressExtensionRegister(this, "RAMPZ", 1);
 
-    eicra_reg = new IOSpecialReg(&coreTraceGroup, "EICRA");
-    eimsk_reg = new IOSpecialReg(&coreTraceGroup, "EIMSK");
-    eifr_reg = new IOSpecialReg(&coreTraceGroup, "EIFR");
+    eicra_reg = new IOSpecialReg(this,&coreTraceGroup, "EICRA");
+    eimsk_reg = new IOSpecialReg(this,&coreTraceGroup, "EIMSK");
+    eifr_reg = new IOSpecialReg(this,&coreTraceGroup, "EIFR");
     extirq012 = new ExternalIRQHandler(this, irqSystem, eimsk_reg, eifr_reg);
     extirq012->registerIrq(1, 0, new ExternalIRQSingle(eicra_reg, 0, 2, GetPin("D2")));
     extirq012->registerIrq(2, 1, new ExternalIRQSingle(eicra_reg, 2, 2, GetPin("D3")));
     extirq012->registerIrq(3, 2, new ExternalIRQSingle(eicra_reg, 4, 2, GetPin("B2")));
 
-    pcicr_reg = new IOSpecialReg(&coreTraceGroup, "PCICR");
-    pcifr_reg = new IOSpecialReg(&coreTraceGroup, "PCIFR");
-    pcmsk0_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK0");
-    pcmsk1_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK1");
-    pcmsk2_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK2");
-    pcmsk3_reg = new IOSpecialReg(&coreTraceGroup, "PCMSK3");
+    pcicr_reg = new IOSpecialReg(this,&coreTraceGroup, "PCICR");
+    pcifr_reg = new IOSpecialReg(this,&coreTraceGroup, "PCIFR");
+    pcmsk0_reg = new IOSpecialReg(this,&coreTraceGroup, "PCMSK0");
+    pcmsk1_reg = new IOSpecialReg(this,&coreTraceGroup, "PCMSK1");
+    pcmsk2_reg = new IOSpecialReg(this,&coreTraceGroup, "PCMSK2");
+    pcmsk3_reg = new IOSpecialReg(this,&coreTraceGroup, "PCMSK3");
     extirqpc = new ExternalIRQHandler(this, irqSystem, pcicr_reg, pcifr_reg);
     extirqpc->registerIrq(4, 0, new ExternalIRQPort(pcmsk0_reg, &porta));
     extirqpc->registerIrq(5, 1, new ExternalIRQPort(pcmsk1_reg, &portb));

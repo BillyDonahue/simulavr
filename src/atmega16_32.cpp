@@ -98,7 +98,7 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
     // Analog Comparator not implemented yet, vectors 16/18
     // Store Program Memory Ready not implemented yet, vectors 21/21
 
-    sfior_reg = new IOSpecialReg(&coreTraceGroup, "SFIOR");
+    sfior_reg = new IOSpecialReg(this, &coreTraceGroup, "SFIOR");
 
     admux = new HWAdmuxM16(this, &porta->GetPin(0), &porta->GetPin(1), &porta->GetPin(2),
                                  &porta->GetPin(3), &porta->GetPin(4), &porta->GetPin(5),
@@ -110,16 +110,16 @@ AvrDevice_atmega16_32::AvrDevice_atmega16_32(unsigned ram_bytes,
                     PinAtPort(portb, 5), PinAtPort(portb, 6), PinAtPort(portb, 7),
                     PinAtPort(portb, 4),/*irqvec*/ atmega16 ? 10 : 12, true);
 
-    gicr_reg = new IOSpecialReg(&coreTraceGroup, "GICR");
-    gifr_reg = new IOSpecialReg(&coreTraceGroup, "GIFR");
-    mcucr_reg = new IOSpecialReg(&coreTraceGroup, "MCUCR");
-    mcucsr_reg = new IOSpecialReg(&coreTraceGroup, "MCUCSR");
+    gicr_reg = new IOSpecialReg(this, &coreTraceGroup, "GICR");
+    gifr_reg = new IOSpecialReg(this, &coreTraceGroup, "GIFR");
+    mcucr_reg = new IOSpecialReg(this, &coreTraceGroup, "MCUCR");
+    mcucsr_reg = new IOSpecialReg(this, &coreTraceGroup, "MCUCSR");
     extirq = new ExternalIRQHandler(this, irqSystem, gicr_reg, gifr_reg);
     extirq->registerIrq(1, 6, new ExternalIRQSingle(mcucr_reg, 0, 2, GetPin("D2")));  // INT0
     extirq->registerIrq(2, 7, new ExternalIRQSingle(mcucr_reg, 2, 2, GetPin("D3")));  // INT1
     extirq->registerIrq(atmega16 ? 18 : 3, 5, new ExternalIRQSingle(mcucsr_reg, 6, 1, GetPin("B2")));  // INT2
     
-    assr_reg = new IOSpecialReg(&coreTraceGroup, "ASSR");
+    assr_reg = new IOSpecialReg(this, &coreTraceGroup, "ASSR");
     prescaler01 = new HWPrescaler(this, "01", sfior_reg, 0);
     prescaler2 = new HWPrescalerAsync(this, "2", PinAtPort(portc, 6),
                                       assr_reg, 3, sfior_reg, 1);
