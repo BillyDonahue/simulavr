@@ -232,7 +232,6 @@ class OpenDrain: public Pin {
          */
         void SetInState ( const Pin &p)
         {
-            traceOut << __PRETTY_FUNCTION__ << std::endl;
             pin-> SetInState(*pin); //Spiegel wie im Mirror Net
         }
 
