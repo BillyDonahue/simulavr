@@ -32,42 +32,31 @@
 
 #include "systemclocktypes.h"
 #include "simulationmember.h"
-//#include "hardware.h"
 #include "ui.h"
 #include "pin.h"
 
-enum t_myState {
-        IDLE,
-        POWER_ON,     // First State after Reset
-        PWR_AFTER_FS1,// After first Function Set Cmd no Busy Flag
-        PWR_AFTER_FS2,// After second Function Set Cmd no Busy Flag
-        PWR_ON_FINISH,// After third Function Set Cmd no Busy Flag. After the next CMD BF is valid
-        CMDEXEC       // Executing any command after init
-    } ;
-
-
-inline void PrintState(t_myState val)
-{
-    switch( val )
-    {
-        case IDLE: std::cerr << "IDLE"; break;
-        case POWER_ON: std::cerr << "POWER_ON"; break;
-        case PWR_AFTER_FS1: std::cerr << "PWR_AFTER_FS1"; break;
-        case PWR_AFTER_FS2: std::cerr << "PWR_AFTER_FS2"; break;
-        case PWR_ON_FINISH: std::cerr << "PWR_ON_FINISH"; break;
-        case CMDEXEC: std::cerr << "CMDEXEC"; break;
-    }
-}
-
-
-
-/** Simulates busyFlaga HD44780 character-LCD controller with a 4 bit interface.
- * This HD-controller is boring slow :-) like some original.
+/** 
+  Simulates busyFlaga HD44780 character-LCD controller with a 4 and 8 bit interface.
  */
 class Lcd : public SimulationMember {
     private:
         void SetPort( unsigned char newValue );
         void TriStatePort(); 
+
+        static constexpr int lcdStartLine []={0, 0x40, 0x14, 0x20};
+
+
+        // worst case
+        // static constexpr SystemClockOffset powerUpTime = 40_ms;
+        // static constexpr SystemClockOffset clearDisplayTime = 4.1_ms;
+        // static constexpr SystemClockOffset standardDelayTime = 100_us;
+
+        // typical timings 190kHz from TC1602A-01T datasheet
+        static constexpr SystemClockOffset powerUpTime = 15_ms;
+        static constexpr SystemClockOffset clearDisplayTime = 2.16_ms;
+        static constexpr SystemClockOffset standardDelayTime = 53_us;
+
+
 
     protected:
         UserInterface *ui;
@@ -87,33 +76,43 @@ class Lcd : public SimulationMember {
         Pin readWrite;
         Pin commandData;
 
-        unsigned int CmdExecTime_ns; // Command Execution Time
-        t_myState myState;           // LCD State-Event machine
-        char      myd3;              // internal D3
-
-
         int merke_x;
         int merke_y;
 
         void LcdWriteData(unsigned char data);
-        unsigned int LcdWriteCommand(unsigned char command);
+        void LcdWriteCommand(unsigned char command);
         unsigned char LcdReadData();
         unsigned char LcdReadCommand();
 
         void SendCursorPosition();
         bool lastEnable;
-        bool busyFlag;
-        bool mode4bit;
-
-        bool lowNibble;  // in 4 bit mode we first receive/send higher 4 bit data
-        unsigned char data;  // if we are running in 4 bit mode, we carry our read values here
+        SystemClockOffset busyUntil;    //!< lcd is busy until this simulation time has expired, 0 if not busy
+        bool mode4bit;                  //!< true if in 4 bit mode
+        bool lowNibble;                 //!< in 4 bit mode we first receive/send higher 4 bit data, true if wait for low nibble
+        unsigned char data;             //!< if we are running in 4 bit mode, we carry our read values here
+        bool firstFunctionSetCommandReceived; //!< init sequence may have multiple SetFunctionMode commands, first takes longer
 
     public:
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
-        //Lcd(UserInterface *ui, const string &name, const string &baseWindow);
         Lcd(UserInterface *ui, const char *name, const char *baseWindow);
         virtual ~Lcd();
         Pin *GetPin(const char *name);
+
+        /**
+          Force Lcd controller to operate in 4 or 8 bit mode. Function
+          is only used to control initial startup behaviour to test
+          user code for all variants of startup sequences. default for
+          hardware startup is 8 bit mode.
+          */
+        void Set4BitMode( bool mode4bit_ );
+
+        /**
+          Forces Lcd to read/write as next the low nibble.
+          The function only takes effect if controller is set in 4 bit mode.
+          Functuion is only used to set up the controller at startup to test
+          user code for correct initilaization of the device
+          */
+        void SetLowNibble( bool lowNibble_ );
 };
 
 #endif

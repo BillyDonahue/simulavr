@@ -28,20 +28,80 @@
  *  $Id$
  */
 
+
+/**
+  General hint for using Lcds:
+
+  The display controller support 4 and 8 bit port.
+  If the display should be used in 4 bit mode the UPPER 4 data
+  pins must be connected. This is also the case for the simulated device!
+  So use d4..d7 for data port connection in 4 bit mode.
+
+  Before startup, a real hardware can be in 4 bit mode or in 8 bit mode
+  and if in 4 bit mode we have no idea if it is reading the upper or lower
+  nibble next.
+  The device may be not completely initialized or may have wrong initialization
+  by getting some spikes on port pins as long the DDR is not set or even
+  by setting the DDR and PORT in wrong order.
+
+  As this it is common to send two times 0x3x to the device to switch definitely
+  to 8 bit mode, even if only 4 bit mode is desired! This is the only chance
+  to get the 4 bit mode into sync, as there is no control line which selects
+  upper and lower nibble for data transfer. Setting up 8 bit mode and after that
+  to 4 bit mode it is guaranteed after this command that we now read/write the upper
+  nibble as next! From that data transfer we send/receive always pairs of upper 
+  nibble first followed by lower nibble.
+
+  The simulated device can be set manipulated for simulation to be in any of the 3 states:
+  8 bit mode
+  4 bit mode, waiting for lower nibble
+  4 bit mode, waiting for upper nibble 
+
+  This makes it possible to check if tested code syncs up correctly in every case!
+  Use Set4BitMode(), SetLowNibble() for this!
+  Default mode is 8 bit at startup. This is the default mode for the real hardware
+  but only valid if it was not unintentionally changed on startup before controller
+  starts up.
+  */
+
+
+ 
+
 #include <iostream>
 #include <fstream>
 
 #include "lcd.h"
 #include "pinatport.h"
+#include "systemclock.h"
 
-int lcdStartLine []={0, 0x40, 0x14, 0x20};
-// Exec Times for HD44780 5V version! At 2.7V the first time rises from 15 to 40ms!
-//                 Power-on, 1st CMD, 2nd Cmd, 3rd Cmd, typical, Ret-Home
-//static int Power_onTimes[]={15000000, 4100000,  100000,   37000, 1520000};
-static int Power_onTimes[]={1500000, 410000,  10000,   3700, 152000};
+void Lcd::Set4BitMode( bool mode4bit_ )
+{
+    mode4bit = mode4bit_;
+}
+
+void Lcd::SetLowNibble( bool lowNibble_ )
+{
+    lowNibble = lowNibble_;
+}
 
 void Lcd::LcdWriteData(unsigned char data) {
-    //std::cerr << "Lcd::LcdWriteData " << std::hex << (unsigned int)data << std::dec << std::endl;
+    if ( busyUntil )
+    {
+        // ubs! we are busy and got a write...
+        std::cerr << "Lcd got WriteData while still busy!" << std::endl;
+
+        if ( trace_on )
+        {
+            traceOut << "Lcd got WriteData while still busy! ";
+        }
+
+        return; // we ignore DataWrite!
+    }
+
+    if ( trace_on )
+    {
+        traceOut << "WriteData " << std::hex << (unsigned int)data << " " << data << " ";
+    }
 
     std::ostringstream os;
     os << name << " WriteChar " << merke_x+1 << " " << merke_y << " " << (unsigned int)data << std::endl;
@@ -49,23 +109,41 @@ void Lcd::LcdWriteData(unsigned char data) {
 
     merke_x++;
     SendCursorPosition();
+
+    busyUntil = SystemClock::Now() + standardDelayTime;
 }
 
 void Lcd::SendCursorPosition() {
     std::ostringstream os;
     os << name << " MoveCursor " << merke_x << " " << merke_y << " " <<  std::endl;
     ui->Write(os.str());
+
+    if ( trace_on )
+    {
+        traceOut << "Lcd: " << name << " MoveCursor " << merke_x << " " << merke_y << " ";
+    }
 }
 
-unsigned int  Lcd::LcdWriteCommand(unsigned char command) {
-    std::cerr << "Lcd::LcdWriteCommand " << std::hex << (unsigned int)command << std::dec << std::endl;
+void Lcd::LcdWriteCommand(unsigned char command) {
+    if ( busyUntil )
+    {   
+        // ubs! we are busy and got a write...
+        std::cerr << "Lcd got WriteCommand while still busy!" << std::endl;
 
-    // TODO: busy flag dependent on timing,
-    // currently only a single ReadCommand busy
-    busyFlag = true;
+        if ( trace_on )
+        {
+            traceOut << "Lcd got WriteCommand while still busy! ";
+        }   
 
-    bool lerr = false;
-    if (command >= 0x80 ) { //goto
+        return; // we ignore DataWrite!
+    } 
+
+    if ( trace_on )
+    {
+        traceOut << "WriteCommand " << std::hex << (unsigned int)command << std::dec << " ";
+    }
+
+    if (command >= 0x80 ) { // set ddram address ( goto )
 
         int line;
         int value=command-0x80;
@@ -80,29 +158,52 @@ unsigned int  Lcd::LcdWriteCommand(unsigned char command) {
         merke_x++;
         SendCursorPosition();
 
-        return Power_onTimes[3];
+        busyUntil = SystemClock::Now() + standardDelayTime;
+        return;
     }
 
     if (command >= 0x40) { //Set Character Generator Address
-        std::cerr << "Not supported LCD command: Set Character Generator Address " << std::endl;
-        return Power_onTimes[3];
+        if ( trace_on )
+        {
+            traceOut << "Not supported LCD command: Set Character Generator Address ";
+        }
+
+        busyUntil = SystemClock::Now() + standardDelayTime;
+        return;
     }
+
     if (command >= 0x20) { //Function Set
+        if ( trace_on )
+        {
+            traceOut << "Function Set ";
+        }
         if ((command & 0x10)) {
+            if ( trace_on ) { traceOut << "mode 8 bit "; }
             mode4bit = false;
         } else {
+            if ( trace_on ) { traceOut << "mode 4 bit "; }
             mode4bit = true;
+            lowNibble = false;
         }
 
 
         if ((command & 0x04)) {
-            std::cerr << "Not supported LCD command: 5*10 char. size";
-            lerr = true;
+            if ( trace_on )
+            {
+                traceOut << "Not supported LCD command: 5*10 char. size";
+            }
         }
-        if (lerr == true) {
-            std::cerr << std::endl;
+
+        if ( !firstFunctionSetCommandReceived )
+        {
+            firstFunctionSetCommandReceived = true;
+            busyUntil = SystemClock::Now() + clearDisplayTime; 
         }
-        return Power_onTimes[3];
+        else
+        {
+            busyUntil = SystemClock::Now() + standardDelayTime;
+        }
+        return;
     }
 
     if (command >= 0x10) { //Cursor or Display shift
@@ -116,47 +217,63 @@ unsigned int  Lcd::LcdWriteCommand(unsigned char command) {
                 break;
             case 8:
             case 0x0c:
-                std::cerr << "Not supported LCD command: Display shift left or right" << std::endl;
+                if ( trace_on )
+                {
+                    traceOut << "Not supported LCD command: Display shift left or right";
+                }
                 break;
             default:
                 break;
         }
-        return Power_onTimes[3];
+
+        busyUntil = SystemClock::Now() + standardDelayTime;
+        return;
     }
 
     if (command >= 8) { //Display on / off
-        if (command != 0x0e) {// E = Display on, Cursor on, Cursor Blink off
-            std::cerr << "Not supported LCD command: Display off / Cursor off / Cursor Blink" << std::endl;
+        if ( trace_on )
+        {
+            traceOut << "Not supported LCD command: Display off / Cursor off / Cursor Blink";
         }
-        return Power_onTimes[3];
+
+        busyUntil = SystemClock::Now() + standardDelayTime;
+        return;
     }
 
     if (command >= 4) { //Set Entry Mode
-        if (command != 6) {// 6 = Increment, Cursor movement
-            std::cerr << "Not supported LCD command: Set Entry Mode" << std::endl;
+        if ( trace_on )
+        {
+            traceOut << "Not supported LCD command: Set Entry Mode";
         }
-        return Power_onTimes[3];
+
+        busyUntil = SystemClock::Now() + standardDelayTime;
+        return;
     }
 
     if (command >= 2) { //Return Home
         merke_x=0;
         merke_y=0;
         SendCursorPosition();
-        return Power_onTimes[4];
+
+        busyUntil = SystemClock::Now() + clearDisplayTime;
     }
 
     if (command==1) { //clear
+        if ( trace_on ) { traceOut << "Clear "; }
+
         for (merke_y=3; merke_y>=0; merke_y--) {
-            for ( merke_x=0; merke_x<=19; ) {
-                LcdWriteData(' ');
+            for ( merke_x=0; merke_x<=19; merke_x++) {
+                std::ostringstream os;
+                os << name << " WriteChar " << merke_x+1 << " " << merke_y << " " << (unsigned int)' ' << std::endl;
+                ui->Write(os.str());
             }
         }
         merke_x=0;
         merke_y=0;
         SendCursorPosition();
-        return Power_onTimes[4];
+
+        busyUntil = SystemClock::Now() + clearDisplayTime;
     }
-    return 0;  // Should not come here! Added to avoid warning
 }
 
 void Lcd::SetPort( unsigned char value )
@@ -185,10 +302,12 @@ void Lcd::TriStatePort()
 
 unsigned char Lcd::LcdReadCommand()
 {
-    // TODO: busy flag is not depending on timing
-    unsigned char value = busyFlag << 7;
-    busyFlag = false;
-    return value;
+    if ( busyUntil )
+    {
+        return 0x80;   // busy flag is transmitted as bit 7 by command read
+    }   
+
+    return 0x00;
 }
 
 /*
@@ -202,6 +321,20 @@ unsigned char Lcd::LcdReadData()
 
 int Lcd::Step( bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns ) 
 {
+    if ( trace_on )
+    {
+        traceOut << "Lcd: " << name << " ";
+    }
+
+    if ( busyUntil && ( busyUntil < SystemClock::Now() )  )
+    {
+        busyUntil = 0;
+        if ( trace_on )
+        {
+            traceOut << "active: clear busy flag! ";
+        }
+    }
+
     static constexpr unsigned int COMMAND       = 0x01;  // HIGH -> Data, LOW -> Command
     static constexpr unsigned int READWRITE     = 0x02;  // HIGH -> Read, LOW -> Write
     static constexpr unsigned int ENABLE        = 0x04;  // edge to low, take data
@@ -219,55 +352,63 @@ int Lcd::Step( bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns )
 
     if ( lastEnable !=  localEnable )
     {
+        if ( trace_on )
+        {
+            traceOut << "active: ";
+        }
+
         lastEnable = localEnable;
-#ifdef DEBUG_LCD
 
-        if ( controlLines & COMMAND )
+        if ( trace_on )
         {
-            std::cerr << "DATA      ";
-        } else
-        {
-            std::cerr << "COMMAND   ";
-        }
 
-        if ( controlLines & READWRITE )
-        {
-            std::cerr << "READ      ";
-        }
-        else
-        {
-            std::cerr << "WRITE     ";
-        }
+            if ( controlLines & COMMAND )
+            {
+                traceOut << "DATA      ";
+            } else
+            {
+                traceOut << "COMMAND   ";
+            }
 
-        if ( controlLines & ENABLE )
-        {
-            std::cerr << "ENABLE    ";
-        }
-        else
-        {
-            std::cerr << "--E--     ";
-        }
+            if ( controlLines & READWRITE )
+            {
+                traceOut << "READ      ";
+            }
+            else
+            {
+                traceOut << "WRITE     ";
+            }
 
-        if ( controlLines & MODE4BIT )
-        {
-            std::cerr << "4 bit     ";
-        }
-        else
-        {
-            std::cerr << "8 bit     ";
-        }
+            if ( controlLines & ENABLE )
+            {
+                traceOut << "ENABLE    ";
+            }
+            else
+            {
+                traceOut << "--E--     ";
+            }
 
-        if ( controlLines & LOWNIBBLE )
-        {
-            std::cerr << " LOW NIBBLE ";
-        }
-        else
-        {
-            std::cerr << "HIGH NIBBLE ";
-        }
+            if ( controlLines & MODE4BIT )
+            {
+                traceOut << "4 bit     ";
+            }
+            else
+            {
+                traceOut << "8 bit     ";
+            }
 
-        std::cerr << std::endl;
-#endif
+            if ( controlLines & LOWNIBBLE )
+            {
+                traceOut << " LOW NIBBLE ";
+            }
+            else
+            {
+                traceOut << "HIGH NIBBLE ";
+            }
+
+        } // trace_on
+
+
 
         // always we loose enable, we have to remove data from our bus lines
         if ( !((bool)enable))
@@ -342,7 +483,18 @@ int Lcd::Step( bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns )
 
         }
     }
+    else    // no change on port
+    {
+        if ( trace_on )
+        {
+            traceOut << "no change on enable line, do nothing";
+        }
+    }
 
+    if ( trace_on )
+    {
+        traceOut << std::endl;
+    }
 
     if( timeToNextStepIn_ns != 0 ) 
     {
@@ -353,7 +505,6 @@ int Lcd::Step( bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns )
 }
 
 
-//Lcd::Lcd(UserInterface *_ui, const string &_name, const string &baseWindow):
 Lcd::Lcd(UserInterface *ui_, const char *name_, const char *baseWindow):
     ui(ui_), name(name_),
     d0( &portValue, 0x01),
@@ -365,9 +516,10 @@ Lcd::Lcd(UserInterface *ui_, const char *name_, const char *baseWindow):
     d6( &portValue, 0x40),
     d7( &portValue, 0x80),
     lastEnable{ false },
-    busyFlag{ false },
+    busyUntil{ SystemClock::Now() + powerUpTime },   // at power up, we wait a bit longer
     mode4bit{ false },
-    lowNibble{ false }
+    lowNibble{ false },
+    firstFunctionSetCommandReceived{ false }  // normal init sequence starts with write command 0x30 multiple times, first time results in longer busy time
 {
     allPins["d0"]=&d0;
     allPins["d1"]=&d1;
@@ -381,9 +533,6 @@ Lcd::Lcd(UserInterface *ui_, const char *name_, const char *baseWindow):
     allPins["e"]=&enable;
     allPins["r"]=&readWrite;
     allPins["c"]=&commandData;
-
-    myState = POWER_ON;
-    CmdExecTime_ns = Power_onTimes[0]; // 15ms = 15.000us = 15.000.000ns
 
     merke_x=0;
     merke_y=0;
