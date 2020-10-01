@@ -36,6 +36,7 @@ class SimulationMember {
         virtual ~SimulationMember() { }
         /// Return nonzero if a breakpoint was hit.
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0)=0;
+        int trace_on;
 };
 
 #endif 

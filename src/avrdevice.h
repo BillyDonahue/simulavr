@@ -87,7 +87,6 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         int cpuCycles;
 
     public:
-        int trace_on;
         Breakpoints BP;
         Exitpoints EP;
         unsigned int PC;  ///< Next/current instruction index. Multiply by 2 to get an address.
