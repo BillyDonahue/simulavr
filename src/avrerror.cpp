@@ -89,6 +89,10 @@ void SystemConsoleHandler::SetTraceFile(const char *name, unsigned int maxlines)
     traceToFile = true;
 }
 
+void SystemConsoleHandler::SetNumberOfTraceLines( unsigned int maxlines) {
+    traceLinesOnFile = maxlines;
+}
+
 void SystemConsoleHandler::SetTraceStream(std::ostream *s) {
     StopTrace();
     traceStream = s;
@@ -118,8 +122,18 @@ void SystemConsoleHandler::TraceNextLine(void) {
         delete traceStream;
         
         std::ostringstream n;
-        int idx = traceFilename.rfind('.');
-        n << traceFilename.substr(0, idx) << "_" << traceFileCount << traceFilename.substr(idx);
+        size_t idx = traceFilename.rfind('.');
+
+        // please do not crash if we simply have no '.' in filename
+        if ( idx != std::string::npos )
+        {   
+            n << traceFilename.substr(0, idx) << "_" << traceFileCount << traceFilename.substr(idx);
+        }
+        else // if no '.' found, simply add number at end of filename
+        {   
+            n << traceFilename << "_" << traceFileCount;
+        }  
+
         std::ofstream* os = new std::ofstream();
         os->open(n.str().c_str());
         

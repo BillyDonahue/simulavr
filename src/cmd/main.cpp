@@ -250,6 +250,7 @@ int main(int argc, char *argv[]) {
                     cerr << "linestotrace is not a number" << endl;
                     exit(1);
                 }
+                sysConHandler.SetNumberOfTraceLines(linestotrace);
                 break;
 
             case 'm':

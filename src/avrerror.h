@@ -62,14 +62,22 @@ class SystemConsoleHandler {
         
         //! Sets the trace to file stream and enables tracing global
         void SetTraceFile(const char *name, unsigned int maxlines = 0);
+
+        //! Sets number of lines to trace
+        void SetNumberOfTraceLines( unsigned int maxlines );
+
         //! Sets the trace to given stream and enables tracing global
         void SetTraceStream(std::ostream *s);
+
         //! Stops tracing global, close file, if set, redirect trace to nullStream
         void StopTrace();
+
         //! Returns true, if tracing is global enabled
         bool GetTraceState() { return traceEnabled; }
+
         //! Gives Access to trace stream
         std::ostream &traceOutStream() { return *traceStream; }
+
         //! Ends a trace line, performs reopen new filestream, if necessary
         void TraceNextLine();
         
