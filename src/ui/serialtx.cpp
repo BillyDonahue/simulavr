@@ -28,7 +28,6 @@
 #include "string2.h"
 #include "avrerror.h"
 
-using namespace std;
 
 SerialTxBuffered::SerialTxBuffered()
 {
@@ -107,7 +106,7 @@ void SerialTxBuffered::Send(unsigned char data)
 {
     inputBuffer.push_back(data); //write new char to input buffer
 
-    cerr << "TX: " << hex << data << " ";
+    std::cerr << "TX: " << std::hex << data << " ";
     //if we not active, activate tx machine now
     if (txState==TX_DISABLED) {
         txState=TX_SEND_STARTBIT;
@@ -132,21 +131,21 @@ void SerialTxBuffered::SetHexInput(bool newValue){
 
 SerialTx::SerialTx(UserInterface *ui, const char *name, const char *baseWindow)
 {
-    ostringstream os;
-    os << "create SerialTx " << name  << " " << baseWindow << endl;
+    std::ostringstream os;
+    os << "create SerialTx " << name  << " " << baseWindow << std::endl;
     ui->Write(os.str());
     ui->AddExternalType(name, this);
     Reset();
 }
 
-void SerialTx::SetNewValueFromUi(const string &s) {
-    cout << "SerialTx::SetNewValueFromUi >" << s << "<" << endl;
+void SerialTx::SetNewValueFromUi(const std::string &s) {
+    std::cout << "SerialTx::SetNewValueFromUi >" << s << "<" << std::endl;
     if ( receiveInHex ) {
         unsigned char value;
         bool          rc;
         rc = StringToUnsignedChar( s.c_str(), &value, NULL, 16 );
         if ( !rc ) {
-            cerr << "SerialTx::SetNewValueFromUi:: bad conversion" << endl;
+            std::cerr << "SerialTx::SetNewValueFromUi:: bad conversion" << std::endl;
         } else {
             // cerr << "SerialTx::Send " << hex << (unsigned int) value << endl;
             Send(value);

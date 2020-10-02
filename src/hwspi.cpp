@@ -53,7 +53,6 @@
    FIXME: Make this configurable through the command line interface. */
 #define SPI_VERBOSE 0
 
-using namespace std;
 void HWSpi::spdr_access() {
     if (spsr_read) {
     // if status is read with SPIF == 1
@@ -110,9 +109,9 @@ void HWSpi::SetSPSR(unsigned char val) {
         updatePrescaler();
     } else {
         ((core->trace_on) ?
-            (traceOut) : (cerr))
-            << "spsr is read only! (0x" << hex << core->PC << " =  " <<
-            core->Flash->GetSymbolAtAddress(core->PC) << ")" << endl;
+            (traceOut) : (std::cerr))
+            << "spsr is read only! (0x" << std::hex << core->PC << " =  " <<
+            core->Flash->GetSymbolAtAddress(core->PC) << ")" << std::endl;
     }
 }
 
@@ -202,7 +201,7 @@ void HWSpi::ClearIrqFlag(unsigned int vector) {
         spsr&=~SPIF;
         irq->ClearIrqFlag(irq_vector);
     } else {
-        cerr << "WARNING: There is HWSPI called to get a irq vector which is not assigned for!?!?!?!?";
+        std::cerr << "WARNING: There is HWSPI called to get a irq vector which is not assigned for!?!?!?!?";
     }
 }
 
@@ -223,7 +222,7 @@ void HWSpi::trxend() {
     if (finished) {
     finished=false;
     if (core->trace_on && SPI_VERBOSE)
-        traceOut << "SPI: READ " << int(shift_in) << endl;
+        traceOut << "SPI: READ " << int(shift_in) << std::endl;
     /* set also data_write to allow continuous shifting
        when slave. */
     data_write=data_read=shift_in; 
@@ -243,7 +242,7 @@ unsigned int HWSpi::CpuCycle() {
     int bitpos_prec=(spcr&DORD) ? bitcnt-1 : 8-bitcnt;
     
     if (core->trace_on && SPI_VERBOSE) {
-        traceOut << "SPI: " << bitcnt << ", " << bitpos << ", " << clkcnt << endl;
+        traceOut << "SPI: " << bitcnt << ", " << bitpos << ", " << clkcnt << std::endl;
     }
     
     if (spcr & MSTR) {

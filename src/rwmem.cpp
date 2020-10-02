@@ -39,7 +39,6 @@
 #include "avrdevice.h"
 #include "memory.h"
 
-using namespace std;
 
 RWMemoryMember::RWMemoryMember(TraceValueRegister *_reg,
                                const std::string &_tracename,
@@ -131,7 +130,7 @@ void CLKPRRegister::set(unsigned char v) {
         if(activate == 0) activate = 4;
     } else if((v & 0x80) == 0) {
         if(activate > 0) {
-            string buf = "<invalid>";
+            std::string buf = "<invalid>";
             unsigned char i = v & 0x0f;
             if(i <= 8)
                 buf = "CKx" + int2str(1 << i);
@@ -219,7 +218,7 @@ unsigned char RAM::get() const
 
         if ( myAddress > 0x20 )
         {
-            traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress)<<"]-->"<<HexChar(value)<<dec<<"--> ";
+            traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress)<<"]-->"<<HexChar(value)<<std::dec<<"--> ";
         }
     }
     return value; 
@@ -233,12 +232,12 @@ void RAM::set(unsigned char v)
         // fix me: it makes no sense to compare here if we already know during construction that we are register or io or i/e ram
         if ( myAddress > 0x20 )
         {
-            traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress)<<"]="<<HexChar(v)<<dec<<" ";
+            traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress)<<"]="<<HexChar(v)<<std::dec<<" ";
         }
         else  // register
         {
             if (core->trace_on==1) {
-                traceOut << "R" << dec<< myAddress << "=" << HexChar(v) << " ";
+                traceOut << "R" << std::dec<< myAddress << "=" << HexChar(v) << " ";
 
                 switch (myAddress) {
                     case 26:
@@ -265,7 +264,7 @@ InvalidMem::InvalidMem(AvrDevice* _c, int _a):
     addr(_a) {}
 
     unsigned char InvalidMem::get() const {
-        string s = "Invalid read access from IO[0x" + int2hex(addr) + "], PC=0x" + int2hex(core->PC * 2);
+        std::string s = "Invalid read access from IO[0x" + int2hex(addr) + "], PC=0x" + int2hex(core->PC * 2);
         if(core->abortOnInvalidAccess)
             avr_error("%s", s.c_str());
         avr_warning("%s", s.c_str());
@@ -273,7 +272,7 @@ InvalidMem::InvalidMem(AvrDevice* _c, int _a):
     }
 
 void InvalidMem::set(unsigned char c) {
-    string s = "Invalid write access to IO[0x" + int2hex(addr) +
+    std::string s = "Invalid write access to IO[0x" + int2hex(addr) +
         "]=0x" + int2hex(c) + ", PC=0x" + int2hex(core->PC * 2);
     if(core->abortOnInvalidAccess)
         avr_error("%s", s.c_str());

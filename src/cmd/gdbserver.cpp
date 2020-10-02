@@ -24,7 +24,6 @@
  */
 
 #include <iostream>
-using namespace std;
 
 #include <assert.h>
 #include <stdio.h>
@@ -308,7 +307,7 @@ GdbServer::GdbServer(AvrDevice *c, int _port, int debug, int _waitForGdbConnecti
 }
 
 //make the instance of static list of all gdb servers here
-vector<GdbServer*> GdbServer::allGdbServers;
+std::vector<GdbServer*> GdbServer::allGdbServers;
 
 GdbServer::~GdbServer() {
     server->Close();
@@ -1475,7 +1474,7 @@ int GdbServer::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
 
 void GdbServer::IdleStep() {
     int gdbRet=gdb_receive_and_process_packet(GDB_BLOCKING_OFF);
-    cout << "IdleStep Instance" << this << " RunMode:" << dec << runMode << endl;
+    std::cout << "IdleStep Instance" << this << " RunMode:" << std::dec << runMode << std::endl;
 
     if (lastCoreStepFinished) {
         switch(gdbRet) {
@@ -1495,7 +1494,7 @@ void GdbServer::IdleStep() {
                 break;
 
             default:
-                cout << "wondering" << endl;
+                std::cout << "wondering" << std::endl;
         }
     }
 }
@@ -1552,7 +1551,7 @@ int GdbServer::InternalStep(bool &untilCoreStepFinished, SystemClockOffset *time
             if(!leave) { //we can't leave the loop so we have to request the other gdb instances now!
                 // step through all gdblist members WITHOUT my self!
                 //cout << "we do not leave and check for gdb events" << endl;
-                vector<GdbServer*>::iterator ii;
+                std::vector<GdbServer*>::iterator ii;
                 for (ii=allGdbServers.begin(); ii!=allGdbServers.end(); ii++) {
                     if (*ii!=this) { //run other instances but not me 
                         (*ii)->IdleStep();

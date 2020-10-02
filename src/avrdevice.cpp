@@ -37,7 +37,6 @@
 
 #include "avrdevice_impl.h"
 
-using namespace std;
 
 const unsigned int AvrDevice::registerSpaceSize = 32;
 const unsigned int AvrDevice::totalIoSpace = 0x10000;
@@ -53,7 +52,7 @@ void AvrDevice::AddToCycleList(Hardware *hw) {
 }
         
 void AvrDevice::RemoveFromCycleList(Hardware *hw) {
-    vector<Hardware*>::iterator element;
+    std::vector<Hardware*>::iterator element;
     element=find(hwCycleList.begin(), hwCycleList.end(), hw);
     if(element != hwCycleList.end())
         hwCycleList.erase(element);
@@ -134,7 +133,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     ioSpaceSize(_ioSpaceSize),
     iRamSize(IRamSize),
     eRamSize(ERamSize),
-    devSignature(numeric_limits<unsigned int>::max()),
+    devSignature(std::numeric_limits<unsigned int>::max()),
     abortOnInvalidAccess(false),
     coreTraceGroup(this),
     deferIrq(false),
@@ -250,9 +249,9 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
 
     if(trace_on) {
         traceOut << actualFilename << " ";
-        traceOut << HexShort(cPC << 1) << dec << ": ";
+        traceOut << HexShort(cPC << 1) << std::dec << ": ";
 
-        string sym(Flash->GetSymbolAtAddress(cPC<<1));
+        std::string sym(Flash->GetSymbolAtAddress(cPC<<1));
         traceOut << sym << " ";
         for (int len = sym.length(); len < 30;len++)
             traceOut << " " ;
@@ -273,7 +272,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
             //check for enabled breakpoints here
             if(BP.end() != find(BP.begin(), BP.end(), PC)) {
                 if(trace_on)
-                    traceOut << "Breakpoint found at 0x" << hex << PC << dec << endl;
+                    traceOut << "Breakpoint found at 0x" << std::hex << PC << std::dec << std::endl;
                 if(nextStepIn_ns != 0)
                     *nextStepIn_ns=clockFreq;
                 untilCoreStepFinished = !(cpuCycles > 0);
@@ -337,11 +336,11 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
 
             if(cpuCycles <= 0) {
                 if((unsigned int)(PC << 1) >= (unsigned int)Flash->GetSize() ) {
-                    ostringstream os;
-                    os << actualFilename << " Simulation runs out of Flash Space at " << hex << (PC << 1);
-                    string s = os.str();
+                    std::ostringstream os;
+                    os << actualFilename << " Simulation runs out of Flash Space at " << std::hex << (PC << 1);
+                    std::string s = os.str();
                     if(trace_on)
-                        traceOut << s << endl;
+                        traceOut << s << std::endl;
                     avr_error("%s", s.c_str());
                 }
 
@@ -367,7 +366,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
         *nextStepIn_ns = clockFreq;
 
     if(trace_on == 1) {
-        traceOut << endl;
+        traceOut << std::endl;
         sysConHandler.TraceNextLine();
     }
 
@@ -379,7 +378,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
 void AvrDevice::Reset() {
     cPC = PC = fuses->GetResetAddr();
 
-    vector<Hardware *>::iterator ii;
+    std::vector<Hardware *>::iterator ii;
     for(ii= hwResetList.begin(); ii != hwResetList.end(); ii++)
         (*ii)->Reset();
 

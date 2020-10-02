@@ -141,8 +141,8 @@ class GdbServer: public SimulationMember {
 
         bool avr_core_flash_read(int addr, word& val) ;
         void avr_core_flash_write(int addr, word val) ;
-        void avr_core_flash_write_hi8( int addr, byte val) ;
-        void avr_core_flash_write_lo8( int addr, byte val) ;
+        void avr_core_flash_write_hi8( int addr, ::byte val) ;
+        void avr_core_flash_write_lo8( int addr, ::byte val) ;
         void avr_core_remove_breakpoint(dword pc) ;
         void avr_core_insert_breakpoint(dword pc) ;
         int signal_has_occurred(int signo); 

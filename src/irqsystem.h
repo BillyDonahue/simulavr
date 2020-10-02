@@ -85,6 +85,7 @@ class IrqStatisticPerVector {
     public:
 
         IrqStatisticEntry actual;
+        IrqStatisticEntry last;
         IrqStatisticEntry next;
 
         void CalculateStatistic();

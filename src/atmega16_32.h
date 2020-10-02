@@ -84,6 +84,31 @@ class AvrDevice_atmega16: public AvrDevice_atmega16_32 {
     public:
         //! Creates the device for ATMega16, see AvrDevice_atmega16_32.
         AvrDevice_atmega16() : AvrDevice_atmega16_32(1024, 16 * 1024, 512, 0x1c00, true) {}
+
+        static constexpr const char* irqnames[]
+        {
+            "RESET",
+                "INT0",
+                "INT1",
+                "TIMER2_COMP",
+                "TIMER2_OVF",
+                "TIMER1_CAPT",
+                "TIMER1_COMPA",
+                "TIMER1_COMPB",
+                "TIMER1_OVF",
+                "TIMER0_OVF",
+                "SPI, STC",
+                "USART RXC",
+                "USART UDRE",
+                "USART TXC",
+                "ADC",
+                "EE_RDY",
+                "ANA_COMP",
+                "TWI",
+                "INT2",
+                "TIMER0_COMP",
+                "SPM_RDY"
+        };
 };
 
 //! AVR device class for ATMega32, see AvrDevice_atmega16_32.
@@ -91,6 +116,37 @@ class AvrDevice_atmega32: public AvrDevice_atmega16_32 {
     public:
         //! Creates the device for ATMega32, see AvrDevice_atmega16_32.
         AvrDevice_atmega32() : AvrDevice_atmega16_32(2 * 1024, 32 * 1024, 1024, 0x3800, false) {}
+
+        static constexpr const char* const irqnames[]
+        {
+            "RESET",
+                "INT0",
+                "INT1",
+                "INT2",
+                "TIMER2_COMP",
+                "TIMER2_OVF",
+                "TIMER1_CAPT",
+                "TIMER1_COMPA",
+                "TIMER1_COMPB",
+                "TIMER1_OVF",
+                "TIMER0_COMP",
+                "TIMER0_OVF",
+                "SPI, STC",
+                "USART RXC",
+                "USART UDRE",
+                "USART TXC",
+                "ADC",
+                "EE_RDY",
+                "ANA_COMP",
+                "TWI",
+                "SPM_RDY"
+        };  
+        virtual void GetInterruptVectorNames(const char*const*& names, unsigned int& cnt) const 
+        {
+            names = irqnames;
+            cnt = sizeof( irqnames )/sizeof(char*); 
+        }
+
 };
 
 #endif

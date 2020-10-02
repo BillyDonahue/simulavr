@@ -29,7 +29,6 @@
 #include "net.h"
 
 #include <sstream>
-using namespace std;
 
 ExtPin::ExtPin(T_Pinstate ps,
                UserInterface *_ui,
@@ -39,9 +38,9 @@ ExtPin::ExtPin(T_Pinstate ps,
     ui(_ui),
     extName(_extName)
 {
-    ostringstream os;
+    std::ostringstream os;
     outState=ps;
-    os << "create Net " << _extName << " " << baseWindow << " " << endl;
+    os << "create Net " << _extName << " " << baseWindow << " " << std::endl;
     ui->Write(os.str());
     
     ui->AddExternalType(extName, this);
@@ -55,7 +54,7 @@ ExtPin::ExtPin(T_Pinstate ps,
     os.str(""); // make it empty
     os.clear(); // reset state flags
 
-    os << "setfrombackdoor " << extName << " " << defaultState << endl;
+    os << "setfrombackdoor " << extName << " " << defaultState << std::endl;
     ui->Write(os.str());
 }
 
@@ -63,7 +62,7 @@ void ExtPin::SetInState(const Pin &p) {
     ui->SendUiNewState(extName, p);
 }
 
-void ExtPin::SetNewValueFromUi(const string& s) {
+void ExtPin::SetNewValueFromUi(const std::string& s) {
     Pin tmp;
     tmp= s[0];
     //outState= tmp.GetOutState();
@@ -72,7 +71,7 @@ void ExtPin::SetNewValueFromUi(const string& s) {
     connectedTo->CalcNet();
 }
 
-void ExtAnalogPin::SetNewValueFromUi(const string& s) {
+void ExtAnalogPin::SetNewValueFromUi(const std::string& s) {
     outState= ANALOG;
 
     //analogValue=atol(s.c_str());
@@ -90,8 +89,8 @@ ExtAnalogPin::ExtAnalogPin(unsigned int value,
     ui(_ui),
     extName(_extName)
 {
-    ostringstream os;
-    os << "create AnalogNet " << _extName << " " << baseWindow << " " << endl;
+    std::ostringstream os;
+    os << "create AnalogNet " << _extName << " " << baseWindow << " " << std::endl;
     ui->Write(os.str());
 
     ui->AddExternalType(extName, this);

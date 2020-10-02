@@ -1,7 +1,6 @@
 #include <iostream>
 #include "spisink.h"
 
-using namespace std;
 
 enum {
 		SSBIT = 0,
@@ -110,18 +109,18 @@ int	SpiSink::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
 						}
 					_state	= 1;
 
-					streamsize	streamWidth = cout.width();
-					ios_base::fmtflags	saved	= cout.flags();
-					cout.setf(ios_base::hex,ios_base::basefield);
-					cout.setf(ios_base::uppercase);
-					cout.setf(ios_base::right);
-					cout << "spisink: 0x";
-					cout.width(2);
-					cout.fill('0');
-					cout << (unsigned long)_sr;
-					cout << endl;
-					cout.width(streamWidth);
-					cout.flags(saved);
+                    std::streamsize	streamWidth = std::cout.width();
+                    std::ios_base::fmtflags	saved	= std::cout.flags();
+                    std::cout.setf(std::ios_base::hex,std::ios_base::basefield);
+                    std::cout.setf(std::ios_base::uppercase);
+                    std::cout.setf(std::ios_base::right);
+                    std::cout << "spisink: 0x";
+                    std::cout.width(2);
+                    std::cout.fill('0');
+                    std::cout << (unsigned long)_sr;
+                    std::cout << std::endl;
+                    std::cout.width(streamWidth);
+                    std::cout.flags(saved);
 					}
 				break;
 			}
@@ -130,10 +129,10 @@ int	SpiSink::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
 
 	if(_ssState != _prevSS){
 		if(_ssState){
-			cout << "spisink: /SS negated" << endl;
+            std::cout << "spisink: /SS negated" << std::endl;
 			}
 		else {
-			cout << "spisink: /SS asserted" << endl;
+            std::cout << "spisink: /SS asserted" << std::endl;
 			}
 		_prevSS	= _ssState;
 		}

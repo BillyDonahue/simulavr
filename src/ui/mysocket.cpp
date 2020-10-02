@@ -7,7 +7,6 @@
 #include "mysocket.h"
 #include "avrerror.h"
 
-using namespace std;
 
 #if !(defined(_MSC_VER) || defined(HAVE_SYS_MINGW))
 
@@ -82,7 +81,7 @@ ssize_t Socket::Poll() {
 
 #endif
 
-ssize_t Socket::Read(string &a) {
+ssize_t Socket::Read(std::string &a) {
     char buf[256];
 #if defined(_MSC_VER) || defined(HAVE_SYS_MINGW)
     ssize_t len = recv(_socket, buf, 255, 0);
@@ -97,14 +96,14 @@ ssize_t Socket::Read(string &a) {
     return len;
 }
 
-void Socket::Write(const string &s) {
+void Socket::Write(const std::string &s) {
 #if defined(_MSC_VER) || defined(HAVE_SYS_MINGW)
     int err = ::send(_socket, s.c_str(), s.length(), 0);
 #else
     int err = ::write( conn, s.c_str(), s.size());
 #endif
     if (err<0)
-        cerr << "Write in UI fails!" << endl;
+        std::cerr << "Write in UI fails!" << std::endl;
 }
 
 #if !(defined(_MSC_VER) || defined(HAVE_SYS_MINGW))
@@ -121,7 +120,7 @@ void Socket::OpenSocket(int port) {
     int                i;
 
     if ( (sock = socket( PF_INET, SOCK_STREAM, 0 )) < 0 )
-        cerr << "Can't create socket:" << strerror(errno) << endl;
+        std::cerr << "Can't create socket:" << strerror(errno) << std::endl;
 
 
     /* Tell TCP not to delay small packets.  This greatly speeds up
@@ -180,7 +179,7 @@ void Socket::OpenSocket(int port) {
     do {
         ret = connect ( sock, (struct sockaddr *)address, sizeof(address));
         if (ret<0) {
-            cerr << "No connect to socket possible now... retry " << strerror(errno) << endl;
+            std::cerr << "No connect to socket possible now... retry " << strerror(errno) << std::endl;
             sleep(1);
         } else {
             break; //leave retry loop
@@ -202,7 +201,7 @@ void Socket::OpenSocket(int port) {
     /* If we got this far, we now have a client connected and can start 
     processing. */
 
-    cerr << "User Interface Connection opened by host "<< inet_ntoa(address->sin_addr) << " port " <<   ntohs(address->sin_port) << endl;
+    std::cerr << "User Interface Connection opened by host "<< inet_ntoa(address->sin_addr) << " port " <<   ntohs(address->sin_port) << std::endl;
 
     fcntl(conn, F_SETFL, O_NONBLOCK);
 }

@@ -2,7 +2,6 @@
 #include "spisrc.h"
 #include "avrerror.h"
 
-using namespace std;
 
 SpiSource::SpiSource(   const char* fileName,
                         Net&        ssNet,
@@ -36,7 +35,7 @@ static char*    readNextLine(std::ifstream& f,char* buffer,unsigned len,SystemCl
             }
         *timeToNextStepIn_ns    = 1000000;  // Once every 100 microseconds
         f.clear();
-        f.seekg (0, ios::beg);
+        f.seekg (0, std::ios::beg);
         }
     return 0;
     }

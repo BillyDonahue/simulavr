@@ -28,7 +28,6 @@
 
 #include <string>
 
-using namespace std;
 
 #include "externaltype.h"
 #include "ui.h"

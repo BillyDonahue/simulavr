@@ -29,12 +29,11 @@
 
 #include "../avrerror.h"
 #include "ui.h"   
-using namespace std;
 
-map<int,int> xToNumber;
-map<int, const int* > keynumberToScancode1;
-map<int, const int* > keynumberToScancode2;
-map<int, const int* > keynumberToScancode3;
+std::map<int,int> xToNumber;
+std::map<int, const int* > keynumberToScancode1;
+std::map<int, const int* > keynumberToScancode2;
+std::map<int, const int* > keynumberToScancode3;
 
 
 
@@ -188,8 +187,8 @@ bufferWriteIndex(0), bufferReadIndex(0)
     bitCnt=0;
 
     //ncurses setup
-    ostringstream os;
-    os << "create Kbd " << name  << " .x " <<  endl;
+    std::ostringstream os;
+    os << "create Kbd " << name  << " .x " <<  std::endl;
     ui->Write(os.str());
 
     ui->AddExternalType(name, this);
@@ -251,7 +250,7 @@ void Keyboard::InsertBreakCodeToBuffer( int key) {
     } while (1);
 }
 
-void Keyboard::SetNewValueFromUi(const string& s) {
+void Keyboard::SetNewValueFromUi(const std::string& s) {
     switch (s[0]) {
         case 'B':
             InsertBreakCodeToBuffer(atoi(s.substr(1).c_str()));
@@ -262,7 +261,7 @@ void Keyboard::SetNewValueFromUi(const string& s) {
             break;
 
         default:
-            cerr << "Unknown message for kbd-handler received from gui :-(" << endl;
+            std::cerr << "Unknown message for kbd-handler received from gui :-(" << std::endl;
     }
 }
 

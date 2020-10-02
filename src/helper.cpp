@@ -27,48 +27,47 @@
 #include <sstream>
 #include "helper.h"
 
-using namespace std;
 
 HexChar::HexChar(unsigned char x) { val=x; }
 HexShort::HexShort(unsigned short x) { val=x; }
 DecLong::DecLong(unsigned long x) { val=x; }
 
-ostream &operator << (ostream &os, const HexChar &h) {
+std::ostream &operator << (std::ostream &os, const HexChar &h) {
     os << "0x";
     os.width(2);
     os.fill('0');
-    os << hex << (unsigned int) h.val << dec ;
+    os << std::hex << (unsigned int) h.val << std::dec ;
     return os;
 }
 
-ostream &operator << (ostream &os, const HexShort &h) {
+std::ostream &operator << (std::ostream &os, const HexShort &h) {
     os << "0x" ;
     os.width(4);
     os.fill('0');
-    os << hex << (unsigned int) h.val << dec ;
+    os << std::hex << (unsigned int) h.val << std::dec ;
     return os;
 }
 
-ostream &operator << (ostream &os, const DecLong &h) {
+std::ostream &operator << (std::ostream &os, const DecLong &h) {
     os.width(9);
     os.fill(' ');
-    os << dec << (unsigned long) h.val << dec ;
+    os << std::dec << (unsigned long) h.val << std::dec ;
     return os;
 }
 
 std::string int2str(int i) {
-    stringstream s;
+    std::stringstream s;
     s << i;
     return s.str();
 }
 
 std::string int2hex(int i) {
-    stringstream s;
-    s << hex << i;
+    std::stringstream s;
+    s << std::hex << i;
     return s.str();
 }
 
-std::string readline(istream &is) {
+std::string readline(std::istream &is) {
     std::string out;
     char c=0;
     while (!is.eof() && c!='\n') {
@@ -79,8 +78,8 @@ std::string readline(istream &is) {
     return out;
 }
 
-vector<std::string> split(const std::string &inp, std::string splitc) {
-    vector<std::string> out;
+std::vector<std::string> split(const std::string &inp, std::string splitc) {
+    std::vector<std::string> out;
     std::string cur;
     for (size_t i=0; i < inp.size(); i++) {
 	char c=inp[i];

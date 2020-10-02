@@ -29,8 +29,6 @@
 #include "avrmalloc.h"
 #include "flash.h"
 
-//#include <iostream>
-//using namespace std;
 
 void FlashProgramming::ClearOperationBits(void) {
     spmcr_val &= ~spmcr_opr_bits;

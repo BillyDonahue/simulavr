@@ -32,14 +32,13 @@
 #include "avrerror.h"
 #include <sstream>
 
-using namespace std;
 
 UserInterface::UserInterface(int port, bool _withUpdateControl): Socket(port), updateOn(1), pollFreq(100000)  {
     if (_withUpdateControl) {
         waitOnAckFromTclRequest=0;
         waitOnAckFromTclDone=0;
-        ostringstream os;
-        os << "create UpdateControl dummy dummy " << endl; 
+        std::ostringstream os;
+        os << "create UpdateControl dummy dummy " << std::endl; 
         Write(os.str());
         AddExternalType("UpdateControl", this);
     }
@@ -73,17 +72,17 @@ int UserInterface::Step(bool &dummy1, SystemClockOffset *nextStepIn_ns) {
 
                 while (len>0) {
 
-                    string::size_type pos;
+                    std::string::size_type pos;
 
                     pos=dummy.find(" ");
 
-                    string net=dummy.substr(0, pos);
-                    string rest=dummy.substr(pos+1); //vfrom pos+1 to end
+                    std::string net=dummy.substr(0, pos);
+                    std::string rest=dummy.substr(pos+1); //vfrom pos+1 to end
 
                     if (net == "exit" )
                         avr_error("Exiting at external UI request");
 
-                    string par;
+                    std::string par;
                     int pos2=rest.find(" ");
 
                     if (pos2<=0) break;
@@ -95,7 +94,7 @@ int UserInterface::Step(bool &dummy1, SystemClockOffset *nextStepIn_ns) {
                     if (net == "__ack" ) {
                         waitOnAckFromTclDone++;
                     } else {
-                        map<string, ExternalType*>::iterator ii;
+                        std::map<std::string, ExternalType*>::iterator ii;
                         ii=extMembers.find(net);
                         if (ii != extMembers.end() ) {
                             (ii->second)->SetNewValueFromUi(par);
@@ -126,8 +125,8 @@ int UserInterface::Step(bool &dummy1, SystemClockOffset *nextStepIn_ns) {
 
 
 
-void UserInterface::SendUiNewState(const string &s, const char &c)  {
-    ostringstream os;
+void UserInterface::SendUiNewState(const std::string &s, const char &c)  {
+    std::ostringstream os;
     //static map<string, char> LastState;
 
     if (LastState[s]==c) {
@@ -135,13 +134,13 @@ void UserInterface::SendUiNewState(const string &s, const char &c)  {
     }
     LastState[s]=c;
 
-    os << "set " << s << " " << c << endl;
+    os << "set " << s << " " << c << std::endl;
     Write(os.str());
 
     //    SystemClock::Instance().Rescedule(this, 1000); //read ack back as fast as possible
 }
 
-void UserInterface::SetNewValueFromUi(const string &value){
+void UserInterface::SetNewValueFromUi(const std::string &value){
     if (value=="0") {
         updateOn=false;
     } else {
@@ -150,7 +149,7 @@ void UserInterface::SetNewValueFromUi(const string &value){
 
 }
 
-void UserInterface::Write(const string &s) {
+void UserInterface::Write(const std::string &s) {
     if (updateOn) {
 
         for (unsigned int tt = 0; tt< s.length() ; tt++) {

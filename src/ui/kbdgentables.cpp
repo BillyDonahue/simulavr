@@ -7,7 +7,6 @@
 #include <fstream>
 #include <sstream>
 
-using namespace std;
 
 void outNumberToScancode(ostream &target, int set, int number, const string &str) {
     static int objcnt=0;

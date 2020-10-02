@@ -30,13 +30,12 @@
 #include "avrfactory.h"
 #include "avrerror.h"
 
-using namespace std;
 
-typedef map<std::string, AvrFactory::AvrDeviceCreator> AVRDeviceMap;
+using AVRDeviceMap = std::map<std::string, AvrFactory::AvrDeviceCreator>;
 
 void AvrFactory::reg(const std::string name,
                      AvrDeviceCreator create) {
-    string devname(name);
+    std::string devname(name);
     for(unsigned int i = 0; i < devname.size(); i++)
         devname[i] = tolower(devname[i]);
     AVRDeviceMap & devmap = instance().devmap;
@@ -48,7 +47,7 @@ void AvrFactory::reg(const std::string name,
 }
 
 AvrDevice* AvrFactory::makeDevice(const char *in) {
-    string devname(in);
+    std::string devname(in);
     for(unsigned int i = 0; i < devname.size(); i++)
         devname[i] = tolower(devname[i]);
     if(devname == "unknown")

@@ -218,6 +218,10 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         //! Get value of Z register (16bit)
         unsigned GetRegZ(void);
 
+        //! Get names of interrupt vectors
+        virtual void GetInterruptVectorNames(const char**&, unsigned int& cnt) const { cnt = 0; }
+
+
         //! When a call/jump/cond-jump instruction was executed. For debugging.
         void DebugOnJump();
 

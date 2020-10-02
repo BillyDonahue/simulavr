@@ -27,7 +27,6 @@
 #include "systemclock.h"
 #include "systemclocktypes.h"
 
-using namespace std;
 
 SerialRxBasic::SerialRxBasic(){
     rx.RegisterCallback(this);
@@ -154,20 +153,20 @@ SerialRx::SerialRx(UserInterface *_ui, const char *_name, const char *baseWindow
     ui(_ui), name(_name)  {
         rx.RegisterCallback(this);
 
-        ostringstream os;
-        os << "create SerialRx " << name  << " " << baseWindow << endl;
+        std::ostringstream os;
+        os << "create SerialRx " << name  << " " << baseWindow << std::endl;
         ui->Write(os.str());
         ui->AddExternalType(name, this);
         Reset();
     }
 
 void SerialRx::CharReceived(unsigned char c){
-    ostringstream os;
+    std::ostringstream os;
 
     os << "set" << " " << name << " ";
     if (sendInHex) 
     {
-        os << hex << "0x" << (unsigned int)c;
+        os << std::hex << "0x" << (unsigned int)c;
     } 
     else
     {
@@ -189,18 +188,18 @@ void SerialRx::CharReceived(unsigned char c){
                       }
                       else
                       {
-                          os << hex << "0x" << (unsigned int)c;
+                          os << std::hex << "0x" << (unsigned int)c;
                       }
         }
 
     }
 
 
-    os << endl;
+    os << std::endl;
     ui->Write(os.str());
 }
 
 
 //not used
-void SerialRx::SetNewValueFromUi(const string &){
+void SerialRx::SetNewValueFromUi(const std::string &){
 }

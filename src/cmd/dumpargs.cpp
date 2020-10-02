@@ -35,34 +35,32 @@
 #include "../flash.h"
 #include "../hweeprom.h"
 
-using namespace std;
- 
-void SetDumpTraceArgs(const vector<string> &traceopts, AvrDevice *dev) {
+void SetDumpTraceArgs(const std::vector<std::string> &traceopts, AvrDevice *dev) {
     DumpManager *dman = DumpManager::Instance();
     for(size_t i = 0; i < traceopts.size(); i++) {
-        vector<string> ls = split(traceopts[i], ":");
+        std::vector<std::string> ls = split(traceopts[i], ":");
         if(ls.size() < 1)
             avr_error("Invalid tracing option '%s'.", traceopts[i].c_str());
         Dumper *d;
         TraceSet ts;
-        cerr << "Enabling tracer: '";
+        std::cerr << "Enabling tracer: '";
         if(ls[0] == "warnread") {
-            cerr << "warnread'." << endl;
+            std::cerr << "warnread'." << std::endl;
             if(ls.size() > 1)
                 avr_error("Invalid number of options for 'warnread'.");
             ts = dman->all();
             d = new WarnUnknown(dev);
         } else if (ls[0] == "vcd") {
-            cerr << "vcd'." << endl;
+            std::cerr << "vcd'." << std::endl;
             if(ls.size() < 3 || ls.size() > 4)
                 avr_error("Invalid number of options for 'vcd'.");
-            cerr << "Reading values to trace from '" << ls[1] << "'." << endl;
+            std::cerr << "Reading values to trace from '" << ls[1] << "'." << std::endl;
         
-            ifstream is(ls[1].c_str());
+            std::ifstream is(ls[1].c_str());
             if(is.is_open() == 0)
                 avr_error("Can't open '%s'", ls[1].c_str());
         
-            cerr << "Output VCD file is '" << ls[2] << "'." << endl;
+            std::cerr << "Output VCD file is '" << ls[2] << "'." << std::endl;
             ts = dman->load(is);
         
             bool rs = false, ws = false;
@@ -83,41 +81,41 @@ void SetDumpTraceArgs(const vector<string> &traceopts, AvrDevice *dev) {
     }
 }
  
-void ShowRegisteredTraceValues(const string &outname) {
-    cerr << "Dumping traceable values to ";
+void ShowRegisteredTraceValues(const std::string &outname) {
+    std::cerr << "Dumping traceable values to ";
     if(outname != "-")
-        cerr << "'" << outname << "'." << endl;
+        std::cerr << "'" << outname << "'." << std::endl;
     else
-        cerr << "stdout." << endl;
+        std::cerr << "stdout." << std::endl;
     
-    ostream *outf;
+    std::ostream *outf;
     if(outname != "-")
-        outf = new ofstream(outname.c_str());
+        outf = new std::ofstream(outname.c_str());
     else
-        outf = &cout;
+        outf = &std::cout;
    
     DumpManager::Instance()->save(*outf);
     
-    if(outf != &cout)
+    if(outf != &std::cout)
         delete outf;
 }
 
-static void WriteCoreDumpIO(ostream &outf, AvrDevice *dev, int offs, int size) {
+static void WriteCoreDumpIO(std::ostream &outf, AvrDevice *dev, int offs, int size) {
     int hsize = (size + 1) / 2;
     const int sp_name = 10, sp_col = 15; // place for IO register name an gap size between columns
     for(int i = 0; i < hsize; i++) {
         // left column
-        string regname = dev->rw[i + offs]->GetTraceName();
+        std::string regname = dev->rw[i + offs]->GetTraceName();
         unsigned char val = 0;
         if(dev->rw[i + offs]->IsInvalid())
             regname = "Reserved";
         else
             val = (unsigned char)*(dev->rw[i + offs]);
-        outf << hex << setw(2) << setfill('0') << right << (i + offs) << " : "
-             << setw(sp_name) << setfill(' ') << left << regname << " : "
-             << "0x" << hex << setw(2) << setfill('0') << right << (int)val;
+        outf << std::hex << std::setw(2) << std::setfill('0') << std::right << (i + offs) << " : "
+             << std::setw(sp_name) << std::setfill(' ') << std::left << regname << " : "
+             << "0x" << std::hex << std::setw(2) << std::setfill('0') << std::right << (int)val;
         if((i + hsize) >= size)
-            outf << endl; // odd count of IO registers?
+            outf << std::endl; // odd count of IO registers?
         else {
             // right column
             regname = dev->rw[i + hsize + offs]->GetTraceName();
@@ -126,29 +124,29 @@ static void WriteCoreDumpIO(ostream &outf, AvrDevice *dev, int offs, int size) {
                 regname = "Reserved";
             else
                 val = (unsigned char)*(dev->rw[i + hsize + offs]);
-            outf << setw(sp_col) <<  setfill(' ') << " "
-                 << hex << setw(2) << setfill('0') << right << (i + hsize + offs) << " : "
-                 << setw(sp_name) << setfill(' ') << left << regname << " : "
-                 << "0x" << hex << setw(2) << setfill('0') << right << (int)val
-                 << endl;
+            outf << std::setw(sp_col) <<  std::setfill(' ') << " "
+                 << std::hex << std::setw(2) << std::setfill('0') << std::right << (i + hsize + offs) << " : "
+                 << std::setw(sp_name) << std::setfill(' ') << std::left << regname << " : "
+                 << "0x" << std::hex << std::setw(2) << std::setfill('0') << std::right << (int)val
+                 << std::endl;
         }
     }
 }
 
-static void WriteCoreDumpRAM(ostream &outf, AvrDevice *dev, int offs, int size) {
+static void WriteCoreDumpRAM(std::ostream &outf, AvrDevice *dev, int offs, int size) {
     const int maxLineByte = 16;
-    ostringstream buf;
+    std::ostringstream buf;
     int start = offs, lastStart = 0, dup = 0, j = 0;
-    string lastLine("");
+    std::string lastLine("");
 
     for(int i = 0; i < size; i++) {
-        buf << hex << setw(2) << setfill('0') << (int)((unsigned char)*(dev->rw[i + offs])) << " ";
+        buf << std::hex << std::setw(2) << std::setfill('0') << (int)((unsigned char)*(dev->rw[i + offs])) << " ";
         if(++j == maxLineByte) {
             if(buf.str() == lastLine) // check for duplicate line
               dup++;
             else {
-              if(dup > 0) outf << "  -- last line repeats --" << endl;
-              outf << hex << setw(4) << setfill('0') << right << start << " : " << buf.str() << endl;
+              if(dup > 0) outf << "  -- last line repeats --" << std::endl;
+              outf << std::hex << std::setw(4) << std::setfill('0') << std::right << start << " : " << buf.str() << std::endl;
               dup = 0;
               lastLine = buf.str();
             }
@@ -159,28 +157,28 @@ static void WriteCoreDumpRAM(ostream &outf, AvrDevice *dev, int offs, int size) 
         }
     }
     if((j > 0) || (dup > 0)) {
-        if(dup > 0) outf << "  -- last line repeats --" << endl;
+        if(dup > 0) outf << "  -- last line repeats --" << std::endl;
         if(j == 0)
-          outf << hex << setw(4) << setfill('0') << right << lastStart << " : " << lastLine << endl;
+          outf << std::hex << std::setw(4) << std::setfill('0') << std::right << lastStart << " : " << lastLine << std::endl;
         else
-          outf << hex << setw(4) << setfill('0') << right << start << " : " << buf.str() << endl;
+          outf << std::hex << std::setw(4) << std::setfill('0') << std::right << start << " : " << buf.str() << std::endl;
     }
 }
 
-static void WriteCoreDumpEEPROM(ostream &outf, AvrDevice *dev, int size) {
+static void WriteCoreDumpEEPROM(std::ostream &outf, AvrDevice *dev, int size) {
     const int maxLineByte = 16;
-    ostringstream buf;
+    std::ostringstream buf;
     int start = 0, lastStart = 0, dup = 0, j = 0;
-    string lastLine("");
+    std::string lastLine("");
 
     for(int i = 0; i < size; i++) {
-        buf << hex << setw(2) << setfill('0') << (int)(dev->eeprom->ReadFromAddress(i)) << " ";
+        buf << std::hex << std::setw(2) << std::setfill('0') << (int)(dev->eeprom->ReadFromAddress(i)) << " ";
         if(++j == maxLineByte) {
             if(buf.str() == lastLine) // check for duplicate line
               dup++;
             else {
-              if(dup > 0) outf << "  -- last line repeats --" << endl;
-              outf << hex << setw(4) << setfill('0') << right << start << " : " << buf.str() << endl;
+              if(dup > 0) outf << "  -- last line repeats --" << std::endl;
+              outf << std::hex << std::setw(4) << std::setfill('0') << std::right << start << " : " << buf.str() << std::endl;
               dup = 0;
               lastLine = buf.str();
             }
@@ -191,28 +189,28 @@ static void WriteCoreDumpEEPROM(ostream &outf, AvrDevice *dev, int size) {
         }
     }
     if((j > 0) || (dup > 0)) {
-        if(dup > 0) outf << "  -- last line repeats --" << endl;
+        if(dup > 0) outf << "  -- last line repeats --" << std::endl;
         if(j == 0)
-          outf << hex << setw(4) << setfill('0') << right << lastStart << " : " << lastLine << endl;
+          outf << std::hex << std::setw(4) << std::setfill('0') << std::right << lastStart << " : " << lastLine << std::endl;
         else
-          outf << hex << setw(4) << setfill('0') << right << start << " : " << buf.str() << endl;
+          outf << std::hex << std::setw(4) << std::setfill('0') << std::right << start << " : " << buf.str() << std::endl;
     }
 }
 
-static void WriteCoreDumpFlash(ostream &outf, AvrDevice *dev, int size) {
+static void WriteCoreDumpFlash(std::ostream &outf, AvrDevice *dev, int size) {
     const int maxLineWord = 8;
-    ostringstream buf;
+    std::ostringstream buf;
     int start = 0, lastStart = 0, dup = 0, j = 0;
-    string lastLine("");
+    std::string lastLine("");
 
     for(int i = 0; i < size; i += 2) {
-        buf << hex << setw(4) << setfill('0') << dev->Flash->ReadMemRawWord(i) << " ";
+        buf << std::hex << std::setw(4) << std::setfill('0') << dev->Flash->ReadMemRawWord(i) << " ";
         if(++j == maxLineWord) {
             if(buf.str() == lastLine) // check for duplicate line
               dup++;
             else {
-              if(dup > 0) outf << "  -- last line repeats --" << endl;
-              outf << hex << setw(4) << setfill('0') << right << start << " : " << buf.str() << endl;
+              if(dup > 0) outf << "  -- last line repeats --" << std::endl;
+              outf << std::hex << std::setw(4) << std::setfill('0') << std::right << start << " : " << buf.str() << std::endl;
               dup = 0;
               lastLine = buf.str();
             }
@@ -223,70 +221,70 @@ static void WriteCoreDumpFlash(ostream &outf, AvrDevice *dev, int size) {
         }
     }
     if((j > 0) || (dup > 0)) {
-        if(dup > 0) outf << "  -- last line repeats --" << endl;
+        if(dup > 0) outf << "  -- last line repeats --" << std::endl;
         if(j == 0)
-          outf << hex << setw(4) << setfill('0') << right << lastStart << " : " << lastLine << endl;
+          outf << std::hex << std::setw(4) << std::setfill('0') << std::right << lastStart << " : " << lastLine << std::endl;
         else
-          outf << hex << setw(4) << setfill('0') << right << start << " : " << buf.str() << endl;
+          outf << std::hex << std::setw(4) << std::setfill('0') << std::right << start << " : " << buf.str() << std::endl;
     }
 }
 
-void WriteCoreDump(const string &outname, AvrDevice *dev) {
-    ostream *outf;
+void WriteCoreDump(const std::string &outname, AvrDevice *dev) {
+    std::ostream *outf;
 
     // open dump file
     if(outname != "-")
-        outf = new ofstream(outname.c_str());
+        outf = new std::ofstream(outname.c_str());
     else
-        outf = &cout;
+        outf = &std::cout;
 
     // write out PC
-    *outf << "PC = 0x" << hex << setw(6) << setfill('0') << dev->PC
-          << " (PC*2 = 0x" << hex << setw(6) << setfill('0') << (dev->PC * 2)
-          << ")" << endl << endl;
+    *outf << "PC = 0x" << std::hex << std::setw(6) << std::setfill('0') << dev->PC
+          << " (PC*2 = 0x" << std::hex << std::setw(6) << std::setfill('0') << (dev->PC * 2)
+          << ")" << std::endl << std::endl;
 
     // write out general purpose register
-    *outf << "General Purpose Register Dump:" << endl;
+    *outf << "General Purpose Register Dump:" << std::endl;
     for(unsigned int i = 0, j = 0; i < dev->GetMemRegisterSize(); i++) {
-        *outf << dec << "r" << setw(2) << setfill('0') << i << "="
-              << hex << setw(2) << setfill('0') << (int)((unsigned char)*(dev->rw[i])) << "  ";
+        *outf << std::dec << "r" << std::setw(2) << std::setfill('0') << i << "="
+              << std::hex << std::setw(2) << std::setfill('0') << (int)((unsigned char)*(dev->rw[i])) << "  ";
         j++;
         if(j == 8) {
-            *outf << endl;
+            *outf << std::endl;
             j = 0;
         }
     }
-    *outf << endl;
+    *outf << std::endl;
 
     // write out IO register
-    *outf << "IO Register Dump:" << endl;
+    *outf << "IO Register Dump:" << std::endl;
     WriteCoreDumpIO(*outf, dev, dev->GetMemRegisterSize(), dev->GetMemIOSize());
-    *outf << endl;
+    *outf << std::endl;
 
     // write out internal RAM
-    *outf << "Internal SRAM Memory Dump:" << endl;
+    *outf << "Internal SRAM Memory Dump:" << std::endl;
     WriteCoreDumpRAM(*outf, dev, dev->GetMemRegisterSize() + dev->GetMemIOSize(), dev->GetMemIRamSize());
-    *outf << endl;
+    *outf << std::endl;
 
     // write out external RAM
     if(dev->GetMemERamSize() > 0) {
-        *outf << "External SRAM Memory Dump:" << endl;
+        *outf << "External SRAM Memory Dump:" << std::endl;
         WriteCoreDumpRAM(*outf, dev, dev->GetMemRegisterSize() + dev->GetMemIOSize() + dev->GetMemIRamSize(), dev->GetMemERamSize());
-        *outf << endl;
+        *outf << std::endl;
     }
 
     // write out EEPROM content
-    *outf << "EEPROM Memory Dump:" << endl;
+    *outf << "EEPROM Memory Dump:" << std::endl;
     WriteCoreDumpEEPROM(*outf, dev, dev->eeprom->GetSize());
-    *outf << endl;
+    *outf << std::endl;
 
     // write out flash content
-    *outf << "Program Flash Memory Dump:" << endl;
+    *outf << "Program Flash Memory Dump:" << std::endl;
     WriteCoreDumpFlash(*outf, dev, dev->Flash->GetSize());
-    *outf << endl;
+    *outf << std::endl;
 
     // close file
-    if(outf != &cout)
+    if(outf != &std::cout)
         delete outf;
 }
 

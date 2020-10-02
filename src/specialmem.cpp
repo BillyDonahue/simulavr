@@ -28,13 +28,12 @@
 #include "specialmem.h"
 #include "avrerror.h"
 
-using namespace std;
 
 RWWriteToFile::RWWriteToFile(TraceValueRegister *registry,
-                             const string &tracename,
-                             const string &filename):
+                             const std::string &tracename,
+                             const std::string &filename):
     RWMemoryMember(registry, tracename),
-    os(filename=="-" ? cout : ofs)
+    os(filename=="-" ? std::cout : ofs)
 {
     if(filename != "-")
         ofs.open(filename.c_str());
@@ -51,10 +50,10 @@ unsigned char RWWriteToFile::get() const {
 } 
 
 RWReadFromFile::RWReadFromFile(TraceValueRegister *registry,
-                               const string &tracename,
-                               const string &filename):
+                               const std::string &tracename,
+                               const std::string &filename):
     RWMemoryMember(registry, tracename),
-    is((filename=="-") ? cin : ifs)
+    is((filename=="-") ? std::cin : ifs)
 {
     if(filename != "-")
         ifs.open(filename.c_str());
@@ -72,7 +71,7 @@ unsigned char RWReadFromFile::get() const {
 
 
 RWExit::RWExit(TraceValueRegister *registry,
-               const string &tracename) :
+               const std::string &tracename) :
     RWMemoryMember(registry, tracename) {}
 
 
@@ -90,7 +89,7 @@ unsigned char RWExit::get() const {
 }
 
 RWAbort::RWAbort(TraceValueRegister *registry,
-                 const string &tracename) :
+                 const std::string &tracename) :
     RWMemoryMember(registry, tracename) {}
 
 void RWAbort::set(unsigned char c) {

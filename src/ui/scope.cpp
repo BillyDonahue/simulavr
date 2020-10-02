@@ -27,7 +27,6 @@
 #include "systemclock.h"
 
 
-using namespace std;
 
 class ScopePin : public Pin {
     protected:
@@ -41,7 +40,7 @@ class ScopePin : public Pin {
         }
 };
 
-Scope::Scope( UserInterface *u, const string & n, unsigned int cnt, const char *baseWindow)
+Scope::Scope( UserInterface *u, const std::string & n, unsigned int cnt, const char *baseWindow)
 	: ui(u), name(n), vecPin(cnt), lastVal(cnt), noOfChannels(cnt)
 {
     for (unsigned int tt=0; tt< cnt; tt++) {
@@ -50,8 +49,8 @@ Scope::Scope( UserInterface *u, const string & n, unsigned int cnt, const char *
     }
 
     //  setup the corresponding ui in tcl from here
-    ostringstream os;
-    os << "create Scope " << name  << " "<<baseWindow <<" " <<  noOfChannels << endl;
+    std::ostringstream os;
+    os << "create Scope " << name  << " "<<baseWindow <<" " <<  noOfChannels << std::endl;
     ui->Write(os.str());
 }
 
@@ -63,8 +62,8 @@ Pin *Scope::GetPin(unsigned int n) {
 
 void Scope::SetInStateForChannel(unsigned int channel, Pin& p) {
     if ( lastVal[channel]!= p.GetAnalog() ) {
-        ostringstream os;
-        os << name << " ChangeValue " << SystemClock::Instance().GetCurrentTime() << " " << channel << " " << p.GetAnalog()<<endl;
+        std::ostringstream os;
+        os << name << " ChangeValue " << SystemClock::Instance().GetCurrentTime() << " " << channel << " " << p.GetAnalog()<<std::endl;
 
         ui->Write(os.str());
         //cout << "Set last val for channel " << channel << " value " << p.GetAnalog() << endl;

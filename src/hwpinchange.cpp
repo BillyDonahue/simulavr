@@ -3,7 +3,6 @@
 #include "hwpinchange.h"
 #include "irqsystem.h"
 
-using namespace std;
 
 HWPcir::HWPcir(	AvrDevice*		core,
 				HWIrqSystem&	irqSystem,
@@ -69,7 +68,7 @@ unsigned	HWPcir::convertBitToVector(unsigned bit) const throw(){
 			vector	= _vector7;
 			break;
 		default:
-			cerr << "HWPcir: invalid PCIFR bit specified.." << endl;
+            std::cerr << "HWPcir: invalid PCIFR bit specified.." << std::endl;
 			break;
 		};
 	return vector;
@@ -86,7 +85,7 @@ void	HWPcir::setPcifr(unsigned pcifrBit) throw(){
 	unsigned vector	= convertBitToVector(pcifrBit);
 
 	if(vector == (unsigned)~0){
-		cerr << "HWPcir: Attempt to set invalid pin-change interrupt." << endl;
+        std::cerr << "HWPcir: Attempt to set invalid pin-change interrupt." << std::endl;
 		return;
 		}
 
@@ -200,7 +199,7 @@ void HWPcir::ClearIrqFlag(unsigned int vector){
         _irqSystem.ClearIrqFlag(vector);
 		return;
 		}
-        cerr << "HWPcir: Attempt to clear non-existent irq vector";
+    std::cerr << "HWPcir: Attempt to clear non-existent irq vector";
 	}
 
 HWPcmsk::HWPcmsk(

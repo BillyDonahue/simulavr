@@ -32,7 +32,6 @@
 #include "avrerror.h"
 #include "systemclock.h"
 
-using namespace std;
 
 TraceValue::TraceValue(size_t bits,
                        const std::string &__name,
@@ -176,10 +175,10 @@ TraceValueRegister::~TraceValueRegister() {
 }
 
 void TraceValueRegister::_tvr_registerTraceValues(TraceValueRegister *r) {
-    string n = r->GetScopeName();
+    std::string n = r->GetScopeName();
     if(GetScopeGroupByName(n) == NULL) {
-        string *s = new string(n);
-        pair<string*, TraceValueRegister*> v(s, r);
+        std::string *s = new std::string(n);
+        std::pair<std::string*, TraceValueRegister*> v(s, r);
         _tvr_registers.insert(v);
     } else
         avr_error("duplicate name '%s', another TraceValueRegister child is already registered", n.c_str());
@@ -201,19 +200,19 @@ void TraceValueRegister::_tvr_insertTraceValuesToSet(TraceSet &t) {
 
 void TraceValueRegister::RegisterTraceValue(TraceValue *t) {
     // check for duplicate names and the right prefix
-    string p = t->name();
+    std::string p = t->name();
     unsigned int idx = _tvr_scopeprefix.length();
     if((p.length() <= idx) || (p.substr(0, idx) != _tvr_scopeprefix))
         avr_error("add TraceValue denied: wrong prefix: '%s', scope is '%s'",
                   p.c_str(), _tvr_scopeprefix.c_str());
-    string n = p.substr(idx);
-    if(n.find('.') != string::npos)
+    std::string n = p.substr(idx);
+    if(n.find('.') != std::string::npos)
         avr_error("add TraceValue denied: wrong name: '%s', scope is '%s'",
                   n.c_str(), _tvr_scopeprefix.c_str());
     // register this TraceValue
     if(GetTraceValueByName(n) == NULL) {
-        string *s = new string(n);
-        pair<string*, TraceValue*> v(s, t);
+        std::string *s = new std::string(n);
+        std::pair<std::string*, TraceValue*> v(s, t);
         _tvr_values.insert(v);
     } else
         avr_error("add TraceValue denied: name found: '%s'", n.c_str());
@@ -221,7 +220,7 @@ void TraceValueRegister::RegisterTraceValue(TraceValue *t) {
 
 void TraceValueRegister::UnregisterTraceValue(TraceValue *t) {
     int idx = _tvr_scopeprefix.length();
-    string n = t->name().substr(idx);
+    std::string n = t->name().substr(idx);
     for (valmap_t::iterator i = _tvr_values.begin(); i != _tvr_values.end(); i++) {
         if(n == *(i->first)) {
             _tvr_values.erase(i);
@@ -300,8 +299,8 @@ void TraceValueCoreRegister::RegisterTraceSetValue(TraceValue *t, const std::str
     // create TraceSet, if not found
     if(set == NULL) {
         set = new TraceSet(size, NULL);
-        string *s = new string(name);
-        pair<string*, TraceSet*> v(s, set);
+        std::string *s = new std::string(name);
+        std::pair<std::string*, TraceSet*> v(s, set);
         _tvr_valset.insert(v);
     }
     // set TraceValue to set[idx]
@@ -314,7 +313,7 @@ TraceValue* TraceValueCoreRegister::GetTraceValueByName(const std::string &name)
         int idx = _tvr_numberindex(name);
         if(idx != -1) {
             // name + number found, check name and index value
-            string n = name.substr(0, idx);
+            std::string n = name.substr(0, idx);
             int v = atoi(name.substr(idx).c_str());
             for(setmap_t::iterator i = _tvr_valset.begin(); i != _tvr_valset.end(); i++) {
                 if(n == *(i->first)) {
@@ -372,9 +371,9 @@ int TraceValueCoreRegister::_tvr_numberindex(const std::string &str) {
 WarnUnknown::WarnUnknown(AvrDevice *_core) : core(_core) {}
 
 void WarnUnknown::markReadUnknown(const TraceValue *t) {
-    cerr << "READ-before-WRITE for value " << t->name()
+    std::cerr << "READ-before-WRITE for value " << t->name()
          << " at time " << SystemClock::Instance().GetCurrentTime()
-         << ", PC=0x" << hex << 2*core->PC << dec << endl;
+         << ", PC=0x" << std::hex << 2*core->PC << std::dec << std::endl;
 }
 bool WarnUnknown::enabled(const TraceValue *t) const {
     return true;
@@ -395,7 +394,7 @@ void DumpVCD::flushbuffer(void) {
     osbuffer.str("");
 }
 
-DumpVCD::DumpVCD(ostream *_os,
+DumpVCD::DumpVCD(std::ostream *_os,
                  const std::string &_tscale,
                  const bool rstrobes,
                  const bool wstrobes) :
@@ -414,7 +413,7 @@ DumpVCD::DumpVCD(const std::string &_name,
     rs(rstrobes),
     ws(wstrobes),
     changesWritten(false),
-    os(new ofstream(_name.c_str()))
+    os(new std::ofstream(_name.c_str()))
 {}
 
 void DumpVCD::setActiveSignals(const TraceSet &act) {
@@ -439,7 +438,7 @@ void DumpVCD::start() {
     unsigned n=0;
     for (iter i=tv.begin();
          i!=tv.end(); i++) {
-        string s=(*i)->name();
+        std::string s=(*i)->name();
 
         /* find last dot in string as divider
            between name of the variable and the module string. */
@@ -574,8 +573,8 @@ void DumpManager::registerAvrDevice(AvrDevice* dev) {
 }
 
 void DumpManager::unregisterAvrDevice(AvrDevice* dev) {
-    vector<AvrDevice*> dl;
-    for(vector<AvrDevice*>::iterator i = devices.begin(); i != devices.end(); i++) {
+    std::vector<AvrDevice*> dl;
+    for(std::vector<AvrDevice*>::iterator i = devices.begin(); i != devices.end(); i++) {
         AvrDevice* d = *i;
         if(d != dev)
             dl.push_back(d);
@@ -584,9 +583,9 @@ void DumpManager::unregisterAvrDevice(AvrDevice* dev) {
 }
 
 void DumpManager::detachAvrDevices() {
-    vector<AvrDevice*> dl;
+    std::vector<AvrDevice*> dl;
 
-    for(vector<AvrDevice*>::iterator i = devices.begin(); i != devices.end(); i++) {
+    for(std::vector<AvrDevice*>::iterator i = devices.begin(); i != devices.end(); i++) {
         AvrDevice* d = *i;
         d->detachDumpManager();
     }
@@ -601,7 +600,7 @@ TraceValue* DumpManager::seekValueByName(const std::string &name) {
         int idx = name.find('.');
         if(idx <= 0)
             return NULL;
-        for(vector<AvrDevice*>::iterator i = devices.begin(); i != devices.end(); i++) {
+        for(std::vector<AvrDevice*>::iterator i = devices.begin(); i != devices.end(); i++) {
             if((*i)->GetScopeName() == name.substr(0, idx)) {
                 return (*i)->FindTraceValueByName(name.substr(idx + 1));
             }
@@ -640,7 +639,7 @@ const TraceSet& DumpManager::all() {
     _all.clear();
     
     // over all registered devices
-    for(vector<AvrDevice*>::const_iterator d = devices.begin(); d != devices.end(); d++) {
+    for(std::vector<AvrDevice*>::const_iterator d = devices.begin(); d != devices.end(); d++) {
         // all values from device
         s = (*d)->GetAllTraceValuesRecursive();
         // change allocated vector size
@@ -684,9 +683,9 @@ void DumpManager::stopApplication(void) {
     dumps.clear();
 }
 
-void DumpManager::save(ostream &os) const {
+void DumpManager::save(std::ostream &os) const {
     TraceSet* s;
-    for(vector<AvrDevice*>::const_iterator d = devices.begin(); d != devices.end(); d++) {
+    for(std::vector<AvrDevice*>::const_iterator d = devices.begin(); d != devices.end(); d++) {
         s = (*d)->GetAllTraceValuesRecursive();
         for(TraceSet::const_iterator i = s->begin(); i != s->end(); i++) {
             TraceValue& tv = *(*i);
@@ -715,20 +714,20 @@ void DumpManager::save(ostream &os) const {
     }
 }
 
-TraceSet DumpManager::load(istream &is) {
+TraceSet DumpManager::load(std::istream &is) {
     TraceSet res;
     
     while(!is.eof()) {
         // read line from stream and split it up
-        string l = readline(is);
-        vector<string> ls = split(l);
+        std::string l = readline(is);
+        std::vector<std::string> ls = split(l);
         
         // empty line or to short?
         if(ls.size() < 2) continue;
         
         if(ls[0] == "+") {
             // single value, get name
-            string n = ls[1];
+            std::string n = ls[1];
             // seek value
             TraceValue *t = seekValueByName(n);
             if(t == NULL)
@@ -740,12 +739,12 @@ TraceSet DumpManager::load(istream &is) {
             if(ls[3] != "..")
                 avr_error("'..' expected between range limits.");
             // get name and range values
-            string bn = ls[1];
+            std::string bn = ls[1];
             size_t min = atoi(ls[2].c_str());
             size_t max = atoi(ls[4].c_str());
             // seek for all values in range
             for(size_t i = min; i <= max; i++) {
-                string n = ls[1] + int2str(i);
+                std::string n = ls[1] + int2str(i);
                 TraceValue *t = seekValueByName(n);
                 if(t == NULL)
                     avr_error("While constructing range with '%s', TraceValue is not known.", n.c_str());
@@ -759,8 +758,8 @@ TraceSet DumpManager::load(istream &is) {
     return res;
 }
 
-TraceSet DumpManager::load(const string &istr) {
-    istringstream is(istr.c_str());
+TraceSet DumpManager::load(const std::string &istr) {
+    std::istringstream is(istr.c_str());
     return load(is);
 }
 

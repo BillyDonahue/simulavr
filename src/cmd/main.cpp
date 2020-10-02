@@ -28,7 +28,6 @@
 #include <string>
 #include <map>
 #include <limits>
-using namespace std;
 
 #include <stdio.h>
 #include <stdlib.h>
