@@ -80,7 +80,7 @@ class IrqStatisticPerVector {
         IrqStatisticEntry long_StartedFinished;
         IrqStatisticEntry short_StartedFinished;
 
-        friend std::ostream& operator<<(std::ostream &os, const IrqStatisticPerVector &ispv);
+        friend std::string Print( const IrqStatisticPerVector &ispv, AvrDevice* core );
 
     public:
 
@@ -99,10 +99,8 @@ std::ostream& operator<<(std::ostream &, const IrqStatisticPerVector&);
 
 class IrqStatistic: public Printable {
     
-    protected:
-        AvrDevice *core; //only used to get the (file) name of the core device
-        
     public:
+        AvrDevice *core; //only used to get the (file) name of the core device
         std::map<unsigned int, IrqStatisticPerVector> entries;
         IrqStatistic(AvrDevice *);
         void operator()();

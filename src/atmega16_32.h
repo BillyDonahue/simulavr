@@ -141,7 +141,8 @@ class AvrDevice_atmega32: public AvrDevice_atmega16_32 {
                 "TWI",
                 "SPM_RDY"
         };  
-        virtual void GetInterruptVectorNames(const char*const*& names, unsigned int& cnt) const 
+
+        void GetInterruptVectorNames(const char*const*& names, unsigned int& cnt) const override
         {
             names = irqnames;
             cnt = sizeof( irqnames )/sizeof(char*); 

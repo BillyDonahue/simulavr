@@ -67,7 +67,7 @@ void AvrDevice::SetClockFreq(SystemClockOffset nanosec) {
    clockFreq = nanosec;
 }
 
-SystemClockOffset AvrDevice::GetClockFreq() {
+SystemClockOffset AvrDevice::GetClockFreq() const {
     return clockFreq;
 }
 
