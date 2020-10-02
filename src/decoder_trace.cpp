@@ -134,9 +134,10 @@ const char *branch_opcodes_clear[8] = {
 };
 
 int avr_op_BRBC::Trace() {
+    word addr = ( core->PC+1+offset ) << 1;
     traceOut << branch_opcodes_clear[INDEX_FROM_BITMASK(bitmask)]
-             << " ->" << HexShort(offset * 2) << " ";
-    string sym(core->Flash->GetSymbolAtAddress(core->PC+1+offset));
+             << " ->" << HexShort( addr ) << " ";
+    string sym(core->Flash->GetSymbolAtAddress(addr));
     int ret = this->operator()();
     
     traceOut << sym << " ";
@@ -158,9 +159,10 @@ const char *branch_opcodes_set[8] = {
 };
 
 int avr_op_BRBS::Trace() {
+    word addr = ( core->PC+1+offset ) << 1;
     traceOut << branch_opcodes_set[INDEX_FROM_BITMASK(bitmask)]
-             << " ->" << HexShort(offset * 2) << " ";
-    string sym(core->Flash->GetSymbolAtAddress(core->PC+1+offset));
+             << " ->" << " " << HexShort( addr ) << " ";
+    string sym(core->Flash->GetSymbolAtAddress(addr));
     int ret=this->operator()();
 
     traceOut << sym << " ";
@@ -198,7 +200,7 @@ int avr_op_BST::Trace() {
 int avr_op_CALL::Trace() {
     word K_lsb = core->Flash->ReadMemWord((core->PC + 1) * 2);
     int k = (KH << 16) | K_lsb;
-    traceOut << "CALL 0x" << hex << k * 2 << dec << " ";
+    traceOut << "CALL " << HexShort( k * 2 ) << " ";
     int ret = this->operator()();
     return ret;
 }
@@ -366,7 +368,7 @@ int avr_op_JMP::Trace() {
     traceOut << "JMP ";
     word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);  //this is k!
     int ret = this->operator()();
-    traceOut << hex << 2 * offset << dec << " ";
+    traceOut << HexShort( offset << 1 ) << " ";
 
     string sym(core->Flash->GetSymbolAtAddress(offset));
     traceOut << sym << " ";
@@ -564,7 +566,7 @@ int avr_op_PUSH::Trace() {
 }
 
 int avr_op_RCALL::Trace() {
-    traceOut << "RCALL " << hex << ((core->PC + K + 1) << 1) << dec << " ";
+    traceOut << "RCALL " << HexShort( (core->PC + K + 1) << 1 ) << " ";
     int ret = this->operator()();
     return ret;
 }
@@ -582,7 +584,8 @@ int avr_op_RETI::Trace() {
 }
 
 int avr_op_RJMP::Trace() {
-    traceOut << "RJMP " << hex << ((core->PC + K + 1) << 1) << dec << " ";
+    word offset = ((core->PC + K + 1) );
+    traceOut << "RJMP " << HexShort( offset << 1) << " ";
     int ret = this->operator()();
     return ret;
 }

@@ -219,7 +219,7 @@ unsigned char RAM::get() const
 
         if ( myAddress > 0x20 )
         {
-            traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress+0x800000)<<"]-->"<<HexChar(value)<<dec<<"--> ";
+            traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress)<<"]-->"<<HexChar(value)<<dec<<"--> ";
         }
     }
     return value; 
@@ -233,7 +233,7 @@ void RAM::set(unsigned char v)
         // fix me: it makes no sense to compare here if we already know during construction that we are register or io or i/e ram
         if ( myAddress > 0x20 )
         {
-            traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress+0x800000)<<"]="<<HexChar(v)<<dec<<" ";
+            traceOut << "IRAM["<<HexShort(myAddress) <<","<< core->data->GetSymbolAtAddress(myAddress)<<"]="<<HexChar(v)<<dec<<" ";
         }
         else  // register
         {

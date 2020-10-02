@@ -248,11 +248,11 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
     if (cpuCycles<=0)
         cPC=PC;
 
-    if(trace_on == 1) {
+    if(trace_on) {
         traceOut << actualFilename << " ";
         traceOut << HexShort(cPC << 1) << dec << ": ";
 
-        string sym(Flash->GetSymbolAtAddress(cPC));
+        string sym(Flash->GetSymbolAtAddress(cPC<<1));
         traceOut << sym << " ";
         for (int len = sym.length(); len < 30;len++)
             traceOut << " " ;
