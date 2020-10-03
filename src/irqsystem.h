@@ -30,89 +30,9 @@
 
 #include "hardware.h"
 #include "funktor.h"
-#include "printable.h"
 #include "avrdevice.h"
 #include "traceval.h"
-
-//! global switch to enable irq statistic (default is disabled)
-extern bool enableIRQStatistic;
-
-#ifndef SWIG
-
-class IrqStatisticEntry {
-        
-    public:
-        SystemClockOffset flagSet;
-        SystemClockOffset flagCleared;
-        SystemClockOffset handlerStarted;
-        SystemClockOffset handlerFinished;
-
-        SystemClockOffset setClear;
-        SystemClockOffset setStarted;   
-        SystemClockOffset setFinished;  
-        SystemClockOffset startedFinished;
-
-
-        IrqStatisticEntry():
-            flagSet(0),
-            flagCleared(0),
-            handlerStarted(0),
-            handlerFinished(0),
-            setClear(0),
-            setStarted(0),
-            setFinished(0),
-            startedFinished(0) {}
-        void CalcDiffs();
-};
-
-class IrqStatisticPerVector {
-    
-    protected:
-        IrqStatisticEntry long_SetClear;
-        IrqStatisticEntry short_SetClear;
-
-        IrqStatisticEntry long_SetStarted;
-        IrqStatisticEntry short_SetStarted;
-
-        IrqStatisticEntry long_SetFinished;
-        IrqStatisticEntry short_SetFinished;
-
-        IrqStatisticEntry long_StartedFinished;
-        IrqStatisticEntry short_StartedFinished;
-
-        friend std::string Print( const IrqStatisticPerVector &ispv, AvrDevice* core );
-
-    public:
-
-        IrqStatisticEntry actual;
-        IrqStatisticEntry last;
-        IrqStatisticEntry next;
-
-        void CalculateStatistic();
-        void CheckComplete();
-
-        IrqStatisticPerVector();
-};
-
-std::ostream& operator<<(std::ostream &, const IrqStatisticEntry&);
-std::ostream& operator<<(std::ostream &, const IrqStatisticPerVector&);
-
-class IrqStatistic: public Printable {
-    
-    public:
-        AvrDevice *core; //only used to get the (file) name of the core device
-        std::map<unsigned int, IrqStatisticPerVector> entries;
-        IrqStatistic(AvrDevice *);
-        void operator()();
-
-        virtual ~IrqStatistic() {}
-
-        friend std::ostream& operator<<(std::ostream &, const IrqStatistic&);
-};
-
-std::ostream& operator<<(std::ostream &, const IrqStatistic&);
-
-#endif // ifndef SWIG
+#include "irqstatistic.h"
 
 class HWIrqSystem: public TraceValueRegister {
     
@@ -136,32 +56,13 @@ class HWIrqSystem: public TraceValueRegister {
         unsigned int GetNewPc(unsigned int &vector_index);
         void SetIrqFlag(Hardware *, unsigned int vector_index);
         void ClearIrqFlag(unsigned int vector_index);
-        void IrqHandlerStarted(unsigned int vector_index);
-        void IrqHandlerFinished(unsigned int vector_index);
+        void IrqHandlerStarted(uint32_t stackPointer, unsigned int vector_index);
+        void IrqHandlerFinished(uint32_t stackPointer, unsigned int vector_index);
         /// In datasheets RESET vector is index 1 but we use 0! And not a byte address.
         void DebugVerifyInterruptVector(unsigned int vector_index, const Hardware* source);
         void DebugDumpTable();
 };
 
-#ifndef SWIG
-
-class IrqFunktor: public Funktor {
-    
-    protected:
-        HWIrqSystem *irqSystem;
-        void (HWIrqSystem::*fp)(unsigned int);
-        unsigned int vectorNo;
-
-    public:
-        IrqFunktor(HWIrqSystem *i, void (HWIrqSystem::*_fp)(unsigned int), unsigned int _vector):
-            irqSystem(i),
-            fp(_fp),
-            vectorNo(_vector) {}
-        void operator()() { (irqSystem->*fp)(vectorNo); }
-        Funktor* clone() { return new IrqFunktor(*this); }
-};
-
-#endif // ifndef SWIG
 
 #endif
 

@@ -94,7 +94,7 @@ class HWStack {
         AvrDevice *core; //!< Link to device
         uint32_t stackPointer; //!< current value of stack pointer
         uint32_t lowestStackPointer; //!< marker: lowest stackpointer used by program
-        std::multimap<unsigned long, Funktor*> returnPointList; //!< Maps adresses to listeners for return addresses
+        std::multimap<unsigned long, std::function<void(uint32_t /*stack ptr*/ )> > returnPointList; //!< Maps adresses to listeners for return addresses
 
         /// Run functions registered for current stack address and delete them
         void CheckReturnPoints();
@@ -116,10 +116,9 @@ class HWStack {
         unsigned long GetStackPointer() const { return stackPointer; }
         //! Sets current stack pointer value (used by GDB interface)
         void SetStackPointer(unsigned long val) { stackPointer = val; }
+
         //! Subscribes a Listener for a return address
-        /*! Attention! SetReturnPoint must get a COPY of a Funktor because it
-            self destroy this functor after usage! */
-        void SetReturnPoint(unsigned long stackPointer, Funktor *listener);
+        void SetReturnPoint(unsigned long stackPointer, std::function< void( uint32_t)> f);
         
         //! Sets lowest stack marker back to current stackpointer
         void ResetLowestStackpointer(void) { lowestStackPointer = stackPointer; }

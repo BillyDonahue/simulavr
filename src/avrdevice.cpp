@@ -315,9 +315,15 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                         if(trace_on)
                             traceOut << "IRQ DETECTED: VectorAddr: " << newIrqPc ;
 
-                        irqSystem->IrqHandlerStarted(actualIrqVector);    //what vector we raise?
-                        Funktor* fkt = new IrqFunktor(irqSystem, &HWIrqSystem::IrqHandlerFinished, actualIrqVector);
-                        stack->SetReturnPoint(stack->GetStackPointer(), fkt);
+                        irqSystem->IrqHandlerStarted(stack->GetStackPointer(), actualIrqVector);
+
+                        stack->SetReturnPoint(stack->GetStackPointer(), 
+                                              [irqSystem=irqSystem,actualIrqVector=actualIrqVector](uint32_t stackPointer) 
+                                              {
+                                                  irqSystem->IrqHandlerFinished( stackPointer, actualIrqVector ); 
+                                              }
+                                              );
+
                         stack->PushAddr(PC);
                         cpuCycles = 4; //push needs 4 cycles! (on external RAM +2, this is handled from HWExtRam!)
                         status->I = 0; //irq started so remove I-Flag from SREG
@@ -494,6 +500,21 @@ unsigned AvrDevice::GetRegY(void) {
 unsigned AvrDevice::GetRegZ(void) {
     // R31:R30
     return (*(rw[31]) << 8) + *(rw[30]);
+}
+
+
+std::string AvrDevice::GetInterruptVectorName( unsigned int vectorNumber )
+{
+    unsigned int cnt;
+    const char*const* names;
+    GetInterruptVectorNames( names, cnt );
+
+    if ( cnt > vectorNumber )
+    {
+        return { std::string{"\""} + names[vectorNumber] + "\"" };
+    }
+
+    return {};
 }
 
 // EOF

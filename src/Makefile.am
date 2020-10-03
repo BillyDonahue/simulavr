@@ -54,7 +54,7 @@ libsim_la_SOURCES = \
   hwtimer/timerprescaler.cpp hwtimer/prescalermux.cpp \
   hwtimer/timerirq.cpp hwpinchange.cpp hwport.cpp hwspi.cpp hwsreg.cpp \
   hwtimer/icapturesrc.cpp hwstack.cpp hwtimer/hwtimer.cpp hwuart.cpp hwwado.cpp \
-  ioregs.cpp irqsystem.cpp ui/keyboard.cpp ui/lcd.cpp memory.cpp \
+  ioregs.cpp irqsystem.cpp irqstatistic.cpp ui/keyboard.cpp ui/lcd.cpp memory.cpp \
   ui/mysocket.cpp net.cpp pin.cpp ui/extpin.cpp pinatport.cpp pinmon.cpp \
   rwmem.cpp ui/scope.cpp ui/serialrx.cpp ui/serialtx.cpp spisrc.cpp spisink.cpp \
   specialmem.cpp string2.cpp systemclock.cpp traceval.cpp ui/ui.cpp avrdevice_helper.cpp
@@ -79,7 +79,7 @@ pkginclude_HEADERS = \
   externalirq.h hardware.h helper.h avrdevice_impl.h avrerror.h avrfactory.h avrmalloc.h \
   string2.h decoder.h externaltype.h flash.h flashprog.h hwdecls.h hwusi.h \
   funktor.h hwacomp.h hwad.h hweeprom.h string2_template.h hwpinchange.h \
-  hwport.h hwspi.h hwsreg.h hwstack.h hwuart.h hwwado.h ioregs.h irqsystem.h \
+  hwport.h hwspi.h hwsreg.h hwstack.h hwuart.h hwwado.h ioregs.h irqsystem.h irqstatistic.h \
   memory.h net.h pin.h pinatport.h pinnotify.h pinmon.h printable.h rwmem.h \
   simulationmember.h spisrc.h spisink.h specialmem.h systemclock.h \
   systemclocktypes.h traceval.h types.h avrsignature.h avrreadelf.h \

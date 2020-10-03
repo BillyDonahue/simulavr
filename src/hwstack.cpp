@@ -45,17 +45,16 @@ void HWStack::Reset(void) {
 }
 
 void HWStack::CheckReturnPoints() {
-    using I = std::multimap<unsigned long, Funktor *>::iterator;
+    using I = std::multimap<unsigned long, std::function< void( uint32_t)> >::iterator;
     std::pair<I,I> l = returnPointList.equal_range(stackPointer);
     
     for(I i = l.first; i != l.second; i++) {
-        (*(i->second))(); //execute Funktor
-        delete i->second; //and delete it
+        (i->second)(stackPointer); //execute Funktor
     }
     returnPointList.erase(l.first, l.second);
 }
 
-void HWStack::SetReturnPoint(unsigned long stackPointer, Funktor *f) {
+void HWStack::SetReturnPoint(unsigned long stackPointer, std::function< void( uint32_t)> f) {
     returnPointList.insert(std::make_pair(stackPointer, f));
 }
 

@@ -139,6 +139,9 @@ class AvrDevice: public SimulationMember, public TraceValueRegister {
         AvrDevice(unsigned int ioSpaceSize, unsigned int IRamSize, unsigned int ERamSize, unsigned int flashSize, unsigned int pcSize = 2);
         virtual ~AvrDevice();
 
+        /*! Get name of the interrupt vector */
+        std::string GetInterruptVectorName( unsigned int vectorNumber );
+
         /*! Adds to the list of parts to reset. If already in that list, does
           nothing. */
         void AddToResetList(Hardware *hw);
