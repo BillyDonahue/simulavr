@@ -26,6 +26,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 
 #include "hardware.h"
 #include "funktor.h"
@@ -51,43 +52,50 @@ class IrqStatisticEntry {
         SystemClockOffset setFinished;  
         SystemClockOffset startedFinished;
 
+        uint32_t stackPointer;
+
 
         IrqStatisticEntry():
-            flagSet(0),
-            flagCleared(0),
-            handlerStarted(0),
-            handlerFinished(0),
-            setClear(0),
-            setStarted(0),
-            setFinished(0),
-            startedFinished(0) {}
+            flagSet(INVALID),
+            flagCleared(INVALID),
+            handlerStarted(INVALID),
+            handlerFinished(INVALID),
+            setClear(INVALID),
+            setStarted(INVALID),
+            setFinished(INVALID),
+            startedFinished(INVALID),
+            stackPointer(0)
+    {}
         void CalcDiffs();
+        bool CheckComplete();
 };
 
 class IrqStatisticPerVector {
+    std::shared_ptr<IrqStatisticEntry> dummyInitObject;
     
     protected:
-        IrqStatisticEntry long_SetClear;
-        IrqStatisticEntry short_SetClear;
+        std::shared_ptr<IrqStatisticEntry> long_SetClear;
+        std::shared_ptr<IrqStatisticEntry> short_SetClear;
 
-        IrqStatisticEntry long_SetStarted;
-        IrqStatisticEntry short_SetStarted;
+        std::shared_ptr<IrqStatisticEntry> long_SetStarted;
+        std::shared_ptr<IrqStatisticEntry> short_SetStarted;
 
-        IrqStatisticEntry long_SetFinished;
-        IrqStatisticEntry short_SetFinished;
+        std::shared_ptr<IrqStatisticEntry> long_SetFinished;
+        std::shared_ptr<IrqStatisticEntry> short_SetFinished;
 
-        IrqStatisticEntry long_StartedFinished;
-        IrqStatisticEntry short_StartedFinished;
+        std::shared_ptr<IrqStatisticEntry> long_StartedFinished;
+        std::shared_ptr<IrqStatisticEntry> short_StartedFinished;
+
+        std::shared_ptr<IrqStatisticEntry> last;
 
         friend std::string Print( const IrqStatisticPerVector &ispv, AvrDevice* core );
 
     public:
+        std::vector< std::shared_ptr<IrqStatisticEntry> > unfinishedEntries;
+        std::vector< std::shared_ptr<IrqStatisticEntry> > usedInSummarize;
 
-        IrqStatisticEntry actual;
-        IrqStatisticEntry last;
 
         void CalculateStatistic();
-        void CheckComplete();
 
         IrqStatisticPerVector();
 };

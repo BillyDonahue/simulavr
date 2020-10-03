@@ -31,10 +31,14 @@ infinite recursion in header dependencies which I have not fixed until now
 
 #include <cstdint>
 #include <iomanip>
+#include <limits>
 
 #ifndef SYSTEMCLOCKTYPES
 #define SYSTEMCLOCKTYPES
 using SystemClockOffset = uint64_t;
+static constexpr SystemClockOffset INVALID = std::numeric_limits<SystemClockOffset>::max();
+
+
 
 inline constexpr SystemClockOffset operator ""_ns(unsigned long long int val) { return val; }
 inline constexpr SystemClockOffset operator ""_us(unsigned long long int val) { return val * 1E3; }

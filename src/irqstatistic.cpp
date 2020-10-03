@@ -41,140 +41,262 @@
 bool enableIRQStatistic = false;
 
 void IrqStatisticEntry::CalcDiffs() {
-    setClear          =flagCleared-flagSet;
-    setStarted        =handlerStarted-flagSet;
-    setFinished       =handlerFinished-flagSet;
-    startedFinished   =handlerFinished-handlerStarted;
+    // only calc if we have valid entries in both parms for diff
+    if ( ( flagCleared     != INVALID ) && ( flagSet        != INVALID ) ) { setClear          = flagCleared -     flagSet; }
+    if ( ( handlerStarted  != INVALID ) && ( flagSet        != INVALID ) ) { setStarted        = handlerStarted -  flagSet; }
+    if ( ( handlerFinished != INVALID ) && ( flagSet        != INVALID ) ) { setFinished       = handlerFinished - flagSet; }
+    if ( ( handlerFinished != INVALID ) && ( handlerStarted != INVALID ) ) { startedFinished   = handlerFinished - handlerStarted; }
 }
 
-IrqStatisticPerVector::IrqStatisticPerVector() {
-    // set the "short" params to the max values so that the first "not dummy" is smaller 
-    //  and set to the real statistic
-    IrqStatisticEntry longDummy;
-    IrqStatisticEntry shortDummy;
+bool IrqStatisticEntry::CheckComplete() {
+    if (
+        (flagSet!=INVALID) &&
+        (flagCleared!=INVALID) &&
+        (handlerStarted!=INVALID) &&
+        (handlerFinished!=INVALID)
+       ) 
+    {
+        return true;
+    }
 
-    longDummy.setClear=0xffffffffffffll;
-    longDummy.setStarted=0xffffffffffffll;
-    longDummy.setFinished=0xffffffffffffll;
-    longDummy.startedFinished=0xffffffffffffll;
+    return false;
+}
 
-    shortDummy.setClear=0;
-    shortDummy.setStarted=0;
-    shortDummy.setFinished=0;
-    shortDummy.startedFinished=0;
 
-    long_SetClear=shortDummy;
-    long_SetStarted=shortDummy;
-    long_SetFinished=shortDummy;
-    long_StartedFinished=shortDummy;
-
-    short_SetClear=longDummy;
-    short_SetStarted=longDummy;
-    short_SetFinished=longDummy;
-    short_StartedFinished=longDummy;
+IrqStatisticPerVector::IrqStatisticPerVector():
+    dummyInitObject{ std::make_shared<IrqStatisticEntry>() },
+    long_SetClear{ dummyInitObject },
+    short_SetClear{ dummyInitObject },
+    long_SetStarted{ dummyInitObject },
+    short_SetStarted{ dummyInitObject },
+    long_SetFinished{ dummyInitObject },
+    short_SetFinished{ dummyInitObject },
+    long_StartedFinished{ dummyInitObject },
+    short_StartedFinished{ dummyInitObject },
+    last{ dummyInitObject }
+{
+    dummyInitObject.reset(); // we do not need it any longer
 }
 
 void IrqStatisticPerVector::CalculateStatistic() {
-    actual.CalcDiffs();
+    std::vector< decltype( unfinishedEntries.begin() ) > toRemove;
 
-    if (actual.setClear< short_SetClear.setClear) {
-        short_SetClear=actual;
-    }
-
-    if (actual.setClear> long_SetClear.setClear) {
-        long_SetClear=actual;
-    }
-
-    if (actual.setStarted< short_SetStarted.setStarted) {
-        short_SetStarted=actual;
-    }
-
-    if( actual.setStarted> long_SetStarted.setStarted) {
-        long_SetStarted=actual;
-    }
-
-    if ( actual.setFinished< short_SetFinished.setFinished) {
-        short_SetFinished= actual;
-    }
-
-    if ( actual.setFinished > long_SetFinished.setFinished) {
-        long_SetFinished= actual;
-    }
-
-    if (actual.startedFinished < short_StartedFinished.startedFinished) {
-        short_StartedFinished= actual;
-    }
-
-    if (actual.startedFinished > long_StartedFinished.startedFinished) {
-        long_StartedFinished= actual;
-    }
-}
-
-void IrqStatisticPerVector::CheckComplete() {
-    if ((actual.flagSet!=0) &&
-        (actual.flagCleared!=0) &&
-        (actual.handlerStarted!=0) &&
-        (actual.handlerFinished!=0)) 
+    for ( auto it= unfinishedEntries.begin(); it != unfinishedEntries.end(); it++)
     {
-        CalculateStatistic();
+        auto& el=*it;
 
-        last=actual;
-        actual=IrqStatisticEntry{};
+        if ( 
+            ( el->setClear != INVALID ) &&
+            (
+                ( el->setClear< short_SetClear->setClear ) ||
+                ( short_SetClear->setClear == INVALID )
+            )
+           )
+        {
+            short_SetClear=el;
+        }
+
+        if (
+            ( el->setClear != INVALID ) &&
+            (
+                ( el->setClear> long_SetClear->setClear ) ||
+                ( long_SetClear->setClear == INVALID )
+            )
+           )
+        {
+            long_SetClear=el;
+        }
+
+        if (
+            ( el->setStarted != INVALID ) &&
+            (
+                ( el->setStarted< short_SetStarted->setStarted ) ||
+                ( short_SetStarted->setStarted == INVALID )
+            )
+           )
+        {
+            short_SetStarted=el;
+        }
+
+        if ( 
+            ( el->setStarted != INVALID ) &&
+            (
+                ( el->setStarted> long_SetStarted->setStarted ) ||
+                ( long_SetStarted->setStarted == INVALID )
+            )
+           )
+        {
+            long_SetStarted=el;
+        }
+
+        if (
+            ( el->setFinished != INVALID ) &&
+            (
+                ( el->setFinished< short_SetFinished->setFinished ) ||
+                ( short_SetFinished->setFinished == INVALID )
+            )
+           ) 
+        {
+            short_SetFinished= el;
+        }
+
+        if ( 
+            ( el->setFinished != INVALID ) &&
+            (
+                ( el->setFinished > long_SetFinished->setFinished ) ||
+                ( long_SetFinished->setFinished == INVALID )
+            )
+           )
+        {
+            long_SetFinished= el;
+        }
+
+        if (
+            ( el->startedFinished != INVALID ) &&
+            (
+                ( el->startedFinished < short_StartedFinished->startedFinished ) ||
+                ( short_StartedFinished->startedFinished != INVALID )
+            )
+           )
+        {
+            short_StartedFinished= el;
+        }
+
+        if (
+            ( el->startedFinished != INVALID ) &&
+            (
+                ( el->startedFinished > long_StartedFinished->startedFinished ) ||
+                ( long_StartedFinished->startedFinished == INVALID )
+            )
+           )
+        {
+            long_StartedFinished= el;
+        }
+
+        // if one of the entries has all elements set, we can remove it from the all entries list
+        // to print it ones, we leave the entry in the "last" element
+        if ( el->CheckComplete() )
+        {
+            last = el;
+            toRemove.push_back( it );
+        }
     }
+
+    // now we remove all "completed" entries as they are already part of the statistic summerize table
+    for ( auto& rem: toRemove )
+    {
+        unfinishedEntries.erase( rem );
+    }
+
+
 }
 
 std::ostream& operator<<(std::ostream &os, const IrqStatisticEntry& ise) {
+    std::string invalid_string= "               *";
+    invalid_string += '\t';
+
     os << std::dec<<"\t";
 
-    os << FormattedTime( ise.flagSet ) << "\t";
-    os << FormattedTime( ise.flagCleared ) << "\t"; 
-    os << FormattedTime( ise.handlerStarted )<< "\t"; 
-    os << FormattedTime( ise.handlerFinished ) << "\t";
+    if ( ise.flagSet         != INVALID ) { os << FormattedTime( ise.flagSet ) << "\t"; } else { os << invalid_string ; }
+    if ( ise.flagCleared     != INVALID ) { os << FormattedTime( ise.flagCleared ) << "\t";     } else { os << invalid_string ; }
+    if ( ise.handlerStarted  != INVALID ) { os << FormattedTime( ise.handlerStarted )<< "\t";   } else { os << invalid_string ; }
+    if ( ise.handlerFinished != INVALID ) { os << FormattedTime( ise.handlerFinished ) << "\t"; } else { os << invalid_string ; }
 
-    os << FormattedTime( ise.setClear ) << "\t";
-    os << FormattedTime( ise.setStarted ) << "\t"; 
-    os << FormattedTime( ise.setFinished ) << "\t"; 
-    os << FormattedTime( ise.startedFinished )<< "\t"; 
+    if ( ise.setClear        != INVALID ) { os << FormattedTime( ise.setClear ) << "\t";    } else { os << invalid_string ; }
+    if ( ise.setStarted      != INVALID ) { os << FormattedTime( ise.setStarted ) << "\t";  } else { os << invalid_string ; }
+    if ( ise.setFinished     != INVALID ) { os << FormattedTime( ise.setFinished ) << "\t";     } else { os << invalid_string ; }
+    if ( ise.startedFinished != INVALID ) { os << FormattedTime( ise.startedFinished )<< "\t";  } else { os << invalid_string ; }
 
     return os;
 }
 
-std::string Cycles( const IrqStatisticEntry& ise, AvrDevice* core ) {
+std::string Cycles( const std::shared_ptr<IrqStatisticEntry>& ise, AvrDevice* core ) {
     // Get time for a single step of cpu core
+
+    std::string invalid_string= "               *";
+    invalid_string += '\t';
 
     std::ostringstream os;
     os << std::dec<<"\t";
     SystemClockOffset ns = core->GetClockFreq();
 
-    os << FormattedTime( ise.flagSet ) << "\t";
-    os << FormattedTime( ise.flagCleared ) << "\t"; 
-    os << FormattedTime( ise.handlerStarted )<< "\t"; 
-    os << FormattedTime( ise.handlerFinished ) << "\t";
+    if ( ise->flagSet         != INVALID ) { os << FormattedTime( ise->flagSet ) << "\t"; } else { os << invalid_string ; }
+    if ( ise->flagCleared     != INVALID ) { os << FormattedTime( ise->flagCleared ) << "\t";     } else { os << invalid_string ; }
+    if ( ise->handlerStarted  != INVALID ) { os << FormattedTime( ise->handlerStarted )<< "\t";   } else { os << invalid_string ; }
+    if ( ise->handlerFinished != INVALID ) { os << FormattedTime( ise->handlerFinished ) << "\t"; } else { os << invalid_string ; }
 
-    os << std::setw(16) << ( ise.setClear/ns  ) << "\t";
-    os << std::setw(16) << ( ise.setStarted/ns ) << "\t"; 
-    os << std::setw(16) << ( ise.setFinished/ns ) << "\t"; 
-    os << std::setw(16) << ( ise.startedFinished/ns )<< "\t"; 
+    if ( ise->setClear        != INVALID ) { os << std::setw(16) << ( ise->setClear/ns  ) << "\t"; } else { os << invalid_string ; }
+    if ( ise->setStarted      != INVALID ) { os << std::setw(16) << ( ise->setStarted/ns ) << "\t"; }else { os << invalid_string ; }
+    if ( ise->setFinished     != INVALID ) { os << std::setw(16) << ( ise->setFinished/ns ) << "\t"; }else { os << invalid_string ; }
+    if ( ise->startedFinished != INVALID ) { os << std::setw(16) << ( ise->startedFinished/ns )<< "\t"; }  else { os << invalid_string ; }
 
     return os.str();
 }
 
 std::string Print( const IrqStatisticPerVector &ispv, AvrDevice* core ) {
-    std::ostringstream os;
-    os << "Entry type                     t Flag Set          t Flag Cleared      t Handler Started   t Handler Finished  dt Set->Clear       dt Set->Start       dt Set->Finish      dt Start->Finish" << std::endl;
-    os << "last                     " << ispv.last << std::endl;
-    os << "Set->Clear >             " << ispv.long_SetClear << std::endl; 
-    os << "Set->Clear <             " << ispv.short_SetClear << std::endl;
-    os << "Set->HandlerStarted >    " << ispv.long_SetStarted << std::endl; 
-    os << "Set->HandlerStarted <    " << ispv.short_SetStarted << std::endl;
+    std::string headline;
+    headline += "Entry type              ";
 
-    os << "Set->HandlerFinished >   " << ispv.long_SetFinished << std::endl; 
-    os << "Set->HandlerFinished <   " << ispv.short_SetFinished << std::endl;
-    os << "Handler Start->Finished >" << ispv.long_StartedFinished << std::endl; 
-    os << "Handler Start->Finished <" << ispv.short_StartedFinished << std::endl;
+    headline += "          t Flag Set";
+    headline += "      t Flag Cleared";
+    headline += "   t Handler Started";
+    headline += "  t Handler Finished";
+    headline += "       dt Set->Clear";
+    headline += "       dt Set->Start";
+    headline += "      dt Set->Finish";
+    headline += "    dt Start->Finish";
+
+    std::string headline2;
+    headline2 += "Entry type              ";
+
+    headline2 += "          t Flag Set";
+    headline2 += "      t Flag Cleared";
+    headline2 += "   t Handler Started";
+    headline2 += "  t Handler Finished";
+    headline2 += "      clk Set->Clear";
+    headline2 += "      clk Set->Start";
+    headline2 += "     clk Set->Finish";
+    headline2 += "   clk Start->Finish";
+
+    std::ostringstream os;
+
+    if ( ispv.unfinishedEntries.size() )
+    {
+        os << headline << std::endl;
+
+        for ( auto& v: ispv.unfinishedEntries )
+        {
+            os << "all active handlers:     " << *v << std::endl;
+        }
+        os << std::endl;
+    }
+
+
+    os << headline << std::endl;
+    os << "last                     " << *ispv.last << std::endl;
+    os << "Set->Clear >             " << *ispv.long_SetClear << std::endl; 
+    os << "Set->Clear <             " << *ispv.short_SetClear << std::endl;
+    os << "Set->HandlerStarted >    " << *ispv.long_SetStarted << std::endl; 
+    os << "Set->HandlerStarted <    " << *ispv.short_SetStarted << std::endl;
+
+    os << "Set->HandlerFinished >   " << *ispv.long_SetFinished << std::endl; 
+    os << "Set->HandlerFinished <   " << *ispv.short_SetFinished << std::endl;
+    os << "Handler Start->Finished >" << *ispv.long_StartedFinished << std::endl; 
+    os << "Handler Start->Finished <" << *ispv.short_StartedFinished << std::endl;
     os << std::endl;
 
-    os << "Entry type                     t Flag Set          t Flag Cleared      t Handler Started   t Handler Finished  clk Set->Clear      clk Set->Start      clk Set->Finish     clk Start->Finish" << std::endl;
+    if ( ispv.unfinishedEntries.size() )
+    {
+        os << headline << std::endl;
+
+        for ( auto& v: ispv.unfinishedEntries )
+        {
+            os << "all active handlers:     " << Cycles( v, core ) << std::endl;
+        }
+        os << std::endl;
+    }
+
+    os << headline << std::endl;
     os << "last                     " << Cycles( ispv.last, core ) << std::endl;
     os << "Set->Clear >             " << Cycles( ispv.long_SetClear, core ) << std::endl; 
     os << "Set->Clear <             " << Cycles( ispv.short_SetClear, core ) << std::endl;
@@ -217,53 +339,84 @@ void IrqStatistic::operator()() {
 
 void IrqStatistic::SetIrqFlag( unsigned int vector, SystemClockOffset time )
 {
-    if ( entries[vector].actual.flagSet==0) { //the actual entry was not used before... fine!
-        entries[vector].actual.flagSet= time;
-    } 
-    else
-    {
-        traceOut << "UUUUBS flagSet was already set######################   E  R  R  O  R  ###############################" << std::endl;
-    }
+    // on getting a new irq flag set, we always start with a new statistic entry
+    entries[vector].unfinishedEntries.push_back(std::make_shared<IrqStatisticEntry>());
+    entries[vector].unfinishedEntries.back()->flagSet = time;
+    if ( core->trace_on ) { traceOut << (*this) << std::endl; }
 }
 
 void IrqStatistic::ClearIrqFlag( unsigned int vector, SystemClockOffset time )
 {
-    if (entries[vector].actual.flagCleared==0) {
-        entries[vector].actual.flagCleared=time;
-    }
-    else
+    auto& el = entries[vector].unfinishedEntries.back();
+    if ( el->flagCleared!=INVALID )
     {
-        traceOut << "UUUUBS flagCleared was already set######################   E  R  R  O  R  ###############################" << std::endl;
+        if ( core->trace_on )
+        {
+            traceOut << "UUUUBS flagCleared was already set######################   E  R  R  O  R  ###############################" << std::endl;
+        }
     }
 
-    entries[vector].CheckComplete();
+    el->flagCleared = time;
+    el->CalcDiffs();
+    entries[vector].CalculateStatistic();
+    if ( core->trace_on ) { traceOut << (*this) << std::endl; }
 }
 
 void IrqStatistic::IrqHandlerStarted( unsigned int vector, SystemClockOffset time, unsigned int stackPointer )
 {
-    if (entries[vector].actual.handlerStarted==0) {
-        entries[vector].actual.handlerStarted= time;
-    }
-    else
+    auto& el = entries[vector].unfinishedEntries.back();
+    if ( el->handlerStarted!=INVALID )
     {
-        traceOut << "UUUUBS handlerStarted was already set######################   E  R  R  O  R  ###############################" << std::endl;
+        if ( core->trace_on )
+        {
+            traceOut << "UUUUBS handlerStarted was already set######################   E  R  R  O  R  ###############################" << std::endl;
+        }
     }
-    entries[vector].CheckComplete();
+
+    el->handlerStarted = time;
+    el->stackPointer = stackPointer;
+    el->CalcDiffs();
+    entries[vector].CalculateStatistic();
+    if ( core->trace_on ) { traceOut << (*this) << std::endl; }
 }
-
-
-
 
 void IrqStatistic::IrqHandlerFinished( unsigned int vector, SystemClockOffset time, unsigned int stackPointer )
 {
-    if (entries[vector].actual.handlerFinished==0) {
-        entries[vector].actual.handlerFinished= time;
-    }
-    else
+    // we finish the handler which is on the given stack position as we can have nested irqs for the same
+    // vector. This can happen if the handler set sei() and a new irq for the same vector occures and the 
+    // same handler is started again.
+
+    auto& vec = entries[vector].unfinishedEntries;
+
+    // search vector from back and find same stackPointer
+    for ( auto it = vec.rbegin(); it != vec.rend(); ++it )
     {
-        traceOut << "UUUUBS handlerFinished was already set######################   E  R  R  O  R  ###############################" << std::endl;
+        auto& el = *it;
+        if ( core->trace_on )
+        {
+            traceOut << "run over all entries in reverse order: " << std::endl;
+            traceOut << el << std::endl;
+
+        }
+
+        if ( el->stackPointer == stackPointer )
+        {
+            if ( el->handlerFinished!=INVALID )
+            {
+                if ( core->trace_on )
+                {
+                    traceOut << "UUUUBS handlerFinished was already set######################   E  R  R  O  R  ###############################" << std::endl;
+                }
+            }
+            el->handlerFinished = time;
+            el->CalcDiffs();
+            entries[vector].CalculateStatistic();
+            break;
+        }
     }
 
-    entries[vector].CheckComplete();
+    if ( core->trace_on ) { traceOut << (*this) << std::endl; }
+
+
 }
 

@@ -97,6 +97,7 @@ void HWIrqSystem::SetIrqFlag(Hardware *hwp, unsigned int vector) {
     if (core->trace_on) {
         traceOut << core->GetFname() << " IRQ: " << vector << " " << core->GetInterruptVectorName( vector ) << " is pending" << std::endl;
     }
+
     
     irqStatistic.SetIrqFlag( vector, SystemClock::Now() );
 }
@@ -126,11 +127,6 @@ void HWIrqSystem::IrqHandlerFinished(unsigned int stackPointer, unsigned int vec
     }
 
     irqStatistic.IrqHandlerFinished(  vector, SystemClock::Now(), stackPointer );
-
-    if ( core->trace_on )
-    {
-        traceOut << irqStatistic << std::endl;
-    }
 }
 
 void HWIrqSystem::DebugVerifyInterruptVector(unsigned int vector, const Hardware* source) {
