@@ -18,7 +18,7 @@ class XPin(pysimulavr.Pin):
     
   def SetInState(self, pin):
     pysimulavr.Pin.SetInState(self, pin)
-    print "%s='%s' (t=%dns)" % (self.name, pin.toChar(), sim.getCurrentTime())
+    print("%s='%s' (t=%dns)" % (self.name, pin.toChar(), sim.getCurrentTime()))
 
 if __name__ == "__main__":
 
@@ -33,7 +33,7 @@ if __name__ == "__main__":
   a7 = XPin(dev, "A7", "H")
   
   sim.dmanStart()
-  print "simulation start: (t=%dns)" % sim.getCurrentTime()
+  print("simulation start: (t=%dns)" % sim.getCurrentTime())
   sim.doRun(sim.getCurrentTime() + 7000000)
   a1.SetPin("L")
   sim.doRun(sim.getCurrentTime() + 5000000)
@@ -41,11 +41,11 @@ if __name__ == "__main__":
   sim.doRun(sim.getCurrentTime() + 2000000)
   a1.SetPin("H")
   sim.doRun(sim.getCurrentTime() + 1000000)
-  print "simulation end: (t=%dns)" % sim.getCurrentTime()
+  print("simulation end: (t=%dns)" % sim.getCurrentTime())
   
-  print "value 'timer2_ticks'=%d" % sim.getWordByName(dev, "timer2_ticks")
-  print "value 'port_val'=0x%x" % sim.getWordByName(dev, "port_val")
-  print "value 'port_cnt'=%d" % sim.getWordByName(dev, "port_cnt")
+  print("value 'timer2_ticks'=%d" % sim.getWordByName(dev, "timer2_ticks"))
+  print("value 'port_val'=0x%x" % sim.getWordByName(dev, "port_val"))
+  print("value 'port_cnt'=%d" % sim.getWordByName(dev, "port_cnt"))
   
   sim.dmanStop()
   del dev

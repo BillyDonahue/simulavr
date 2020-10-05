@@ -23,6 +23,7 @@
 # $Id: gdb_rsp.py,v 1.1 2004/07/31 00:59:32 rivetwa Exp $
 #
 
+from __future__ import print_function
 import socket, struct, array, sys
 
 from registers import Reg
@@ -82,37 +83,41 @@ class GdbRemoteSerialProtocol:
 
 	def out(self, s):
 		if self.ofile:
-			print >> self.ofile, s
+			print(s, file=self.ofile)
 
-	def cksum(self,pkt):
+	def cksum(self, pkt):
 		sum = 0
-		for c in pkt:
-			sum += ord(c)
+		if isinstance(pkt[0], int):
+		  for c in pkt:
+		    sum += c
+		else:
+		  for c in pkt:
+		    sum += ord(c)
 
 		return sum & 0xff
 
 	def ack(self):
 		self.out( 'Send: "+" (Ack)' )
-		self.socket.send('+')
+		self.socket.send(b'+')
 		
 	def send(self, msg):
-		s = '$'+msg+'#'+'%02x'%(self.cksum(msg))
+		s = '$'+msg+'#'+'%02x'%(self.cksum(msg.encode("ascii")))
 		self.out( 'Sent: "%s"' % (s) )
-		self.socket.send(s)
+		self.socket.send(s.encode("ascii"))
 		reply = self.socket.recv(1)
-		if reply != '+':
-			raise ErrReply, reply
+		if reply != b'+':
+			raise ErrReply(reply)
 		else:
 			self.out( '-> Ack' )
 
 	def recv(self):
 		c = self.socket.recv(1)
-		if c == '$':
+		if c == b'$':
 			max_buf = 400
-			pkt = ''
+			pkt = b''
 			while max_buf:
 				c = self.socket.recv(1)
-				if c == '#':
+				if c == b'#':
 					break
 				pkt += c
 				max_buf -= 1
@@ -122,13 +127,13 @@ class GdbRemoteSerialProtocol:
 			cccc += self.socket.recv(1)
 			csum = int( cccc, 16 )
 			if sum != csum:
-				raise ErrCheckSum, 'pkt="%s#%s", %02x : %02x' %(pkt,cccc,sum,csum)
+				raise ErrCheckSum('pkt="%s#%s", %02x : %02x' %(pkt,cccc,sum,csum))
 
 			return pkt
-		elif c == '+':
+		elif c == b'+':
 			self.out( 'Ack' )
 		else:
-			raise ErrPacket, c
+			raise ErrPacket(c)
 
 		return None
 
@@ -164,7 +169,7 @@ class GdbRemoteSerialProtocol:
 		arr.fromstring(struct.pack('<33BHL', *regs))
 		self.send('G'+self.bin2str(arr))
 		reply = self.recv()
-		if reply != 'OK':
+		if reply != b'OK':
 			raise ErrReply
 		self.out( 'Recv: "%s"' % (reply) )
 
@@ -191,14 +196,14 @@ class GdbRemoteSerialProtocol:
 
 		self.send('P%x=%s' % (reg, self.bin2str(arr)))
 		reply = self.recv()
-		if reply != 'OK':
+		if reply != b'OK':
 			raise ErrReply
 		self.out( 'Recv: "%s"' % (reply) )
 
 	def read_mem(self, addr, _len):
 		self.send('m%x,%x' % (addr,_len))
 		reply = self.recv()
-		if reply[0] == 'E':
+		if reply[0] == b'E':
 			raise ErrMemRead
 		self.out( 'Recv: "%s"' % (reply) )
 
@@ -207,7 +212,7 @@ class GdbRemoteSerialProtocol:
 	def write_mem(self, addr, _len, buf):
 		self.send( 'M%x,%x:' %(addr,_len) + self.bin2str(buf) )
 		reply = self.recv()
-		if reply != 'OK':
+		if reply != b'OK':
 			raise ErrReply
 		self.out( 'Recv: "%s"' % (reply) )
 
@@ -216,7 +221,7 @@ class GdbRemoteSerialProtocol:
 		"""
 		while 1:
 			reply = self.recv()
-			if reply[0] != 'O':
+			if reply[0] != b'O':
 				break
 
 		return reply
@@ -253,18 +258,18 @@ class GdbRemoteSerialProtocol:
 		pkt = 'Z%d,%x,%x' % (_type, addr, _len)
 		self.send( pkt )
 		reply = self.recv()
-		if reply == '':
+		if reply == b'':
 			self.out( 'Z packets are not supported by target.' )
-		elif reply != 'OK':
+		elif reply != b'OK':
 			raise ErrPacket
 
 	def break_remove(self, _type, addr, _len):
 		pkt = 'z%d,%x,%x' % (_type, addr, _len)
 		self.send( pkt )
 		reply = self.recv()
-		if reply == '':
+		if reply == b'':
 			self.out( 'Z packets are not supported by target.' )
-		elif reply != 'OK':
+		elif reply != b'OK':
 			raise ErrPacket
 
 	def interrupt(self):
@@ -280,21 +285,21 @@ if __name__ == '__main__':
 	regs = rsp.read_regs()
 	regs[10] = 10
 	rsp.write_regs(regs)
-	print rsp.read_regs()
+	print(rsp.read_regs())
 
-	print rsp.read_reg(12)
+	print(rsp.read_reg(12))
 	rsp.write_reg(12,0xaa)
-	print rsp.read_reg(12)
-	print rsp.read_reg(34)				# PC
+	print(rsp.read_reg(12))
+	print(rsp.read_reg(34))				# PC
 
 	# Try to read/write memory
 	addr = 0x0
 	_len  = 10
 	mem = rsp.read_mem(addr,_len)
-	print mem
+	print(mem)
 	mem[4] = 10
 	rsp.write_mem(addr,len(mem),mem)
-	print rsp.read_mem(addr,_len)
+	print(rsp.read_mem(addr,_len))
 
 	# Write zero's (NOP's) to first 60 bytes of flash
 	arr = array.array('B', [ 0x0 for i in range(60) ])

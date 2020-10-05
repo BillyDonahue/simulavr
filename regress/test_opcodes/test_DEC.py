@@ -88,7 +88,7 @@ class test_DEC_r%02d_v%02x(base_DEC):
 	Rd = %d
 	Vd = 0x%x
 	def fail(self,s):
-		raise DEC_r%02d_v%02x_TestFail, s
+		raise DEC_r%02d_v%02x_TestFail(s)
 """
 
 #
@@ -112,4 +112,4 @@ for d in range(32):
 		args = (d,vd)*4
 		code += template % args
 
-exec code
+exec(code)

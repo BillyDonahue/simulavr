@@ -1,3 +1,4 @@
+from __future__ import print_function
 from unittest import TextTestRunner, TestSuite
 from sys import argv, stderr, exit
 
@@ -26,8 +27,8 @@ def getTests(targets):
     try:
       m = __import__(parseTargetName(name))
       l.append(targetLoader[parseTargetType(name)](name).loadTestsFromModule(m))
-    except Exception, e:
-      print >> stderr, "error: %s" % str(e)
+    except Exception as e:
+      print("error: %s" % str(e), file=stderr)
   return TestSuite(l)
   
 if __name__ == '__main__':

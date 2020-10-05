@@ -83,7 +83,7 @@ class RCALL_%03x_TestFail(RCALL_TestFail): pass
 class test_RCALL_%03x(base_RCALL):
   k = 0x%x
   def fail(self,s):
-    raise RCALL_%03x_TestFail, s
+    raise RCALL_%03x_TestFail(s)
 """
 
 #
@@ -96,4 +96,4 @@ class test_RCALL_%03x(base_RCALL):
 code = ''
 for k in (-100,100):
   code += template % ((k & 0xfff), (k & 0xfff), (k & 0xfff), (k & 0xfff))
-exec code
+exec(code)

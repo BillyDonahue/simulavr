@@ -74,7 +74,7 @@ class test_BRBC_bit%d_is_%d(base_BRBC):
 	bit = %d
 	val = %d
 	def fail(self,s):
-		raise BRBC_bit%d_is_%d_TestFail, s
+		raise BRBC_bit%d_is_%d_TestFail(s)
 """
 
 #
@@ -84,4 +84,4 @@ code = ''
 for b in range(8):
 	for v in range(2):
 		code += template % (b,v,b,v,b,v,b,v)
-exec code
+exec(code)

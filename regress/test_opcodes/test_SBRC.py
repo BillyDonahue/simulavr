@@ -84,7 +84,7 @@ class test_SBRC_r%02d_b%d_v%02x_ni%d(base_SBRC):
 	v = %d
 	ni = %d
 	def fail(self,s):
-		raise SBRC_r%02d_b%d_v%02x_ni%d_TestFail, s
+		raise SBRC_r%02d_b%d_v%02x_ni%d_TestFail(s)
 """
 
 #
@@ -97,4 +97,4 @@ for d in range(32):
 			for ni in (16,32): # is next insn 16 or 32 bits
 				args = (d,b,v,ni)*4
 				code += template % args
-exec code
+exec(code)

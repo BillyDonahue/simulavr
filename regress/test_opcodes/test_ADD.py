@@ -96,7 +96,7 @@ class test_ADD_rd%02d_vd%02x_rr%02d_vr%02x_C%d(base_ADD):
 	Vr = 0x%x
 	C  = %d
 	def fail(self,s):
-		raise ADD_rd%02d_vd%02x_rr%02d_vr%02x_C%d_TestFail, s
+		raise ADD_rd%02d_vd%02x_rr%02d_vr%02x_C%d_TestFail(s)
 """
 
 #
@@ -132,4 +132,4 @@ for c in (0,1):
 		for vd,vr in vals:
 			args = (d,vd,d,vd,c)*4
 			code += template % args
-exec code
+exec(code)

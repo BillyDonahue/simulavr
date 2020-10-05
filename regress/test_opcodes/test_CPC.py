@@ -99,7 +99,7 @@ class test_CPC_rd%02d_v%02x_rr%02d_v%02x_C%d_Z%d(base_CPC):
 	C  = %d
 	Z  = %d
 	def fail(self,s):
-		raise CPC_rd%02d_v%02x_rr%02d_v%02x_C%d_Z%d_TestFail, s
+		raise CPC_rd%02d_v%02x_rr%02d_v%02x_C%d_Z%d_TestFail(s)
 """
 
 #
@@ -127,4 +127,4 @@ for c,z in [ (0,0), (0,1), (1,0), (1,1) ]:
 				args = (d,vd,r,vr,c,z)*4
 				code += template % args
 
-exec code
+exec(code)

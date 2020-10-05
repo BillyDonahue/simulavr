@@ -62,7 +62,7 @@ class SWAP_r%02d_TestFail(SWAP_TestFail): pass
 class test_SWAP_r%02d(base_SWAP):
 	reg = %d
 	def fail(self,s):
-		raise SWAP_r%02d_TestFail, s
+		raise SWAP_r%02d_TestFail(s)
 """
 
 #
@@ -71,4 +71,4 @@ class test_SWAP_r%02d(base_SWAP):
 code = ''
 for i in range(32):
 	code += template % (i,i,i,i)
-exec code
+exec(code)

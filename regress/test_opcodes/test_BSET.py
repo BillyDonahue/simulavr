@@ -66,7 +66,7 @@ class BSET_bit%d_TestFail(BSET_TestFail): pass
 class test_BSET_bit%d(base_BSET):
 	bit = %d
 	def fail(self,s):
-		raise BSET_bit%d_TestFail, s
+		raise BSET_bit%d_TestFail(s)
 """
 
 #
@@ -75,4 +75,4 @@ class test_BSET_bit%d(base_BSET):
 code = ''
 for b in range(8):
 	code += template % (b,b,b,b)
-exec code
+exec(code)

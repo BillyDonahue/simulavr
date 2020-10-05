@@ -87,7 +87,7 @@ class test_CPSE_rd%02d_vd%02x_rr%02d_vr%02x_ni%d(base_CPSE):
 	vr = 0x%x
 	ni = %d
 	def fail(self,s):
-		raise CPSE_rd%02d_vd%02x_rr%02d_vr%02x_ni%d_TestFail, s
+		raise CPSE_rd%02d_vd%02x_rr%02d_vr%02x_ni%d_TestFail(s)
 """
 
 vals = (
@@ -113,4 +113,4 @@ for d in range(0,32,step):
 		for ni in (16,32): # is next insn 16 or 32 bits
 			args = (d,vd,d,vd,ni)*4
 			code += template % args
-exec code
+exec(code)

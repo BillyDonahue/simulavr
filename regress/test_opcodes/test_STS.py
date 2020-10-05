@@ -77,7 +77,7 @@ class test_STS_r%02d_k%04x_v%02x(base_STS):
 	k = 0x%x
 	v = 0x%x
 	def fail(self,s):
-		raise STS_r%02d_k%04x_v%02x_TestFail, s
+		raise STS_r%02d_k%04x_v%02x_TestFail(s)
 """
 
 #
@@ -89,4 +89,4 @@ for d in range(0,32):
 		for v in (0xaa, 0x55):
 			args = (d,k,v)*4
 			code += template % args
-exec code
+exec(code)

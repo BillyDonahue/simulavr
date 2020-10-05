@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# -*- coding: UTF-8 -*-
+# -*- coding: utf-8 -*-
 ###############################################################################
 #
 # simulavr - A simulator for the Atmel AVR family of microcontrollers.
@@ -23,8 +23,9 @@
 #
 # $Id: $
 #
+from __future__ import print_function
 from optparse import OptionParser
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 from os.path import exists
 from sys import stderr
 from re import compile
@@ -49,7 +50,7 @@ def readArgs():
   opts.config = ConfigParser()
   try:
     opts.config.read(opts.configfile)
-  except Exception, e:
+  except Exception as e:
     p.error("config file not readable: %s" % str(e))
   if not opts.config.has_section("_rule_") or not opts.config.has_option("_rule_", "rule"):
     p.error("config file wrong: no section '_rule_' or no option 'rule' in it")
@@ -58,7 +59,7 @@ def readArgs():
   if not exists(opts.templatefile): p.error("template file not found")
   try:
     opts.template = open(opts.templatefile, "r").read()
-  except Exception, e:
+  except Exception as e:
     p.error("template file not readable: %s" % str(e))
     
   return opts
@@ -101,12 +102,12 @@ def create_rules(config):
         for p in processors.split():
           d = dict(processor = p)
           d.update(data)
-          rules.append(config.get("_rule_", "rule", False, d))
-          targets.append(config.get(name, "target", False, d))
+          rules.append(config.get("_rule_", "rule", raw=False, vars=d))
+          targets.append(config.get(name, "target", raw=False, vars=d))
       else:
           targets.append(config.get(name, "target"))
-    except Exception, e:
-      print >> stderr, str(e)
+    except Exception as e:
+      print(str(e), file=stderr)
   return dict(rules = "\n".join(rules), targets = " ".join(targets))
   
 if __name__ == "__main__":
