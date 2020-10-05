@@ -85,4 +85,28 @@ class ExtAnalogPin: public Pin, public ExternalType {
         void SetInState(const Pin& p);
 };
 
+
+class ExtPinButton: public Pin, public ExternalType {
+    protected:
+        UserInterface *ui;   //!< ptr to UI
+        std::string extName; //!< identifier for UI access
+
+    public:
+        /*! creates an ExtPin instance
+          @param psReleased pin status for button released
+          @param psPressed  pin status for button pressed
+          @param _ui pointer to UI instance
+          @param _extName identifier used for UI access
+          @param baseWindow window identifier from UI window */
+        ExtPinButton(T_Pinstate psReleased, T_Pinstate psPressed, UserInterface *ui_, const char *extName_, const char *baseWindow);
+        
+        /*! Receives a external value from UI
+          @param s value string */
+        void SetNewValueFromUi(const std::string& s);
+        
+        /*! Send new pin status to UI
+          @param p pin, for which status change is to send */
+        void SetInState(const Pin& p);
+};
+
 #endif // EXTPIN

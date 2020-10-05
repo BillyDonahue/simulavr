@@ -42,7 +42,7 @@ ExtPin::ExtPin(T_Pinstate ps,
     outState=ps;
     os << "create Net " << _extName << " " << baseWindow << " " << std::endl;
     ui->Write(os.str());
-    
+
     ui->AddExternalType(extName, this);
 
     // We also want to set the external GUI to represent the initial value
@@ -71,12 +71,16 @@ void ExtPin::SetNewValueFromUi(const std::string& s) {
     connectedTo->CalcNet();
 }
 
+
+// #################################################################################
+
+
 void ExtAnalogPin::SetNewValueFromUi(const std::string& s) {
     outState= ANALOG;
 
     //analogValue=atol(s.c_str());
     //connectedTo->CalcNet();
-    
+
     SetAnalogValue(atof(s.c_str()));
 }
 
@@ -99,4 +103,51 @@ ExtAnalogPin::ExtAnalogPin(unsigned int value,
 void ExtAnalogPin::SetInState(const Pin &p) {
     ui->SendUiNewState(extName, p);
 }
+
+
+// #################################################################################
+
+
+ExtPinButton::ExtPinButton(T_Pinstate psReleased,
+                           T_Pinstate psPressed,
+                           UserInterface *ui_,
+                           const char *extName_,
+                           const char *baseWindow):
+    Pin(psReleased),
+    ui(ui_),
+    extName(extName_)
+{
+    std::ostringstream os;
+    outState=psReleased;
+    os << "create NetButton " << extName_ << " " << baseWindow << " " << (char)Pin(psReleased) << " " << (char)Pin(psPressed) << std::endl;
+    ui->Write(os.str());
+
+    ui->AddExternalType(extName, this);
+
+    // We also want to set the external GUI to represent the initial value
+    // given as first parameter to the ExtPin.
+
+    // Create pin representation as char for gui
+    const char defaultState = *this;
+
+    os.str(""); // make it empty
+    os.clear(); // reset state flags
+
+    os << "setfrombackdoor " << extName << " " << defaultState << std::endl;
+    ui->Write(os.str());
+}
+
+void ExtPinButton::SetInState(const Pin &p) {
+    ui->SendUiNewState(extName, p);
+}
+
+void ExtPinButton::SetNewValueFromUi(const std::string& s) {
+    Pin tmp;
+    tmp= s[0];
+    //outState= tmp.GetOutState();
+    outState= tmp.outState;
+
+    connectedTo->CalcNet();
+}
+
 
