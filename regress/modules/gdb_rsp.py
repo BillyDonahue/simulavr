@@ -87,8 +87,13 @@ class GdbRemoteSerialProtocol:
 
 	def cksum(self,pkt):
 		sum = 0
+		#print(pkt)
+		#print("#####1############################")
+
 		for c in pkt:
-			sum += ord(c)
+			#print("---> ",c)
+			# sum += ord(c)
+			sum += c
 
 		return sum & 0xff
 
