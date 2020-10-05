@@ -32,6 +32,7 @@
 #include "traceval.h"
 
 #include <map>
+#include <functional>
 
 /** A thread automatically detected in simulated program.
 * We keep track of them in core->stack.m_ThreadList.m_threads[] and
