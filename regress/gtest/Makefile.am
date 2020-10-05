@@ -7,7 +7,7 @@ GTEST_OBJS = gtest-1.6.0/src/gtest-all.cc
 
 GTEST_INCLUDE = -Igtest-1.6.0/include/gtest -Igtest-1.6.0/include -Igtest-1.6.0
 
-GTEST_CXXFLAGS = -Dprivate=public -Dprotected=public 
+#GTEST_CXXFLAGS = -Dprivate=public -Dprotected=public 
 
 GTEST_EXTRA_FILES = gtest-1.6.0/src/gtest-internal-inl.h \
                     gtest-1.6.0/src/gtest-filepath.cc \
