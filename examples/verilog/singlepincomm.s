@@ -23,7 +23,7 @@
 // warranty!
 //
 //-----------------------------------------------------------------------------
-.arch ATTiny25
+#.arch ATTiny25
 #define	__AVR_ATtiny25__	1
 #define __SFR_OFFSET 0
 #include <avr/io.h>

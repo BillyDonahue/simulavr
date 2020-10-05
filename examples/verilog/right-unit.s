@@ -14,7 +14,7 @@
 // with this program; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA..
 //  
-.arch ATTiny25
+#.arch ATTiny25
 #define __SFR_OFFSET 0
 	
 #define	__AVR_ATtiny25__	1
