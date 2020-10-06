@@ -151,7 +151,8 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     flagMOVWInstruction(true),
     flagTiny10(false),
     flagTiny1x(false),
-    flagXMega(false)
+    flagXMega(false),
+    wado(nullptr)
 {
     dumpManager = DumpManager::Instance();
     dumpManager->registerAvrDevice(this);
