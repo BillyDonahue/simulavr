@@ -297,16 +297,16 @@ class IOReg: public RWMemoryMember {
         IOReg(TraceValueRegister *registry,
               const std::string &tracename,
               P *_p,
-              getter_t _g=0,
-              setter_t _s=0,
-              getter_bit_t _gb=0,
-              setter_bit_t _sb=0):
+              getter_t _g = nullptr,
+              setter_t _s = nullptr,
+              getter_bit_t _gb = nullptr,
+              setter_bit_t _sb = nullptr):
             RWMemoryMember(registry, tracename),
             p(_p),
-            g(_g),
-            s(_s),
-            gb(_gb),
-            sb(_sb)
+            getValueFuncPtr(_g),
+            setValueFuncPtr(_s),
+            getValueFuncPtrBitwise(_gb),
+            setValueFuncPtrBitwise(_sb)
         {
             // 'undefined state' doesn't really make sense for IO registers 
             if (tv)
@@ -326,14 +326,14 @@ class IOReg: public RWMemoryMember {
 
         /*! bitwise access to IOReg from SBI
           */
-        virtual void set_bit( unsigned int bitaddr ) {
-            if (sb) {
-                (p->*sb)( 1, bitaddr);
+        void set_bit( unsigned int bitaddr ) override {
+            if (setValueFuncPtrBitwise) {
+                (p->*setValueFuncPtrBitwise)( 1, bitaddr);
             } else { // default to byte access
-                if (g && s) {
-                    unsigned char val = (p->*g)();
+                if (getValueFuncPtr && setValueFuncPtr) {
+                    unsigned char val = (p->*getValueFuncPtr)();
                     val|= 1<<bitaddr;
-                    (p->*s)(val);
+                    (p->*setValueFuncPtr)(val);
                 } else {
                     avr_warning("Bitwise access of '%s' is not supported.", tv->name().c_str());
                 }
@@ -342,14 +342,14 @@ class IOReg: public RWMemoryMember {
 
         /*! bitwise access to IOReg from CBI
           */
-        virtual void clear_bit( unsigned int bitaddr ) {
-            if (sb) {
-                (p->*sb)( 0, bitaddr);
+        void clear_bit( unsigned int bitaddr ) override {
+            if (setValueFuncPtrBitwise) {
+                (p->*setValueFuncPtrBitwise)( 0, bitaddr);
             } else { // default to byte access
-                if (g && s) {
-                    unsigned char val = (p->*g)();
+                if (getValueFuncPtr && setValueFuncPtr) {
+                    unsigned char val = (p->*getValueFuncPtr)();
                     val&= ~(1<<bitaddr);
-                    (p->*s)(val);
+                    (p->*setValueFuncPtr)(val);
                 } else {
                     avr_warning("Bitwise access of '%s' is not supported.", tv->name().c_str());
                 }
@@ -358,16 +358,16 @@ class IOReg: public RWMemoryMember {
 
     protected:
         unsigned char get() const {
-            if (g)
-                return (p->*g)();
+            if (getValueFuncPtr)
+                return (p->*getValueFuncPtr)();
             else if (tv) {
                 avr_warning("Reading of '%s' is not supported.", tv->name().c_str());
             }
             return 0;
         }
         void set(unsigned char val) {
-            if (s)
-                (p->*s)(val);
+            if (setValueFuncPtr)
+                (p->*setValueFuncPtr)(val);
             else if (tv) {
                 avr_warning("Writing of '%s' (with %d) is not supported.", tv->name().c_str(), val);
             }
@@ -375,10 +375,10 @@ class IOReg: public RWMemoryMember {
         
     private:
         P *p;
-        getter_t g;
-        setter_t s;
-        getter_bit_t gb;
-        setter_bit_t sb;
+        getter_t getValueFuncPtr;
+        setter_t setValueFuncPtr;
+        getter_bit_t getValueFuncPtrBitwise;
+        setter_bit_t setValueFuncPtrBitwise;
 };
 
 class IOSpecialReg;
