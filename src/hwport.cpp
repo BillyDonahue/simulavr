@@ -56,6 +56,7 @@ HWPort::HWPort(AvrDevice *core, const std::string &name, bool portToggle, int si
         // connect to output pin
         p[tt].mask = 1 << tt;
         p[tt].pinOfPort= &pin;
+        p[tt].pinRegOfPort= &pin_reg;
         // register pin output trace
         std::string tname = GetTraceValuePrefix() + name + (char)('0' + tt) + "-Out";
         pintrace[tt] = new TraceValueOutput(tname);

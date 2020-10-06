@@ -34,6 +34,7 @@
 
 #include "pin.h"
 #include "net.h"
+#include "rwmem.h"
 
 float AnalogValue::getA(float vcc) {
     switch(dState) {
@@ -75,6 +76,8 @@ void Pin::SetInState(const Pin &p) {
         } else { 
             *pinOfPort &= 0xff - mask;
         }
+        if(pinRegOfPort != nullptr)
+            pinRegOfPort->hardwareChange(*pinOfPort);
     }
 
     std::vector<HasPinNotifyFunction*>::iterator ii;
@@ -96,7 +99,8 @@ bool Pin::CalcPin(void) {
 }
 
 Pin::Pin(T_Pinstate ps) { 
-    pinOfPort = 0; 
+    pinOfPort = 0;
+    pinRegOfPort = nullptr;
     connectedTo = NULL;
     mask = 0;
     
@@ -125,7 +129,8 @@ Pin::Pin(T_Pinstate ps) {
 }
 
 Pin::Pin() { 
-    pinOfPort = 0; 
+    pinOfPort = 0;
+    pinRegOfPort = nullptr;
     connectedTo = NULL;
     mask = 0;
     
@@ -139,6 +144,7 @@ Pin::~Pin() {
 
 Pin::Pin( unsigned char *parentPin, unsigned char _mask) { 
     pinOfPort = parentPin;
+    pinRegOfPort = nullptr;
     mask = _mask;
     connectedTo = NULL;
     
@@ -147,6 +153,7 @@ Pin::Pin( unsigned char *parentPin, unsigned char _mask) {
 
 Pin::Pin(const Pin& p) {
     pinOfPort = 0; // don't take over HWPort connection!
+    pinRegOfPort = nullptr;
     connectedTo = NULL; // don't take over Net instance!
     mask = 0;
     
@@ -157,6 +164,7 @@ Pin::Pin(const Pin& p) {
 Pin::Pin(float analog) {
     mask = 0;
     pinOfPort = 0;
+    pinRegOfPort = nullptr;
     connectedTo = NULL;
     analogVal.setA(analog);
 

@@ -35,6 +35,8 @@
 
 class Net;
 class OpenDrain;
+class HWPort;
+template<typename T> class IOReg;
 
 #define REL_FLOATING_POTENTIAL 0.55
 
@@ -101,6 +103,7 @@ class Pin {
 
     protected:
         unsigned char *pinOfPort; //!< points to HWPort::pin or NULL
+        IOReg<HWPort> *pinRegOfPort; //!< points to PIN io register of port or nullptr
         unsigned char mask; //!< byte mask for HWPort::pin
         AnalogValue analogVal; //!< "real" analog voltage value
 
