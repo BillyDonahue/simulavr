@@ -90,8 +90,11 @@ void HWUSI::SetUSICR(unsigned char val) {
                     setDI((shift_data & 0x80) == 0x80, di_ddr, di_port);
                     setSCK_TWI(false, sck_ddr, sck_port);
                 }
-            default:
                 break;
+
+            case WM_tablesize:
+                break;
+            
         }
     }
 
@@ -99,7 +102,6 @@ void HWUSI::SetUSICR(unsigned char val) {
     irqen_start = (val & 0x80) == 0x80;
     irqen_ovr = (val & 0x40) == 0x40;
 
-    /* store clock mode */
     bool do_count = false;
     clock_mode = (val >> 1) & 0x7;
     if(clock_mode < 4) { /* USICS1 = 0 */
