@@ -50,11 +50,11 @@ class AnalogSignalChange {
 
 //! Implements "real" analog value as float.
 /*! Problem is, that the Vcc level isn't
-  normally not known and so it's not possible to calculate correct value. So, here
-  the value is calculated, if GetAnalogValue method is called. If no analog value
-  is set by SetAnalogValue method, a replacement value is calculated. An analog value
-  set by GetAnalogValue method is valid till it's not rewritten by a "digital"
-  replacement value. */
+    normally not known and so it's not possible to calculate correct value. So, here
+    the value is calculated, if GetAnalogValue method is called. If no analog value
+    is set by SetAnalogValue method, a replacement value is calculated. An analog value
+    set by GetAnalogValue method is valid till it's not rewritten by a "digital"
+    replacement value. */
 class AnalogValue {
 
     private:
@@ -101,13 +101,14 @@ class AnalogValue {
   connection to other sink / source) it's also the real pin state! */
 class Pin {
 
+    
     protected:
-        unsigned char *pinOfPort; //!< points to HWPort::pin or NULL
+        unsigned char *pinOfPort; //!< points to HWPort::pin or nullptr
         IOReg<HWPort> *pinRegOfPort; //!< points to PIN io register of port or nullptr
         unsigned char mask; //!< byte mask for HWPort::pin
         AnalogValue analogVal; //!< "real" analog voltage value
 
-        Net *connectedTo; //!< the connection to other pins (NULL, if not connected)
+        Net *connectedTo; //!< the connection to other pins (nullptr, if not connected)
 
     public:
 
@@ -161,11 +162,11 @@ class Pin {
         void RegisterCallback(HasPinNotifyFunction *); //!< register a listener for input value change
         //! Update input values from output values
         /*! If there is no connection to other pins, then it will reflect the own
-          output value to own input value. Otherwise it calls Net::CalcNet method */
+        output value to own input value. Otherwise it calls Net::CalcNet method */
         bool CalcPin(void);
 
-        bool isPortPin(void) { return pinOfPort != NULL; } //!< True, if it's a port pin
-        bool isConnected(void) { return connectedTo != NULL; } //!< True, if it's connected to other pins
+        bool isPortPin(void) { return pinOfPort != nullptr; } //!< True, if it's a port pin
+        bool isConnected(void) { return connectedTo != nullptr; } //!< True, if it's connected to other pins
         bool hasListener(void) { return notifyList.size() != 0; } //!< True, if there change listeners
 
         friend class HWPort;

@@ -46,12 +46,12 @@ class TraceControl: public ExternalType
          dev(_dev)
       {
          ostringstream os;
-         os << "create TraceControl "  << _extName << " " << baseWindow << " " << endl;
+         os << "create TraceControl "  << _extName << " " << baseWindow << " " << std::endl;
          ui->Write(os.str());
          ui->AddExternalType(extName, this);
       }
 
-      void SetNewValueFromUi(const string& s) 
+      void SetNewValueFromUi(const std::string& s) 
       {
          if ( s == "1" )
          {

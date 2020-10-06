@@ -105,8 +105,8 @@ class TraceValue {
         //! Generate a new unitialized trace value of width bits
         TraceValue(size_t bits,
                    const std::string &_name,
-                   const int __index=-1,
-                   const void* shadow=0);
+                   const int __index = -1,
+                   const void* shadow = nullptr );
         virtual ~TraceValue() {}
 
         //! Give number of bits for this value. Max 32.

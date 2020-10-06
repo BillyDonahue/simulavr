@@ -31,6 +31,6 @@ void PinMonitor::PinStateHasChanged(Pin* pin){
 		_prevState	= false;
 		}
 
-    std::cout << _pinDescStr << ": " << stateStr << std::endl;
+	std::cout << _pinDescStr << ": " << stateStr << std::endl;
 	}
 

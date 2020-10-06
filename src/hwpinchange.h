@@ -9,45 +9,43 @@
 
 class HWPcifrApi {
 	public:
-		virtual ~HWPcifrApi(){}
-		virtual bool	getPcifr(unsigned bit) throw()=0;
-		virtual void	setPcifr(unsigned bit) throw()=0;
+		virtual ~HWPcifrApi() {}
+		virtual bool	getPcifr(unsigned bit) throw() = 0;
+		virtual void	setPcifr(unsigned bit) throw() = 0;
 
-	};
+};
 
 class HWPcicrApi {
 	public:
-		virtual ~HWPcicrApi(){}
-		virtual bool	getPcicr(unsigned bit) throw()=0;
-		virtual void	setPcicr(unsigned bit) throw()=0;
+		virtual ~HWPcicrApi() {}
+		virtual bool	getPcicr(unsigned bit) throw() = 0;
+		virtual void	setPcicr(unsigned bit) throw() = 0;
 
-	};
+};
 
 class HWPcmskApi {
 	public:
-		virtual ~HWPcmskApi(){}
-		virtual void			setPcmskMask(unsigned char val) throw()=0;
-		virtual unsigned char	getPcmskMask() const throw()=0;
+		virtual ~HWPcmskApi() {}
+		virtual void			setPcmskMask(unsigned char val) throw() = 0;
+		virtual unsigned char	getPcmskMask() throw() = 0;
 
-//		virtual bool	getPcmsk(unsigned bit) throw()=0;
-//		virtual void	setPcmsk(unsigned bit) throw()=0;
-
-	};
+};
 
 class HWPcmskPinApi {
 	public:
-		virtual ~HWPcmskPinApi(){}
-		virtual void	pinChanged(unsigned bit) throw()=0;
-	};
+		virtual ~HWPcmskPinApi() {}
+		virtual void	pinChanged(unsigned bit) throw() = 0;
+
+};
 
 class HWPcirMaskApi {
 	public: // HWPcirMaskApi
-		virtual void			setPcifrMask(unsigned char val) throw()=0;
-		virtual unsigned char	getPcifrMask() const throw()=0;
+		virtual void			setPcifrMask(unsigned char val) throw() = 0;
+		virtual unsigned char	getPcifrMask() const throw() = 0;
 
-		virtual void			setPcicrMask(unsigned char val) throw()=0;
-		virtual unsigned char	getPcicrMask() const throw()=0;
-	};
+		virtual void			setPcicrMask(unsigned char val) throw() = 0;
+		virtual unsigned char	getPcicrMask() const throw() = 0;
+};
 		
 /// This class is never used.
 class HWPcir : public HWPcifrApi , public HWPcirMaskApi , public Hardware {
@@ -104,7 +102,7 @@ class HWPcir : public HWPcifrApi , public HWPcirMaskApi , public Hardware {
         void ClearIrqFlag(unsigned int vector);
 
 	
-	};
+};
 
 /// This class is never used.
 class HWPcmsk : public HWPcmskApi , public HWPcmskPinApi {
@@ -129,7 +127,7 @@ class HWPcmsk : public HWPcmskApi , public HWPcmskPinApi {
 		void			pinChanged(unsigned bit) throw();
 
         IOReg<HWPcmsk> pcmsk_reg;
-	};
+};
 
 // This class monitors a single pin for changes
 // an reports an interrupt if the pin chages.
@@ -153,6 +151,6 @@ class PinChange : public HasPinNotifyFunction {
         
 	private:	// HasPinNotifyFunction
         void PinStateHasChanged(Pin*);
-	};
+};
 
 #endif

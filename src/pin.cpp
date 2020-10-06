@@ -70,7 +70,7 @@ void Pin::RegisterCallback(HasPinNotifyFunction *h) {
 void Pin::SetInState(const Pin &p) { 
     analogVal = p.analogVal;
 
-    if(pinOfPort != 0) {
+    if(pinOfPort != nullptr) {
         if(p) {       //is (bool)(Pin) -> is LOW or HIGH for the pin
             *pinOfPort |= mask;
         } else { 
@@ -89,7 +89,7 @@ void Pin::SetInState(const Pin &p) {
 }
 
 bool Pin::CalcPin(void) {
-    if(connectedTo == NULL) {
+    if(connectedTo == nullptr) {
         // no net connected, transfer the output to own input
         SetInState(*this);
         return (bool)*this;
@@ -99,9 +99,9 @@ bool Pin::CalcPin(void) {
 }
 
 Pin::Pin(T_Pinstate ps) { 
-    pinOfPort = 0;
+    pinOfPort = nullptr;
     pinRegOfPort = nullptr;
-    connectedTo = NULL;
+    connectedTo = nullptr;
     mask = 0;
     
     outState = ps;
@@ -129,9 +129,9 @@ Pin::Pin(T_Pinstate ps) {
 }
 
 Pin::Pin() { 
-    pinOfPort = 0;
+    pinOfPort = nullptr; 
     pinRegOfPort = nullptr;
-    connectedTo = NULL;
+    connectedTo = nullptr;
     mask = 0;
     
     outState = TRISTATE;
@@ -142,19 +142,19 @@ Pin::~Pin() {
     UnRegisterNet(connectedTo);
 }
 
-Pin::Pin( unsigned char *parentPin, unsigned char _mask) { 
+Pin::Pin(unsigned char *parentPin, unsigned char _mask) { 
     pinOfPort = parentPin;
     pinRegOfPort = nullptr;
     mask = _mask;
-    connectedTo = NULL;
+    connectedTo = nullptr;
     
     outState = TRISTATE;
 }
 
 Pin::Pin(const Pin& p) {
-    pinOfPort = 0; // don't take over HWPort connection!
+    pinOfPort = nullptr; // don't take over HWPort connection!
     pinRegOfPort = nullptr;
-    connectedTo = NULL; // don't take over Net instance!
+    connectedTo = nullptr; // don't take over Net instance!
     mask = 0;
     
     outState = p.outState;
@@ -163,9 +163,9 @@ Pin::Pin(const Pin& p) {
 
 Pin::Pin(float analog) {
     mask = 0;
-    pinOfPort = 0;
+    pinOfPort = nullptr;
     pinRegOfPort = nullptr;
-    connectedTo = NULL;
+    connectedTo = nullptr;
     analogVal.setA(analog);
 
     outState = ANALOG;
@@ -177,9 +177,9 @@ void Pin::RegisterNet(Net *n) {
 }
 
 void Pin::UnRegisterNet(Net *n) {
-    if(connectedTo == n && connectedTo != NULL)
+    if(connectedTo == n && connectedTo != nullptr)
         connectedTo->Delete(this);
-    connectedTo = NULL;
+    connectedTo = nullptr;
 }
 
 Pin::operator char() const { 

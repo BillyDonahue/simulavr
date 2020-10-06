@@ -38,7 +38,6 @@
 
 #include <memory>
 
-using std::auto_ptr;
 
 /*! AVRDevice class for AT90CAN/32/64/128
   \todo This device isn't completely implemented. Some peripherals are

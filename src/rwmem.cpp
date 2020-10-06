@@ -64,11 +64,11 @@ RWMemoryMember::RWMemoryMember(void):
     tracename(""),
     isInvalid(true) {}
 
-    RWMemoryMember::operator unsigned char() const {
-        if (tv)
-            tv->read();
-        return get();
-    }
+RWMemoryMember::operator unsigned char() const {
+    if (tv)
+        tv->read();
+    return get();
+}
 
 unsigned char RWMemoryMember::operator=(unsigned char val) {
     set(val);
@@ -94,18 +94,18 @@ RWMemoryMember::~RWMemoryMember() {
 
 CLKPRRegister::CLKPRRegister(AvrDevice *core,
                              TraceValueRegister *registry):
-    RWMemoryMember(registry, "CLKPR"),
-    Hardware(core),
-    _core(core) {
-        if(_core->fuses->GetFuseBit(AvrFuses::FB_CKDIV8))
-            value = 3;
-        else
-            value = 0;
-        activate = 0;
+        RWMemoryMember(registry, "CLKPR"),
+        Hardware(core),
+        _core(core) {
+    if(_core->fuses->GetFuseBit(AvrFuses::FB_CKDIV8))
+        value = 3;
+    else
+        value = 0;
+    activate = 0;
 
-        // connect to core to get core cycles
-        core->AddToCycleList(this);
-    }
+    // connect to core to get core cycles
+    core->AddToCycleList(this);
+}
 
 void CLKPRRegister::Reset(void) {
     if(_core->fuses->GetFuseBit(AvrFuses::FB_CKDIV8))
@@ -142,9 +142,9 @@ void CLKPRRegister::set(unsigned char v) {
 }
 
 XDIVRegister::XDIVRegister(AvrDevice *core,
-                           TraceValueRegister *registry):
-    RWMemoryMember(registry, "XDIV"), 
-    Hardware(core)
+                             TraceValueRegister *registry):
+        RWMemoryMember(registry, "XDIV"), 
+        Hardware(core)
 {
     Reset();
 }
@@ -167,11 +167,11 @@ void XDIVRegister::set(unsigned char v) {
 }
 
 OSCCALRegister::OSCCALRegister(AvrDevice *core,
-                               TraceValueRegister *registry,
-                               int cal):
-    RWMemoryMember(registry, "OSCCAL"),
-    Hardware(core),
-    cal_type(cal)
+                             TraceValueRegister *registry,
+                             int cal):
+        RWMemoryMember(registry, "OSCCAL"),
+        Hardware(core),
+        cal_type(cal)
 {
     Reset();
 }

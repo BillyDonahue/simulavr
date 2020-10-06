@@ -129,10 +129,10 @@ int	SpiSink::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
 
 	if(_ssState != _prevSS){
 		if(_ssState){
-            std::cout << "spisink: /SS negated" << std::endl;
+			std::cout << "spisink: /SS negated" << std::endl;
 			}
 		else {
-            std::cout << "spisink: /SS asserted" << std::endl;
+			std::cout << "spisink: /SS asserted" << std::endl;
 			}
 		_prevSS	= _ssState;
 		}

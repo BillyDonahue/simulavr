@@ -51,7 +51,6 @@ bool STRING_TO_NAME (
   int              base
 )
 {
-  //unsigned long long result;
   STRING_TO_INTERMEDIATE_RESULT_TYPE result;
   char           *end;
 

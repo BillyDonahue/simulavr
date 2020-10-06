@@ -68,7 +68,7 @@ unsigned	HWPcir::convertBitToVector(unsigned bit) const throw(){
 			vector	= _vector7;
 			break;
 		default:
-            std::cerr << "HWPcir: invalid PCIFR bit specified.." << std::endl;
+			std::cerr << "HWPcir: invalid PCIFR bit specified.." << std::endl;
 			break;
 		};
 	return vector;
@@ -85,7 +85,7 @@ void	HWPcir::setPcifr(unsigned pcifrBit) throw(){
 	unsigned vector	= convertBitToVector(pcifrBit);
 
 	if(vector == (unsigned)~0){
-        std::cerr << "HWPcir: Attempt to set invalid pin-change interrupt." << std::endl;
+		std::cerr << "HWPcir: Attempt to set invalid pin-change interrupt." << std::endl;
 		return;
 		}
 
@@ -199,7 +199,7 @@ void HWPcir::ClearIrqFlag(unsigned int vector){
         _irqSystem.ClearIrqFlag(vector);
 		return;
 		}
-    std::cerr << "HWPcir: Attempt to clear non-existent irq vector";
+        std::cerr << "HWPcir: Attempt to clear non-existent irq vector";
 	}
 
 HWPcmsk::HWPcmsk(
