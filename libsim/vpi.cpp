@@ -342,7 +342,7 @@ static PLI_INT32 avr_set_rw_tf(char *xx) {
   $avr_trace(tracename)
 
   where
-  tracename is the output file name for tracing. If it is the empty string,
+  tracename is the output file name for tracing. If it is the empty std::string,
   tracing will be disabled again and the file will be closed.
 */
 

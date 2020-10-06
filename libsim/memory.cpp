@@ -30,9 +30,9 @@
 #include "memory.h"
 #include "avrerror.h"
 
-using namespace std;
 
-unsigned int Memory::GetAddressAtSymbol(const string &s) {
+
+unsigned int Memory::GetAddressAtSymbol(const std::string &s) {
   
     // feature: use a number instead of a symbol
     char *dummy;
@@ -51,7 +51,7 @@ unsigned int Memory::GetAddressAtSymbol(const string &s) {
     }
 
     // isn't a number, try to find symbol ...
-    multimap<unsigned int, string>::iterator ii;
+    std::multimap<unsigned int, std::string>::iterator ii;
 
     for(ii = sym.begin(); ii != sym.end(); ii++) {
         if(ii->second == s) {
@@ -64,11 +64,11 @@ unsigned int Memory::GetAddressAtSymbol(const string &s) {
     return 0; // to avoid warnings, avr_error aborts the program
 }
 
-string Memory::GetSymbolAtAddress(unsigned int add){
-    string lastName;
+std::string Memory::GetSymbolAtAddress(unsigned int add){
+    std::string lastName;
     unsigned int lastAddr = 0;
-    multimap<unsigned int, string>::iterator ii;
-    multimap<unsigned int, string>::iterator last_ii;
+    std::multimap<unsigned int, std::string>::iterator ii;
+    std::multimap<unsigned int, std::string>::iterator last_ii;
 
     ii = sym.begin();
     last_ii = ii;
@@ -88,7 +88,7 @@ string Memory::GetSymbolAtAddress(unsigned int add){
             break; // behind the right symbol
     } while(ii != sym.end());
     
-    ostringstream os;
+    std::ostringstream os;
 
     os << lastName;
     ii = last_ii;
@@ -100,7 +100,7 @@ string Memory::GetSymbolAtAddress(unsigned int add){
 
     unsigned int offset = add - lastAddr;
     if((offset) != 0) {
-        os << "+0x" << hex << offset;
+        os << "+0x" << std::hex << offset;
     }
 
     return os.str();

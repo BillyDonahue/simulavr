@@ -28,7 +28,7 @@
 #include <string>
 #include <map>
 #include <limits>
-using namespace std;
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,29 +60,29 @@ const char *SplitOffsetFile(const char *arg,
     char *end;
     
     if(!StringToUnsignedLong(arg, offset, &end, base)) {
-        cerr << name << ": offset is not a number" << endl;
+        std::cerr << name << ": offset is not a number" << std::endl;
         exit(1);
     }
     //position behind the "," or any other delimiter for the offset
     if(!*end) {
-        cerr << name << ": argument ends before filename" << endl;
+        std::cerr << name << ": argument ends before filename" << std::endl;
         exit(1);
     }
     if(*end != ',') {
-        cerr << name << ": argument does not have comma before filename" << endl;
+        std::cerr << name << ": argument does not have comma before filename" << std::endl;
         exit(1);
     }
     ++end;
     if(!*end) {
-        cerr << name << ": argument has comma but no filename" << endl;
+        std::cerr << name << ": argument has comma but no filename" << std::endl;
         exit(1);
     }
     
     return end;
 }
 
-typedef pair<string, string> string_pair_t;
-vector<string_pair_t> newUsage = {
+typedef std::pair<std::string, std::string> string_pair_t;
+std::vector<string_pair_t> newUsage = {
     {".",
      "Common options"},
     {"-V, --version",
@@ -154,22 +154,22 @@ vector<string_pair_t> newUsage = {
      "run with user interface for external pin handling at port 7777"},
 };
 
-void doCommonUsageItem(const string &first, const string &second) {
+void doCommonUsageItem(const std::string &first, const std::string &second) {
    if(first[0] == '.')
-       cout << endl << second << ":" << endl;
+       std::cout << std::endl << second << ":" << std::endl;
    else {
-       cout << first << endl;
-       cout << "\t" << second << endl;
+       std::cout << first << std::endl;
+       std::cout << "\t" << second << std::endl;
    }
 }
 
-void doRSTUsageItem(const string &first, const string &second) {
+void doRSTUsageItem(const std::string &first, const std::string &second) {
    if(first[0] == '.') {
-       string ul(second.size(), '-');
-       cout << second << endl << ul << endl << endl;
+       std::string ul(second.size(), '-');
+       std::cout << second << std::endl << ul << std::endl << std::endl;
    } else {
-       cout << ".. option:: " << first << endl << endl;
-       cout << "  " << second << endl << endl;
+       std::cout << ".. option:: " << first << std::endl << std::endl;
+       std::cout << "  " << second << std::endl << std::endl;
    }
 }
 
@@ -177,29 +177,29 @@ void doUsage(void) {
     bool usage = getenv("SIMULAVR_DOC_RST") == NULL;
     
     if(usage) {
-        cout << "AVR-Simulator Version " VERSION << endl << endl;
+        std::cout << "AVR-Simulator Version " VERSION << std::endl << std::endl;
 
-        cout << "simulavr {options}" << endl;
+        std::cout << "simulavr {options}" << std::endl;
     }
     
-    for(vector<string_pair_t>::iterator iter = newUsage.begin(); iter != newUsage.end(); ++iter) {
+    for(std::vector<string_pair_t>::iterator iter = newUsage.begin(); iter != newUsage.end(); ++iter) {
         if(usage)
             doCommonUsageItem(iter->first, iter->second);
         else
             doRSTUsageItem(iter->first, iter->second);
     }
 
-    vector<string> avrlist = AvrFactory::supportedDevices();
+    std::vector<std::string> avrlist = AvrFactory::supportedDevices();
     if(usage) {
-        cout << endl << "Supported devices:" << endl;
+        std::cout << std::endl << "Supported devices:" << std::endl;
         for(unsigned int i = 0; i < avrlist.size(); i++) {
-            cout << avrlist[i] << endl;
+            std::cout << avrlist[i] << std::endl;
         }
     } else {
-        cout << "Supported devices" << endl << "-----------------" << endl << endl;
-        cout << ".. hlist::" << endl << "   :columns: 5" << endl << endl;
+        std::cout << "Supported devices" << std::endl << "-----------------" << std::endl << std::endl;
+        std::cout << ".. hlist::" << std::endl << "   :columns: 5" << std::endl << std::endl;
         for(unsigned int i = 0; i < avrlist.size(); i++) {
-            cout << "   * " << avrlist[i] << endl;
+            std::cout << "   * " << avrlist[i] << std::endl;
         }
     }
 }
@@ -207,10 +207,10 @@ void doUsage(void) {
 int main(int argc, char *argv[]) {
     int c;
     bool gdbserver_flag = 0;
-    string coredumpfile("unknown");
-    string filename("unknown");
-    string devicename("unknown");
-    string tracefilename("unknown");
+    std::string coredumpfile("unknown");
+    std::string filename("unknown");
+    std::string devicename("unknown");
+    std::string tracefilename("unknown");
     unsigned long long linestotrace = 1000000;
     bool trace_flag = false;
     unsigned long global_gdbserver_port = 1212;
@@ -225,14 +225,14 @@ int main(int argc, char *argv[]) {
     unsigned long readFromPipeOffset = 0x21;
     unsigned long writeToAbort = 0;
     unsigned long writeToExit = 0;
-    string readFromPipeFileName = "";
-    string writeToPipeFileName = "";
+    std::string readFromPipeFileName = "";
+    std::string writeToPipeFileName = "";
     
-    vector<string> terminationArgs;
+    std::vector<std::string> terminationArgs;
     
-    vector<string> tracer_opts;
+    std::vector<std::string> tracer_opts;
     bool tracer_dump_avail = false;
-    string tracer_avail_out;
+    std::string tracer_avail_out;
     
     while (1) {
         //int this_option_optind = optind ? optind : 1;
@@ -292,25 +292,25 @@ int main(int argc, char *argv[]) {
             
             case 'a': // write to abort
                 if(!StringToUnsignedLong(optarg, &writeToAbort, NULL, 16)) {
-                    cerr << "writeToAbort is not a number" << endl;
+                    std::cerr << "writeToAbort is not a number" << std::endl;
                     exit(1);
                 }
                 break;
             
             case 'e': // write to exit
                 if(!StringToUnsignedLong(optarg, &writeToExit, NULL, 16)) {
-                    cerr << "writeToExit is not a number" << endl;
+                    std::cerr << "writeToExit is not a number" << std::endl;
                     exit(1);
                 }
                 break;
             
             case 'F':
                 if(!StringToUnsignedLongLong(optarg, &fcpu, NULL, 10)) {
-                    cerr << "frequency is not a number" << endl;
+                    std::cerr << "frequency is not a number" << std::endl;
                     exit(1);
                 }
                 if(fcpu == 0) {
-                    cerr << "frequency is zero" << endl;
+                    std::cerr << "frequency is zero" << std::endl;
                     exit(1);
                 }
                 if(global_verbose_on)
@@ -320,18 +320,18 @@ int main(int argc, char *argv[]) {
 
             case 'l':
                 if(!StringToUnsignedLongLong( optarg, &linestotrace, NULL, 10)) {
-                    cerr << "linestotrace is not a number" << endl;
+                    std::cerr << "linestotrace is not a number" << std::endl;
                     exit(1);
                 }
                 break;
 
             case 'm':
                 if(!StringToUnsignedLongLong( optarg, &maxRunTime, NULL, 10)) {
-                    cerr << "maxRunTime is not a number" << endl;
+                    std::cerr << "maxRunTime is not a number" << std::endl;
                     exit(1);
                 }
                 if(maxRunTime == 0) {
-                    cerr << "maxRunTime is zero" << endl;
+                    std::cerr << "maxRunTime is zero" << std::endl;
                     exit(1);
                 }
                 avr_message("Maximum Run Time: %lld", maxRunTime);
@@ -365,7 +365,7 @@ int main(int argc, char *argv[]) {
             
             case 'p':
                 if(!StringToUnsignedLong( optarg, &global_gdbserver_port, NULL, 10)) {
-                    cerr << "GDB Server Port is not a number" << endl;
+                    std::cerr << "GDB Server Port is not a number" << std::endl;
                     exit(1);
                 }
                 avr_message("Running on port: %ld", global_gdbserver_port);
@@ -381,15 +381,15 @@ int main(int argc, char *argv[]) {
                 break;
             
             case 'V':
-                cout << "SimulAVR " << VERSION << endl
-                     << "See documentation for copyright and distribution terms" << endl
-                     << endl;
+                std::cout << "SimulAVR " << VERSION << std::endl
+                     << "See documentation for copyright and distribution terms" << std::endl
+                     << std::endl;
                 exit(0);
                 break;
             
             case 'n':
-                cout << "We will NOT wait for a gdb connection, "
-                        "simulation starts now!" << endl;
+                std::cout << "We will NOT wait for a gdb connection, "
+                        "simulation starts now!" << std::endl;
                 globalWaitForGdbConnection = false;
                 break;
             
@@ -434,7 +434,7 @@ int main(int argc, char *argv[]) {
         if(filename != "unknown") {
             // filename given, try to get signature
             sig = ELFGetSignature(filename.c_str());
-            if(sig != numeric_limits<unsigned int>::max()) {
+            if(sig != std::numeric_limits<unsigned int>::max()) {
                 // signature in elf found, try to get devicename
                 std::map<unsigned int, std::string>::iterator cur  = AvrSignatureToNameMap.find(sig);
                 if(cur != AvrSignatureToNameMap.end()) {
@@ -470,7 +470,7 @@ int main(int argc, char *argv[]) {
     SetDumpTraceArgs(tracer_opts, dev1);
     
     if(!gdbserver_flag && filename == "unknown") {
-        cerr << "Specify either --file <executable> or --gdbserver (or --gdb-stdin)" << endl;
+        std::cerr << "Specify either --file <executable> or --gdbserver (or --gdb-stdin)" << std::endl;
         exit(1);
     }
     
@@ -505,7 +505,7 @@ int main(int argc, char *argv[]) {
     }
     
     //if we have a file we can check out for termination lines.
-    vector<string>::iterator ii;
+    std::vector<std::string>::iterator ii;
     for(ii = terminationArgs.begin(); ii != terminationArgs.end(); ii++) {
         avr_message("Termination or Breakpoint Symbol: %s", (*ii).c_str());
         dev1->RegisterTerminationSymbol((*ii).c_str());
@@ -526,14 +526,14 @@ int main(int argc, char *argv[]) {
         SystemClock::Instance().Add(dev1);
         if(maxRunTime == 0) {
             steps = SystemClock::Instance().Endless();
-            cout << "SystemClock::Endless stopped" << endl
-                 << "number of cpu cycles simulated: " << dec << steps << endl;
+            std::cout << "SystemClock::Endless stopped" << std::endl
+                 << "number of cpu cycles simulated: " << std::dec << steps << std::endl;
         } else {                                           // limited
             steps = SystemClock::Instance().Run(maxRunTime);
-            cout << "Run finished.  Terminated at " << dec
+            std::cout << "Run finished.  Terminated at " << std::dec
                  << SystemClock::Instance().GetCurrentTime()
-                 << " ns (simulated) and " << endl 
-                 << dec << steps << " cpu cycles" << endl;
+                 << " ns (simulated) and " << std::endl 
+                 << std::dec << steps << " cpu cycles" << std::endl;
         }
         Application::GetInstance()->PrintResults();
     } else { // gdb should be activated
@@ -542,8 +542,8 @@ int main(int argc, char *argv[]) {
         SystemClock::Instance().Add(&gdb1);
         SystemClock::Instance().Endless();
         if(global_verbose_on) {
-            cout << "SystemClock::Endless stopped" << endl
-                 << "number of cpu cycles simulated: " << dec << steps << endl;
+            std::cout << "SystemClock::Endless stopped" << std::endl
+                 << "number of cpu cycles simulated: " << std::dec << steps << std::endl;
             Application::GetInstance()->PrintResults();
         }
     }

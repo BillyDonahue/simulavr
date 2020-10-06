@@ -25,7 +25,7 @@
 
 #include "application.h"
 #include "printable.h"
-using namespace std;
+
 
 Application* Application::GetInstance() {
     static Application instance;
@@ -37,7 +37,7 @@ void Application::RegisterPrintable(Printable *p) {
 }
 
 void Application::PrintResults() {
-    vector<Printable *>::iterator ii;
+    std::vector<Printable *>::iterator ii;
     for (ii=printable.begin(); ii!=printable.end(); ii++) {
         (*(*ii))();
     }

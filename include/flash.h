@@ -26,7 +26,6 @@
 #ifndef FLASH_H_INCLUDED
 #define FLASH_H_INCLUDED
 #include <string>
-#include <map>
 #include <vector>
 
 #include "decoder.h"

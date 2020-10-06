@@ -30,7 +30,7 @@
 #include "avrerror.h"
 #include <assert.h>
 
-using namespace std;
+
 
 HWEeprom::HWEeprom(AvrDevice *_core,
                    HWIrqSystem *_irqSystem,
@@ -112,7 +112,7 @@ HWEeprom::~HWEeprom() {
 void HWEeprom::SetEearl(unsigned char val) {
     eear = ((eear & 0xff00) + val) & eear_mask;
     if(core->trace_on == 1)
-        traceOut << "EEAR=0x" << hex << eear << dec;
+        traceOut << "EEAR=0x" << std::hex << eear << std::dec;
 }
 
 void HWEeprom::SetEearh(unsigned char val) {
@@ -120,18 +120,18 @@ void HWEeprom::SetEearh(unsigned char val) {
         avr_warning("invalid write access: EEARH=0x%02x, EEPROM size <= 256 byte", val);
     eear = ((eear & 0x00ff) + (val << 8)) & eear_mask;
     if(core->trace_on == 1)
-        traceOut << "EEAR=0x" << hex << eear << dec;
+        traceOut << "EEAR=0x" << std::hex << eear << std::dec;
 }
 
 void HWEeprom::SetEedr(unsigned char val) {
     eedr = val;
     if(core->trace_on == 1)
-        traceOut << "EEDR=0x"<< hex << (unsigned int)eedr << dec;
+        traceOut << "EEDR=0x"<< std::hex << (unsigned int)eedr << std::dec;
 }
 
 void HWEeprom::SetEecr(unsigned char newval) {
     if(core->trace_on == 1)
-        traceOut << "EECR=0x" << hex << (unsigned int)newval << dec;
+        traceOut << "EECR=0x" << std::hex << (unsigned int)newval << std::dec;
     
     eecr = newval & eecr_mask;
 
@@ -153,7 +153,7 @@ void HWEeprom::SetEecr(unsigned char newval) {
                 eecr &= ~CTRL_READ; // reset read bit isn't described in document!
                 core->AddToCycleList(this);
                 if(core->trace_on == 1)
-                    traceOut << " EEPROM: Read = 0x" << hex << (unsigned int)eedr << dec;
+                    traceOut << " EEPROM: Read = 0x" << std::hex << (unsigned int)eedr << std::dec;
             }
             // write will not processed
             eecr &= ~CTRL_WRITE;
@@ -169,7 +169,7 @@ void HWEeprom::SetEecr(unsigned char newval) {
                 eedr = myMemory[eear];
                 eecr &= ~CTRL_READ; // reset read bit isn't described in document!
                 if(core->trace_on == 1)
-                    traceOut << " EEPROM: Read = 0x" << hex << (unsigned int)eedr << dec;
+                    traceOut << " EEPROM: Read = 0x" << std::hex << (unsigned int)eedr << std::dec;
                 break; // to ignore possible write request!
             }
             // start write operation

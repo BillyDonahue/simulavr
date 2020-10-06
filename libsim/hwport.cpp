@@ -24,14 +24,14 @@
  */
 
 #include <iostream>
-using namespace std; // used for string class
+
 
 #include "hwport.h"
 #include "avrdevice.h"
 #include "avrerror.h"
 #include <assert.h>
 
-HWPort::HWPort(AvrDevice *core, const string &name, bool portToggle, int size):
+HWPort::HWPort(AvrDevice *core, const std::string &name, bool portToggle, int size):
     Hardware(core),
     TraceValueRegister(core, "PORT" + name),
     myName(name),
@@ -52,14 +52,14 @@ HWPort::HWPort(AvrDevice *core, const string &name, bool portToggle, int size):
 
     for(unsigned int tt = 0; tt < portSize; tt++) {
         // register pin to give access to pin by name
-        string dummy = name + (char)('0' + tt);
+        std::string dummy = name + (char)('0' + tt);
         core->RegisterPin(dummy, &p[tt]);
         // connect to output pin
         p[tt].mask = 1 << tt;
         p[tt].pinOfPort= &pin;
         p[tt].pinRegOfPort= &pin_reg;
         // register pin output trace
-        string tname = GetTraceValuePrefix() + name + (char)('0' + tt) + "-Out";
+        std::string tname = GetTraceValuePrefix() + name + (char)('0' + tt) + "-Out";
         pintrace[tt] = new TraceValueOutput(tname);
         pintrace[tt]->set_written(Pin::TRISTATE); // initial output driver state is tristate
         RegisterTraceValue(pintrace[tt]);
@@ -105,8 +105,8 @@ void HWPort::CalcOutputs(void) { // Calculate the new output value to be transmi
     pin_reg.hardwareChange(pin);
 }
 
-string HWPort::GetPortString(void) {
-    string dummy;
+std::string HWPort::GetPortString(void) {
+    std::string dummy;
     dummy.resize(portSize);
     for(unsigned int tt = 0; tt < portSize; tt++)
         dummy[portSize - 1 - tt] = p[tt];  // calls Pin::operator char()

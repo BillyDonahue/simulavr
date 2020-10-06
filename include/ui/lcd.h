@@ -85,7 +85,7 @@ class Lcd : public SimulationMember {
 
     public:
         virtual int Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns=0);
-        //Lcd(UserInterface *ui, const string &name, const string &baseWindow);
+        //Lcd(UserInterface *ui, const std::string &name, const std::string &baseWindow);
         Lcd(UserInterface *ui, const char *name, const char *baseWindow);
         virtual ~Lcd();
         Pin *GetPin(const char *name);

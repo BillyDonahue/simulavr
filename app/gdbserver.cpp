@@ -24,8 +24,6 @@
  */
 
 #include <iostream>
-// don't use "using namespace std;" in this unit! It will bring
-// an error for bind system call against std::bind with clang compiler!
 
 #include <assert.h>
 #include <stdio.h>
@@ -385,7 +383,7 @@ void GdbServer::gdb_read_registers( )
     int   i;
     dword val;                  /* ensure it's 32 bit value */
 
-    /* (32 gpwr, SREG, SP, PC) * 2 hex bytes + terminator */
+    /* (32 gpwr, SREG, SP, PC) * 2 std::hex bytes + terminator */
     size_t  buf_sz = (32 + 1 + 2 + 4)*2 + 1;
     char   *buf;
 
@@ -495,8 +493,8 @@ void GdbServer::gdb_write_registers(const char *pkt) {
 is reached or size of int is exceeded or a '\0' is reached. pkt is modified
 to point to stop char when done.
 
-Use this function to extract a num with an arbitrary num of hex
-digits. This should _not_ be used to extract n digits from a m len string
+Use this function to extract a num with an arbitrary num of std::hex
+digits. This should _not_ be used to extract n digits from a m len std::string
 of digits (n <= m). */
 int GdbServer::gdb_extract_hex_num(const char **pkt, char stop) {
     int i = 0;
@@ -518,7 +516,7 @@ int GdbServer::gdb_extract_hex_num(const char **pkt, char stop) {
     return num;
 }
 
-/*! Read a single register. Packet form: 'pn' where n is a hex number with no
+/*! Read a single register. Packet form: 'pn' where n is a std::hex number with no
 zero padding. */
 void GdbServer::gdb_read_register(const char *pkt) {
     int reg;
@@ -564,8 +562,8 @@ void GdbServer::gdb_read_register(const char *pkt) {
     gdb_send_reply( reply );
 }
 
-/*! Write a single register. Packet form: 'Pn=r' where n is a hex number with
-no zero padding and r is two hex digits for each byte in register (target
+/*! Write a single register. Packet form: 'Pn=r' where n is a std::hex number with
+no zero padding and r is two std::hex digits for each byte in register (target
 byte order). */
 void GdbServer::gdb_write_register(const char *pkt) {
     int reg;
@@ -627,7 +625,7 @@ void GdbServer::gdb_write_register(const char *pkt) {
     gdb_send_reply( "OK" );
 }
 
-/*! Parse the pkt string for the addr and length.
+/*! Parse the pkt std::string for the addr and length.
 a_end is first char after addr.
 l_end is first char after len.
 Returns number of characters to advance pkt. */
@@ -1018,7 +1016,7 @@ If addr is given, resume at that address, otherwise, resume at current
 address.
 
 Continue with signal command format: "C<sig>;<addr>" or "S<sig>;<addr>"
-"<sig>" should always be 2 hex digits, possibly zero padded.
+"<sig>" should always be 2 std::hex digits, possibly zero padded.
 ";<addr>" part is optional.
 
 If addr is given, resume at that address, otherwise, resume at current

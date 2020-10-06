@@ -37,7 +37,7 @@
 #include "helper.h"
 #include "rwmem.h"
 
-using namespace std;
+
 
 RWMemoryMember::RWMemoryMember(TraceValueRegister *_reg,
                                const std::string &_tracename,
@@ -124,7 +124,7 @@ void CLKPRRegister::set(unsigned char v) {
         if(activate == 0) activate = 4;
     } else if((v & 0x80) == 0) {
         if(activate > 0) {
-            string buf = "<invalid>";
+            std::string buf = "<invalid>";
             unsigned char i = v & 0x0f;
             if(i <= 8)
                 buf = "CKx" + int2str(1 << i);
@@ -212,7 +212,7 @@ InvalidMem::InvalidMem(AvrDevice* _c, int _a):
     value(0xAA) {}
 
 unsigned char InvalidMem::get() const {
-    string s = "Invalid read access from IO[0x" + int2hex(addr) + "], PC=0x" + int2hex(core->PC * 2);
+    std::string s = "Invalid read access from IO[0x" + int2hex(addr) + "], PC=0x" + int2hex(core->PC * 2);
     unsigned int a = addr & core->dataAddressMask;
     unsigned int r = core->GetMemIOSize() + core->GetMemRegisterSize() + core->GetMemIRamSize() + core->GetMemERamSize();
     if(core->abortOnInvalidAccess)
@@ -225,7 +225,7 @@ unsigned char InvalidMem::get() const {
 }
 
 void InvalidMem::set(unsigned char c) {
-    string s = "Invalid write access to IO[0x" + int2hex(addr) +
+    std::string s = "Invalid write access to IO[0x" + int2hex(addr) +
         "]=0x" + int2hex(c) + ", PC=0x" + int2hex(core->PC * 2);
     unsigned int a = addr & core->dataAddressMask;
     unsigned int r = core->GetMemIOSize() + core->GetMemRegisterSize() + core->GetMemIRamSize() + core->GetMemERamSize();

@@ -34,9 +34,9 @@
 #include "ioregs.h"
 #include "avrerror.h"
 
-#define MONSREG traceOut << (string)(*(core->status))  
+#define MONSREG traceOut << (std::string)(*(core->status))  
 
-using namespace std;
+
 
 /// Calculate index from mask so that (1<<index)==mask. Crash on incorrect values.
 #define INDEX_FROM_BITMASK(mask)  \
@@ -136,7 +136,7 @@ const char *branch_opcodes_clear[8] = {
 int avr_op_BRBC::Trace() {
     traceOut << branch_opcodes_clear[INDEX_FROM_BITMASK(bitmask)]
              << " ->" << HexShort(offset * 2) << " ";
-    string sym(core->Flash->GetSymbolAtAddress(core->PC+1+offset));
+    std::string sym(core->Flash->GetSymbolAtAddress(core->PC+1+offset));
     int ret = this->operator()();
     
     traceOut << sym << " ";
@@ -160,7 +160,7 @@ const char *branch_opcodes_set[8] = {
 int avr_op_BRBS::Trace() {
     traceOut << branch_opcodes_set[INDEX_FROM_BITMASK(bitmask)]
              << " ->" << HexShort(offset * 2) << " ";
-    string sym(core->Flash->GetSymbolAtAddress(core->PC+1+offset));
+    std::string sym(core->Flash->GetSymbolAtAddress(core->PC+1+offset));
     int ret=this->operator()();
 
     traceOut << sym << " ";
@@ -198,7 +198,7 @@ int avr_op_BST::Trace() {
 int avr_op_CALL::Trace() {
     word K_lsb = core->Flash->ReadMemWord((core->PC + 1) * 2);
     int k = (KH << 16) | K_lsb;
-    traceOut << "CALL 0x" << hex << k * 2 << dec << " ";
+    traceOut << "CALL 0x" << std::hex << k * 2 << std::dec << " ";
     int ret = this->operator()();
     return ret;
 }
@@ -271,7 +271,7 @@ int avr_op_ELPM_Z::Trace() {
         rampz = core->rampz->GetRegVal();
     unsigned int Z = (rampz << 16) + core->GetRegZ();
 
-    traceOut << " Flash[0x" << hex << Z << dec << "] ";
+    traceOut << " Flash[0x" << std::hex << Z << std::dec << "] ";
 
     return ret;
 }
@@ -284,7 +284,7 @@ int avr_op_ELPM_Z_incr::Trace() {
     unsigned int Z = (rampz << 16) + core->GetRegZ();
     int ret = this->operator()();
 
-    traceOut << " Flash[0x" << hex << Z << dec << "] ";
+    traceOut << " Flash[0x" << std::hex << Z << std::dec << "] ";
 
     return ret;
 }
@@ -298,7 +298,7 @@ int avr_op_ELPM::Trace() {
         rampz = core->rampz->GetRegVal();
     unsigned int Z = (rampz << 16) + core->GetRegZ();
 
-    traceOut << " Flash[0x" << hex << Z << dec << "] ";
+    traceOut << " Flash[0x" << std::hex << Z << std::dec << "] ";
 
     return ret;
 }
@@ -366,9 +366,9 @@ int avr_op_JMP::Trace() {
     traceOut << "JMP ";
     word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);  //this is k!
     int ret = this->operator()();
-    traceOut << hex << 2 * offset << dec << " ";
+    traceOut << std::hex << 2 * offset << std::dec << " ";
 
-    string sym(core->Flash->GetSymbolAtAddress(offset));
+    std::string sym(core->Flash->GetSymbolAtAddress(offset));
     traceOut << sym << " ";
     for(int len = sym.length(); len < 30; len++)
         traceOut << " " ;
@@ -396,7 +396,7 @@ int avr_op_LDI::Trace() {
 
 int avr_op_LDS::Trace() {
     word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);  //this is k!
-    traceOut << "LDS R" << (int)R1 << ", " << hex << "0x" << offset << dec  << " ";
+    traceOut << "LDS R" << (int)R1 << ", " << std::hex << "0x" << offset << std::dec  << " ";
     int ret = this->operator()();
     return ret;
 }
@@ -449,8 +449,8 @@ int avr_op_LPM_Z::Trace() {
 
     /* Z is R31:R30 */
     unsigned int Z = core->GetRegZ();
-    string sym(core->Flash->GetSymbolAtAddress(Z));
-    traceOut << "FLASH[" << hex << Z << dec << "," << sym << "] ";
+    std::string sym(core->Flash->GetSymbolAtAddress(Z));
+    traceOut << "FLASH[" << std::hex << Z << std::dec << "," << sym << "] ";
 
     return ret;
 }
@@ -461,8 +461,8 @@ int avr_op_LPM::Trace() {
 
     /* Z is R31:R30 */
     unsigned int Z = core->GetRegZ();
-    string sym(core->Flash->GetSymbolAtAddress(Z));
-    traceOut << "FLASH[" << hex << Z << dec << "," << sym << "] ";
+    std::string sym(core->Flash->GetSymbolAtAddress(Z));
+    traceOut << "FLASH[" << std::hex << Z << std::dec << "," << sym << "] ";
 
     return ret;
 }
@@ -473,8 +473,8 @@ int avr_op_LPM_Z_incr::Trace() {
     unsigned int Z = core->GetRegZ();
     int ret = this->operator()();
     
-    string sym(core->Flash->GetSymbolAtAddress(Z));
-    traceOut << "FLASH[" << hex << Z << dec << "," << sym << "] ";
+    std::string sym(core->Flash->GetSymbolAtAddress(Z));
+    traceOut << "FLASH[" << std::hex << Z << std::dec << "," << sym << "] ";
     return ret;
 }
 
@@ -564,7 +564,7 @@ int avr_op_PUSH::Trace() {
 }
 
 int avr_op_RCALL::Trace() {
-    traceOut << "RCALL " << hex << ((core->PC + K + 1) << 1) << dec << " ";
+    traceOut << "RCALL " << std::hex << ((core->PC + K + 1) << 1) << std::dec << " ";
     int ret = this->operator()();
     return ret;
 }
@@ -582,7 +582,7 @@ int avr_op_RETI::Trace() {
 }
 
 int avr_op_RJMP::Trace() {
-    traceOut << "RJMP " << hex << ((core->PC + K + 1) << 1) << dec << " ";
+    traceOut << "RJMP " << std::hex << ((core->PC + K + 1) << 1) << std::dec << " ";
     int ret = this->operator()();
     return ret;
 }
@@ -671,7 +671,7 @@ int avr_op_STD_Z::Trace() {
 
 int avr_op_STS::Trace() {
     word offset = core->Flash->ReadMemWord((core->PC + 1) * 2);  //this is k!
-    traceOut << "STS " << "0x" << hex << offset << dec << ", R" << (int)R1 << " ";
+    traceOut << "STS " << "0x" << std::hex << offset << std::dec << ", R" << (int)R1 << " ";
     int ret = this->operator()();
     return ret;
 }

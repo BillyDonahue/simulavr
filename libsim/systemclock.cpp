@@ -34,7 +34,7 @@
 #include "signal.h"
 #include <assert.h>
 
-using namespace std;
+
 
 template<typename Key, typename Value>
 MinHeap<Key, Value>::MinHeap()
@@ -142,8 +142,8 @@ int SystemClock::Step(bool &untilCoreStepFinished) {
     int res = 0; // returns the state from a core step. Needed by gdb-server to
                  // watch for breakpoints
 
-    static vector<SimulationMember*>::iterator ami;
-    static vector<SimulationMember*>::iterator amiEnd;
+    static std::vector<SimulationMember*>::iterator ami;
+    static std::vector<SimulationMember*>::iterator amiEnd;
 
     if(syncMembers.begin() != syncMembers.end()) {
         // take simulation member and current simulation time from time table

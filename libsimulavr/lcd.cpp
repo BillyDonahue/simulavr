@@ -29,7 +29,7 @@
 #include "ui/lcd.h"
 #include "pinatport.h"
 
-using namespace std;
+
 
 // "Bit-Values for the control lines of the LCD
 #define ENABLE 16
@@ -43,9 +43,9 @@ int lcdStartLine []={0, 0x40, 0x14, 0x20};
 static int Power_onTimes[]={1500000, 410000,  10000,   3700, 152000};
 
 void Lcd::LcdWriteData(unsigned char data) {
-   ostringstream os;
-   os << name << " WriteChar " << merke_x+1 << " " << merke_y << " " << (unsigned int)data << endl;
-   //    cerr << "LcdWriteData: "<< (unsigned int)data << endl;
+   std::ostringstream os;
+   os << name << " WriteChar " << merke_x+1 << " " << merke_y << " " << (unsigned int)data << std::endl;
+   //    std::cerr << "LcdWriteData: "<< (unsigned int)data << std::endl;
    ui->Write(os.str());
 
    merke_x++;
@@ -53,8 +53,8 @@ void Lcd::LcdWriteData(unsigned char data) {
 }
 
 void Lcd::SendCursorPosition() {
-   ostringstream os;
-   os << name << " MoveCursor " << merke_x << " " << merke_y << " " <<  endl;
+   std::ostringstream os;
+   os << name << " MoveCursor " << merke_x << " " << merke_y << " " <<  std::endl;
    ui->Write(os.str());
 }
 
@@ -79,20 +79,20 @@ unsigned int  Lcd::LcdWriteCommand(unsigned char command) {
    }
 
    if (command >= 0x40) { //Set Character Generator Address
-      cerr << "Not supported LCD command: Set Character Generator Address " << endl;
+      std::cerr << "Not supported LCD command: Set Character Generator Address " << std::endl;
       return Power_onTimes[3];
    }
    if (command >= 0x20) { //Function Set
       if ((command & 0x10)) {
-         cerr << "Not supported LCD command: Set 8 Bit Interface ";
+         std::cerr << "Not supported LCD command: Set 8 Bit Interface ";
          lerr = true;
       }
       if ((command & 0x04)) {
-         cerr << "Not supported LCD command: 5*10 char. size";
+         std::cerr << "Not supported LCD command: 5*10 char. size";
          lerr = true;
       }
       if (lerr == true) {
-         cerr << endl;
+         std::cerr << std::endl;
       }
       return Power_onTimes[3];
    }
@@ -108,7 +108,7 @@ unsigned int  Lcd::LcdWriteCommand(unsigned char command) {
             break;
          case 8:
          case 0x0c:
-            cerr << "Not supported LCD command: Display shift left or right" << endl;
+            std::cerr << "Not supported LCD command: Display shift left or right" << std::endl;
             break;
          default:
             break;
@@ -118,14 +118,14 @@ unsigned int  Lcd::LcdWriteCommand(unsigned char command) {
 
    if (command >= 8) { //Display on / off
       if (command != 0x0e) {// E = Display on, Cursor on, Cursor Blink off
-         cerr << "Not supported LCD command: Display off / Cursor off / Cursor Blink" << endl;
+         std::cerr << "Not supported LCD command: Display off / Cursor off / Cursor Blink" << std::endl;
       }
       return Power_onTimes[3];
    }
 
    if (command >= 4) { //Set Entry Mode
       if (command != 6) {// 6 = Increment, Cursor movement
-         cerr << "Not supported LCD command: Set Entry Mode" << endl;
+         std::cerr << "Not supported LCD command: Set Entry Mode" << std::endl;
       }
       return Power_onTimes[3];
    }
@@ -170,7 +170,7 @@ t_myState setInitNext(unsigned char command,t_myState myState,unsigned int  *Cmd
             break;
       }
    } else {
-      cerr << "LCD-Init: Waiting for Function Set Command. Received: 0x" << hex << (unsigned int) command << " Dismissed!" <<endl;
+      std::cerr << "LCD-Init: Waiting for Function Set Command. Received: 0x" << std::hex << (unsigned int) command << " Dismissed!" <<std::endl;
    }
    return myState;
 }
@@ -191,8 +191,8 @@ int Lcd::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
    if (lastPortValue!= myPortValue) {
       lastPortValue=myPortValue;
       /*
-      debugOut << "Changed LCD Port Value to new value: " << hex << (unsigned int ) myPortValue << endl;
-      debugOut << "Data: " << hex << (unsigned int) (myPortValue&0x0f) << endl;
+      debugOut << "Changed LCD Port Value to new value: " << std::hex << (unsigned int ) myPortValue << std::endl;
+      debugOut << "Data: " << std::hex << (unsigned int) (myPortValue&0x0f) << std::endl;
       debugOut << "Flags: "  ;
 
       if ( myPortValue& ENABLE) debugOut << "ENABLE " ;
@@ -201,8 +201,8 @@ int Lcd::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
       if (myPortValue& READWRITE) debugOut << "READ ";
       else debugOut << "WRITE ";
 
-      if (myPortValue&COMMANDDATA) debugOut << "COMMAND" << endl;
-      else debugOut <<"DATA   " << endl;
+      if (myPortValue&COMMANDDATA) debugOut << "COMMAND" << std::endl;
+      else debugOut <<"DATA   " << std::endl;
       */
       //static int enableOld=0;
       if (enableOld!= ( myPortValue& ENABLE)) {
@@ -211,7 +211,7 @@ int Lcd::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
          if (myPortValue& ENABLE) { //we are now new enabled!
             if ((myPortValue& READWRITE)==0) { //write
                if (CmdExecTime_ns >= 1000) { // 1uS we ignore
-                  cerr << "LCD busy for another " << CmdExecTime_ns /1000 << "us" << endl;
+                  std::cerr << "LCD busy for another " << CmdExecTime_ns /1000 << "us" << std::endl;
                   // Trace file entry?
                }
                if ( readLow ==0 ) { //write HIGH
@@ -221,10 +221,10 @@ int Lcd::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
                      case PWR_AFTER_FS1:
                      case PWR_AFTER_FS2:
                         // During startup only 8 Bit commands are send to the LCD and are excepted!
-                        cerr << lcnt << " Got new 8Bit value data: 0x";
-                        cerr.setf(ios::hex);
-                        cerr << (unsigned int)command << endl;
-                        cerr.unsetf(ios::hex);
+                        std::cerr << lcnt << " Got new 8Bit value data: 0x";
+                        std::cerr.setf(std::ios::hex);
+                        std::cerr << (unsigned int)command << std::endl;
+                        std::cerr.unsetf(std::ios::hex);
                         myState = setInitNext((command&0xf0),myState, &CmdExecTime_ns);
                         lcnt++;
                         myd3='L';
@@ -236,7 +236,7 @@ int Lcd::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
                            myState = CMDEXEC;
                            myd3='H';
                         } else {
-                           cerr << "LCD-Init: Waiting for Function Set Command with 4 Bit I/F. Received: 0x" << hex << (unsigned int)command << " Dismissed!" <<endl;
+                           std::cerr << "LCD-Init: Waiting for Function Set Command with 4 Bit I/F. Received: 0x" << std::hex << (unsigned int)command << " Dismissed!" <<std::endl;
                         }
                         break;
                      default:
@@ -246,15 +246,15 @@ int Lcd::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
                } else {            //write Low
                   readLow=0;
                   command|=(myPortValue&0x0f);
-                  //                        cerr << lcnt << " Got new value data:" << (unsigned int)command << endl;
+                  //                        std::cerr << lcnt << " Got new value data:" << (unsigned int)command << std::endl;
                   lcnt++;
                   myd3='H';
                   if ((myPortValue&COMMANDDATA)) { //comand
-                     //                            debugOut << "Got new value data:" << hex << (unsigned int)command << endl;
+                     //                            debugOut << "Got new value data:" << std::hex << (unsigned int)command << std::endl;
                      LcdWriteData (command);
                      CmdExecTime_ns = Power_onTimes[3];
                   } else {
-                     //                            debugOut << "Got new value command:" << hex << (unsigned int)command << endl;
+                     //                            debugOut << "Got new value command:" << std::hex << (unsigned int)command << std::endl;
                      /* Handle the first 3 states before the normal operation */
                      switch (myState) {
                         case POWER_ON:
@@ -264,7 +264,7 @@ int Lcd::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
                            myState = setInitNext((command&0xf0),myState, &CmdExecTime_ns);
                            break;
                         case PWR_ON_FINISH:  // Now we need a line length definition
-                           cerr << "LCD-Init: I/F set to not not supported 8 Bit mode! Received: 0x" << hex << (unsigned int)command << " Dismissed!" <<endl;
+                           std::cerr << "LCD-Init: I/F set to not not supported 8 Bit mode! Received: 0x" << std::hex << (unsigned int)command << " Dismissed!" <<std::endl;
                            break;
                         case IDLE:
                         case CMDEXEC:
@@ -276,7 +276,7 @@ int Lcd::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
                }
             } else { // read
                if ((myPortValue&COMMANDDATA)) { //comand
-                  cerr << "LCD-Read: Read data not supported " <<  endl;
+                  std::cerr << "LCD-Read: Read data not supported " <<  std::endl;
                }else {
                   d3=myd3;
                   if ((CmdExecTime_ns == 0) && (myState>=PWR_ON_FINISH)) {
@@ -291,7 +291,7 @@ int Lcd::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
    return 0;
 }
 
-//Lcd::Lcd(UserInterface *_ui, const string &_name, const string &baseWindow):
+//Lcd::Lcd(UserInterface *_ui, const std::string &_name, const std::string &baseWindow):
 Lcd::Lcd(UserInterface *_ui, const char *_name, const char *baseWindow):
    ui(_ui), name(_name),
    d0( &myPortValue, 1),
@@ -327,8 +327,8 @@ Lcd::Lcd(UserInterface *_ui, const char *_name, const char *baseWindow):
    merke_y=0;
 
    //setup the corrosponding ui in tcl from here
-   ostringstream os;
-   os << "create Lcd " << name  << " " << baseWindow << " " << " 20 4" << endl;
+   std::ostringstream os;
+   os << "create Lcd " << name  << " " << baseWindow << " " << " 20 4" << std::endl;
    ui->Write(os.str());
 }
 

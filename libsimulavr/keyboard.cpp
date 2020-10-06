@@ -29,12 +29,12 @@
 
 #include "avrerror.h"
 #include "ui/ui.h"   
-using namespace std;
 
-map<int,int> xToNumber;
-map<int, const int* > keynumberToScancode1;
-map<int, const int* > keynumberToScancode2;
-map<int, const int* > keynumberToScancode3;
+
+std::map<int,int> xToNumber;
+std::map<int, const int* > keynumberToScancode1;
+std::map<int, const int* > keynumberToScancode2;
+std::map<int, const int* > keynumberToScancode3;
 
 
 
@@ -42,7 +42,7 @@ map<int, const int* > keynumberToScancode3;
 
 int Keyboard::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
 
-    //static string scanString("");  //now we use the buffer
+    //static std::string scanString("");  //now we use the buffer
     //unsigned char actualChar;
 
     static enum {
@@ -123,7 +123,7 @@ int Keyboard::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
 
         case READ:
             {
-                //cout << "Read State for Keybd not implemented" << endl;
+                //std::cout << "Read State for Keybd not implemented" << std::endl;
             }
 
             break;
@@ -135,8 +135,8 @@ int Keyboard::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
     if (lastPortValue!= myPortValue) {
         lastPortValue=myPortValue;
         /* 
-        debugOut << "Changed LCD Port Value to new value: " << hex << (unsigned int ) myPortValue << endl;
-        debugOut << "Data: " << hex << (unsigned int) (myPortValue&0x0f) << endl;
+        debugOut << "Changed LCD Port Value to new value: " << std::hex << (unsigned int ) myPortValue << std::endl;
+        debugOut << "Data: " << std::hex << (unsigned int) (myPortValue&0x0f) << std::endl;
         debugOut << "Flags: "  ; 
 
         if ( myPortValue& 16) debugOut << "ENABLE " ; 
@@ -145,8 +145,8 @@ int Keyboard::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
         if (myPortValue& 32) debugOut << "READ ";
         else debugOut << "WRITE ";
 
-        if (myPortValue&64) debugOut << "COMMAND" << endl;
-        else debugOut <<"DATA   " << endl;
+        if (myPortValue&64) debugOut << "COMMAND" << std::endl;
+        else debugOut <<"DATA   " << std::endl;
 
         static int enableOld=0;
         if (enableOld!= ( myPortValue& 16)) {
@@ -161,10 +161,10 @@ int Keyboard::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns) {
         readLow=0;
         command|=(myPortValue&0x0f);
         if ((myPortValue&64)) { //comand
-        //debugOut << "Got new value data:" << hex << (unsigned int)command << endl;
+        //debugOut << "Got new value data:" << std::hex << (unsigned int)command << std::endl;
         LcdWriteData(command);
         } else {
-        //debugOut << "Got new value command:" << hex << (unsigned int)command << endl;
+        //debugOut << "Got new value command:" << std::hex << (unsigned int)command << std::endl;
         LcdWriteCommand(command);
         }
         }
@@ -188,8 +188,8 @@ bufferWriteIndex(0), bufferReadIndex(0)
     bitCnt=0;
 
     //ncurses setup
-    ostringstream os;
-    os << "create Kbd " << name  << " .x " <<  endl;
+    std::ostringstream os;
+    os << "create Kbd " << name  << " .x " <<  std::endl;
     ui->Write(os.str());
 
     ui->AddExternalType(name, this);
@@ -251,7 +251,7 @@ void Keyboard::InsertBreakCodeToBuffer( int key) {
     } while (1);
 }
 
-void Keyboard::SetNewValueFromUi(const string& s) {
+void Keyboard::SetNewValueFromUi(const std::string& s) {
     switch (s[0]) {
         case 'B':
             InsertBreakCodeToBuffer(atoi(s.substr(1).c_str()));
@@ -262,7 +262,7 @@ void Keyboard::SetNewValueFromUi(const string& s) {
             break;
 
         default:
-            cerr << "Unknown message for kbd-handler received from gui :-(" << endl;
+            std::cerr << "Unknown message for kbd-handler received from gui :-(" << std::endl;
     }
 }
 

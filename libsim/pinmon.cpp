@@ -1,7 +1,7 @@
 #include <iostream>
 #include "pinmon.h"
 
-using namespace std;
+
 
 PinMonitor::PinMonitor(	AvrDevice&	avr,
 						const char*	pinNameStr, // AVR pin name.  (e.g. "B1","C2", etc.)
@@ -32,6 +32,6 @@ void PinMonitor::PinStateHasChanged(Pin* pin){
 		_prevState	= false;
 		}
 
-	cout << _pinDescStr << ": " << stateStr << endl;
+	std::cout << _pinDescStr << ": " << stateStr << std::endl;
 	}
 

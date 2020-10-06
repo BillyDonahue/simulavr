@@ -36,7 +36,7 @@
 #include <assert.h>
 #include <typeinfo>
 
-using namespace std;
+
 
 // global switch to enable irq statistic (default is disabled)
 bool enableIRQStatistic = false;
@@ -128,20 +128,20 @@ void IrqStatisticPerVector::CheckComplete() {
     }
 }
 
-ostream &helpHexOut(ostream &os, unsigned long long x) {
+std::ostream &helpHexOut(std::ostream &os, unsigned long long x) {
 #ifdef HEXOUT
     os << "0x";
     os.fill('0');
     os.width(16);
-    os << hex << x << ":" ;
+    os << std::hex << x << ":" ;
 #else
     os<< x << "\t" ;
 #endif
     return os;
 }
 
-ostream& operator<<(ostream &os, const IrqStatisticEntry& ise) {
-    os << dec<<"\t";
+std::ostream& operator<<(std::ostream &os, const IrqStatisticEntry& ise) {
+    os << std::dec<<"\t";
     helpHexOut(os, ise.flagSet) ;
     helpHexOut(os, ise.flagCleared ); 
     helpHexOut(os, ise.handlerStarted ); 
@@ -154,29 +154,29 @@ ostream& operator<<(ostream &os, const IrqStatisticEntry& ise) {
     return os;
 }
 
-ostream& operator<<(ostream &os, const IrqStatisticPerVector &ispv) {
-    os << "Set->Clear >" << ispv.long_SetClear << endl; 
-    os << "Set->Clear <" << ispv.short_SetClear << endl;
-    os << "Set->HandlerStarted >" << ispv.long_SetStarted << endl; 
-    os << "Set->HandlerStarted <" << ispv.short_SetStarted << endl;
+std::ostream& operator<<(std::ostream &os, const IrqStatisticPerVector &ispv) {
+    os << "Set->Clear >" << ispv.long_SetClear << std::endl; 
+    os << "Set->Clear <" << ispv.short_SetClear << std::endl;
+    os << "Set->HandlerStarted >" << ispv.long_SetStarted << std::endl; 
+    os << "Set->HandlerStarted <" << ispv.short_SetStarted << std::endl;
 
-    os << "Set->HandlerFinished >" << ispv.long_SetFinished << endl; 
-    os << "Set->HandlerFinished <" << ispv.short_SetFinished << endl;
-    os << "Handler Start->Finished >" << ispv.long_StartedFinished << endl; 
-    os << "Handler Start->Finished <" << ispv.short_StartedFinished << endl;
+    os << "Set->HandlerFinished >" << ispv.long_SetFinished << std::endl; 
+    os << "Set->HandlerFinished <" << ispv.short_SetFinished << std::endl;
+    os << "Handler Start->Finished >" << ispv.long_StartedFinished << std::endl; 
+    os << "Handler Start->Finished <" << ispv.short_StartedFinished << std::endl;
 
     return os;
 }
 
 
-ostream& operator<<(ostream &os, const IrqStatistic& is) {
-    map<unsigned int, IrqStatisticPerVector>::const_iterator ii;
+std::ostream& operator<<(std::ostream &os, const IrqStatistic& is) {
+    std::map<unsigned int, IrqStatisticPerVector>::const_iterator ii;
 
-    os << "IRQ STATISTIC" << endl;
-    os << "\tFlagSet\tflagCleared\tHandlerStarted\tHandlerFinished\tSet->Clear\tSet->Started\tSet->Finished\tStarted->Finished"<<endl;
+    os << "IRQ STATISTIC" << std::endl;
+    os << "\tFlagSet\tflagCleared\tHandlerStarted\tHandlerFinished\tSet->Clear\tSet->Started\tSet->Finished\tStarted->Finished"<<std::endl;
     for (ii=is.entries.begin(); ii!= is.entries.end(); ii++) {
-        os << "Core: "  << is.core->GetFname() <<endl;
-        os << "Statistic for vector: 0x" << hex << ii->first << endl;
+        os << "Core: "  << is.core->GetFname() <<std::endl;
+        os << "Statistic for std::vector: 0x" << std::hex << ii->first << std::endl;
         os << (ii->second);
     }
 
@@ -216,7 +216,7 @@ bool HWIrqSystem::IsIrqPending() {
 unsigned int HWIrqSystem::GetNewPc(unsigned int &actualVector) {
     unsigned int newPC = 0xffffffff;
 
-    //this vector is implicit sorted, so the priority of the irq vector is known and handled correctly
+    //this std::vector is implicit sorted, so the priority of the irq std::vector is known and handled correctly
     for(unsigned int index = 0; index < vectorTableSize; index++) {
         if(irqStack[index] == NULL)
             continue;
@@ -247,7 +247,7 @@ void HWIrqSystem::SetIrqFlag(Hardware *hwp, unsigned int vector) {
     irqStackSize++;
 
     if (core->trace_on) {
-        traceOut << core->GetFname() << " interrupt on index " << vector << " is pending" << endl;
+        traceOut << core->GetFname() << " interrupt on index " << vector << " is pending" << std::endl;
     }
 
     if ( irqStatistic.entries[vector].actual.flagSet == 0) { // the actual entry was not used before... fine!
@@ -260,7 +260,7 @@ void HWIrqSystem::ClearIrqFlag(unsigned int vector) {
     irqStackSize--;
 
     if (core->trace_on) {
-        traceOut << core->GetFname() << " interrupt on index " << vector << "cleared" << endl;
+        traceOut << core->GetFname() << " interrupt on index " << vector << "cleared" << std::endl;
     }
 
     if (irqStatistic.entries[vector].actual.flagCleared == 0) {
@@ -273,7 +273,7 @@ void HWIrqSystem::ClearIrqFlag(unsigned int vector) {
 void HWIrqSystem::IrqHandlerStarted(unsigned int vector) {
     irqTrace[vector]->change(1);
     if (core->trace_on) {
-        traceOut << core->GetFname() << " IrqSystem: IrqHandlerStarted Vec: " << vector << endl;
+        traceOut << core->GetFname() << " IrqSystem: IrqHandlerStarted Vec: " << vector << std::endl;
     }
 
     if (irqStatistic.entries[vector].actual.handlerStarted==0) {
@@ -285,7 +285,7 @@ void HWIrqSystem::IrqHandlerStarted(unsigned int vector) {
 void HWIrqSystem::IrqHandlerFinished(unsigned int vector) {
     irqTrace[vector]->change(0);
     if (core->trace_on) {
-        traceOut << core->GetFname() << " IrqSystem: IrqHandler Finished Vec: " << vector << endl;
+        traceOut << core->GetFname() << " IrqSystem: IrqHandler Finished Vec: " << vector << std::endl;
     }
 
     if (irqStatistic.entries[vector].actual.handlerFinished==0) {
@@ -317,7 +317,7 @@ void HWIrqSystem::DebugDumpTable()
     }
 }
 
-IrqStatistic::IrqStatistic (AvrDevice *c):Printable(cout), core(c) {
+IrqStatistic::IrqStatistic (AvrDevice *c):Printable(std::cout), core(c) {
     Application::GetInstance()->RegisterPrintable(this);
 }
 

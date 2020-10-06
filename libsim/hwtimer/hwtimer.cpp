@@ -33,7 +33,7 @@
 #include <cstdlib>
 #include <time.h>
 
-using namespace std;
+
 
 BasicTimerUnit::BasicTimerUnit(AvrDevice *core,
                                PrescalerMultiplexer *p,

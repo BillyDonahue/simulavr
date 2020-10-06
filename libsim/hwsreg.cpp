@@ -26,7 +26,7 @@
 #include "hwsreg.h"
 
 #include <iostream>
-using namespace std;
+
 
 HWSreg_bool::operator int() {
     return C + (Z << 1) + (N << 2) + (V << 3) + (S << 4) + (H << 5) + (T << 6) + (I << 7);
@@ -47,8 +47,8 @@ HWSreg_bool::HWSreg_bool() {
     C = Z = N = V = S = H = T = I = 0;
 }
 
-HWSreg::operator string() {
-    string s("SREG=[");
+HWSreg::operator std::string() {
+    std::string s("SREG=[");
     if(I) s += "I"; else s += "-";
     if(T) s += "T"; else s += "-";
     if(H) s += "H"; else s += "-";

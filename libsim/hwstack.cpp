@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <cstdio>  // NULL
 
-using namespace std;
+
 
 HWStack::HWStack(AvrDevice *c):
     core(c),
@@ -40,7 +40,7 @@ HWStack::HWStack(AvrDevice *c):
 }
 
 HWStack::~HWStack() {
-    typedef multimap<unsigned long, Funktor *>::iterator I;
+    typedef std::multimap<unsigned long, Funktor *>::iterator I;
     for(I i = returnPointList.begin(); i != returnPointList.end(); ++i) {
         delete i->second;
     }
@@ -53,8 +53,8 @@ void HWStack::Reset(void) {
 }
 
 void HWStack::CheckReturnPoints() {
-    typedef multimap<unsigned long, Funktor *>::iterator I;
-    pair<I,I> l = returnPointList.equal_range(stackPointer);
+    typedef std::multimap<unsigned long, Funktor *>::iterator I;
+    std::pair<I,I> l = returnPointList.equal_range(stackPointer);
     
     for(I i = l.first; i != l.second; i++) {
         (*(i->second))(); //execute Funktor
@@ -64,7 +64,7 @@ void HWStack::CheckReturnPoints() {
 }
 
 void HWStack::SetReturnPoint(unsigned long stackPointer, Funktor *f) {
-    returnPointList.insert(make_pair(stackPointer, f));
+    returnPointList.insert(std::make_pair(stackPointer, f));
 }
 
 HWStackSram::HWStackSram(AvrDevice *c, int bs, bool initRE):
@@ -100,7 +100,7 @@ void HWStackSram::Push(unsigned char val) {
     sph_reg.hardwareChange((stackPointer & 0x00ff00)>>8);
     
     if(core->trace_on == 1)
-        traceOut << "SP=0x" << hex << stackPointer << " 0x" << int(val) << dec << " ";
+        traceOut << "SP=0x" << std::hex << stackPointer << " 0x" << int(val) << std::dec << " ";
     m_ThreadList.OnPush();
     CheckReturnPoints();
     
@@ -117,7 +117,7 @@ unsigned char HWStackSram::Pop() {
     sph_reg.hardwareChange((stackPointer & 0x00ff00)>>8);
     
     if(core->trace_on == 1)
-        traceOut << "SP=0x" << hex << stackPointer << " 0x" << int(core->GetRWMem(stackPointer)) << dec << " ";
+        traceOut << "SP=0x" << std::hex << stackPointer << " 0x" << int(core->GetRWMem(stackPointer)) << std::dec << " ";
     m_ThreadList.OnPop();
     CheckReturnPoints();
     return core->GetRWMem(stackPointer);
@@ -155,7 +155,7 @@ void HWStackSram::SetSpl(unsigned char val) {
     spl_reg.hardwareChange(stackPointer & 0x0000ff);
     
     if(core->trace_on == 1)
-        traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
+        traceOut << "SP=0x" << std::hex << stackPointer << std::dec << " " ; 
     if(oldSP != stackPointer)
         m_ThreadList.OnSPWrite(stackPointer);
     CheckReturnPoints();
@@ -172,7 +172,7 @@ void HWStackSram::SetSph(unsigned char val) {
     sph_reg.hardwareChange((stackPointer & 0x00ff00)>>8);
 
     if(core->trace_on == 1)
-        traceOut << "SP=0x" << hex << stackPointer << dec << " " ; 
+        traceOut << "SP=0x" << std::hex << stackPointer << std::dec << " " ; 
     if(oldSP != stackPointer)
         m_ThreadList.OnSPWrite(stackPointer);
     CheckReturnPoints();

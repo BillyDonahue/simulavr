@@ -30,7 +30,6 @@
 #include "flash.h"
 
 //#include <iostream>
-//using namespace std;
 
 void FlashProgramming::ClearOperationBits(void) {
     spmcr_val &= ~spmcr_opr_bits;
@@ -132,7 +131,7 @@ int FlashProgramming::SPM_action(unsigned int data, unsigned int xaddr, unsigned
             ClearOperationBits();
             spmcr_val &= ~0x40;
             core->Flash->SetRWWLock(0);
-            //cout << "unlock rww: [0x" << hex << addr << "]" << endl;
+            //std::cout << "unlock rww: [0x" << std::hex << addr << "]" << std::endl;
             return 0; // is this right, 1 cpu clock for this operation?
         }
         if(spm_opr == SPM_OPS_STOREBUFFER) {
@@ -144,7 +143,7 @@ int FlashProgramming::SPM_action(unsigned int data, unsigned int xaddr, unsigned
             tempBuffer[addr + 1] = (data >> 8) & 0xff;
             // signal: operation done.
             ClearOperationBits();
-            //cout << "store buffer: [0x" << hex << addr << "]=0x" << hex << data << endl;
+            //std::cout << "store buffer: [0x" << std::hex << addr << "]=0x" << std::hex << data << std::endl;
             return 2; // is this right, 3 cpu clocks for this operation?
         }
         if(spm_opr == SPM_OPS_WRITEBUFFER) {
@@ -158,7 +157,7 @@ int FlashProgramming::SPM_action(unsigned int data, unsigned int xaddr, unsigned
             action = SPM_ACTION_LOCKCPU;
             // lock RWW, if necessary
             SetRWWLock(addr);
-            //cout << "write buffer: [0x" << hex << addr << "]" << endl;
+            //std::cout << "write buffer: [0x" << std::hex << addr << "]" << std::endl;
             return 0; // cpu clocks will be extended by CpuCycle calls
         }
         if(spm_opr == SPM_OPS_ERASE) {
@@ -174,10 +173,10 @@ int FlashProgramming::SPM_action(unsigned int data, unsigned int xaddr, unsigned
             action = SPM_ACTION_LOCKCPU;
             // lock RWW, if necessary
             SetRWWLock(addr);
-            //cout << "erase page: [0x" << hex << addr << "]" << endl;
+            //std::cout << "erase page: [0x" << std::hex << addr << "]" << std::endl;
             return 0; // cpu clocks will be extended by CpuCycle calls
         }
-        //cout << "unhandled spm-action(0x" << hex << data << ",0x" << hex << addr << ")" << endl;
+        //std::cout << "unhandled spm-action(0x" << std::hex << data << ",0x" << std::hex << addr << ")" << std::endl;
         ClearOperationBits();
     }
     return 0;
@@ -227,7 +226,7 @@ void FlashProgramming::SetSpmcr(unsigned char v) {
                 break;
         }
     }
-    //cout << "spmcr=0x" << hex << (unsigned int)spmcr_val << "," << action << "," << spm_opr << endl;
+    //std::cout << "spmcr=0x" << std::hex << (unsigned int)spmcr_val << "," << action << "," << spm_opr << std::endl;
 }
 
 AvrFuses::AvrFuses(void):

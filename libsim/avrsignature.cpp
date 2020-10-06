@@ -24,7 +24,6 @@
  */
 #include "avrsignature.h"
 
-//using namespace std;
 
 // Idea taken from http://www.gamedev.net/topic/197291-creating-an-enum-to-string-look-up-table/
 template<typename T_Key, typename T_Value>
