@@ -40,6 +40,15 @@ AVR_REGISTER(atmega324, AvrDevice_atmega324A)
 AVR_REGISTER(atmega644, AvrDevice_atmega644A)
 AVR_REGISTER(atmega1284, AvrDevice_atmega1284A)
 
+// TODO: There are some differences between the parts 
+// e.g.USART and some addition bits in some registers.
+// The current patch did not reflect these changes!
+// See also mirgration sheet: http://ww1.microchip.com/downloads/en/Appnotes/doc8038.pdf
+AVR_REGISTER(atmega164p, AvrDevice_atmega164A)
+AVR_REGISTER(atmega324p, AvrDevice_atmega324A)
+AVR_REGISTER(atmega644p, AvrDevice_atmega644A)
+AVR_REGISTER(atmega1284p, AvrDevice_atmega1284A)
+
 AvrDevice_atmega1284Abase::~AvrDevice_atmega1284Abase() {
     delete usart1;
     delete usart0;
@@ -225,6 +234,7 @@ AvrDevice_atmega1284Abase::AvrDevice_atmega1284Abase(unsigned ram_bytes,
                          21,   // (22) UDRE vector
                          22);  // (23) TX complete vector
 
+    // TODO: ATmega644P has USART1, but ATmega644 (maybe others) has not.
     usart1 = new HWUsart(this,
                          irqSystem,
                          PinAtPort(&portd, 3),    // TXD1
