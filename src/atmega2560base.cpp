@@ -277,11 +277,14 @@ AvrDevice_atmega2560base::AvrDevice_atmega2560base(unsigned ram_bytes,
     gpior1_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR1");
     gpior2_reg = new GPIORegister(this, &coreTraceGroup, "GPIOR2");
 
-    admux = new HWAdmuxM16(this, &porta.GetPin(0), &porta.GetPin(1), &porta.GetPin(2),
-                                 &porta.GetPin(3), &porta.GetPin(4), &porta.GetPin(5),
-                                 &porta.GetPin(6), &porta.GetPin(7));
+    admux = new HWAdmuxM2560(this, &portf.GetPin(0), &portf.GetPin(1), &portf.GetPin(2),
+                                 &portf.GetPin(3), &portf.GetPin(4), &portf.GetPin(5),
+                                 &portf.GetPin(6), &portf.GetPin(7), &portk.GetPin(0),
+                                 &portk.GetPin(1), &portk.GetPin(2), &portk.GetPin(3),
+                                 &portk.GetPin(4), &portk.GetPin(5), &portk.GetPin(6),
+                                 &portk.GetPin(7));
     aref = new HWARef4(this, HWARef4::REFTYPE_BG3);
-    ad = new HWAd(this, HWAd::AD_M164, irqSystem, 29, admux, aref);
+    ad = new HWAd(this, HWAd::AD_M2560, irqSystem, 29, admux, aref);
 
     acomp = new HWAcomp(this, irqSystem, PinAtPort(&porte, 2), PinAtPort(&porte, 3), 28, ad, timer1);
 
