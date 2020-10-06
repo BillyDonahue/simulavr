@@ -66,9 +66,9 @@ class HWPort: public Hardware, public TraceValueRegister {
         Pin& GetPin(unsigned char pinNo); //!< returns a pin reference of pin with pin number
         int GetPortSize(void) { return portSize; } //!< returns, how much bits this port controls
         
-        void SetPort(unsigned char val) { port = val & portMask; CalcOutputs(); } //!< setter method for port register
-        void SetDdr(unsigned char val) { ddr = val & portMask; CalcOutputs(); } //!< setter method for data direction register
-        void SetPin(unsigned char val); //!< setter method for PIN register (for new devices with toggle port)
+        void SetPort(unsigned char val); //!< setter method for port register
+        void SetDdr(unsigned char val);  //!< setter method for data direction register
+        void SetPin(unsigned char val);  //!< setter method for PIN register (for new devices with toggle port)
         void SetPinBit( bool bit, unsigned int bitaddr);
 
         unsigned char GetPort() { return port; } //!< getter method for port register
