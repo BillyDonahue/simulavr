@@ -112,16 +112,16 @@ int	SpiSink::Step(bool &trueHwStep, SystemClockOffset *timeToNextStepIn_ns){
 
                     std::streamsize	streamWidth = std::cout.width();
                     std::ios_base::fmtflags	saved	= std::cout.flags();
-					std::cout.setf(std::ios_base::hex,std::ios_base::basefield);
-					std::cout.setf(std::ios_base::uppercase);
-					std::cout.setf(std::ios_base::right);
-					std::cout << "spisink: 0x";
-					std::cout.width(2);
-					std::cout.fill('0');
-					std::cout << (unsigned long)_sr;
-					std::cout << std::endl;
-					std::cout.width(streamWidth);
-					std::cout.flags(saved);
+                    std::cout.setf(std::ios_base::hex,std::ios_base::basefield);
+                    std::cout.setf(std::ios_base::uppercase);
+                    std::cout.setf(std::ios_base::right);
+                    std::cout << "spisink: 0x";
+                    std::cout.width(2);
+                    std::cout.fill('0');
+                    std::cout << (unsigned long)_sr;
+                    std::cout << std::endl;
+                    std::cout.width(streamWidth);
+                    std::cout.flags(saved);
 					}
 				break;
 			}

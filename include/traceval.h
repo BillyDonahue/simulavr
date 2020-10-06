@@ -106,7 +106,7 @@ class TraceValue {
         TraceValue(size_t bits,
                    const std::string &_name,
                    const int __index = -1,
-                   const void* shadow = NULL);
+                   const void* shadow = nullptr );
         virtual ~TraceValue() { shadow = NULL; }
 
         //! Give number of bits for this value. Max 32.
