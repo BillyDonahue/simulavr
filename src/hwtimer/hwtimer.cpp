@@ -42,12 +42,12 @@ BasicTimerUnit::BasicTimerUnit(AvrDevice *core,
                                int countersize):
     Hardware(core),
     TraceValueRegister(core, "TIMER" + int2str(unit)),
+    eventListener(NULL),
     core(core),
     premx(p),
     timerOverflow(tov),
     timerCapture(tcap),
-    icapSource(icapsrc),
-    eventListener(NULL)
+    icapSource(icapsrc)
 {
     // check counter size and set limit_max
     if(countersize != 8 && countersize != 16)

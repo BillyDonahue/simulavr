@@ -143,6 +143,7 @@ class Pin {
         virtual operator bool() const; //!< return boolean state of output stage
         virtual Pin operator+ (const Pin& p); //!< calculate common state from 2 connected pins
         virtual Pin operator+= (const Pin& p); //!< calculate common state from connected other pin to this pin
+        Pin& operator=(const Pin&);
 #endif
 
         virtual void SetInState(const Pin &p); //!< handles the input value from net
@@ -173,7 +174,7 @@ class Pin {
 class PortPin: public Pin {
 
     private:
-        int regCount; //!< register counter
+        unsigned int regCount; //!< register counter
 
     protected:
         unsigned char DDOE;

@@ -22,7 +22,6 @@
  *
  *  $Id$
  */
-
 #ifndef __String2_h
 #define __String2_h
 

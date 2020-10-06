@@ -235,7 +235,7 @@ void GdbServerSocketUnix::Write(const void* buf, size_t count) {
     /* FIXME: if this happens a lot, we could try to resend the
     unsent bytes. */
     if((unsigned int)res != count)
-        avr_error("write only wrote %d of %d bytes", res, count);
+        avr_error("write only wrote %d of %lu bytes", res, count);
 }
 
 void GdbServerSocketUnix::SetBlockingMode(int mode) {
@@ -761,7 +761,7 @@ void GdbServer::gdb_read_memory(const char *pkt) {
     unsigned int addr = 0;
     int   len  = 0;
     byte *buf;
-    int   i;
+    int   i=0;
     int   is_odd_addr;
 
     pkt += gdb_get_addr_len( pkt, ',', '\0', &addr, &len );
@@ -864,9 +864,8 @@ void GdbServer::gdb_read_memory(const char *pkt) {
 
             if ( avr_core_flash_read( addr, val ))
             {
-                byte bval;
+                byte bval = val & 0xff;
 
-                bval &= 0xff;
                 buf[i++] = HEX_DIGIT[bval >> 4];
                 buf[i++] = HEX_DIGIT[bval & 0xf];
             }
@@ -1263,6 +1262,8 @@ int GdbServer::gdb_parse_packet(const char *pkt) {
         case 'S':               /* step with signal */
             gdb_get_signal(pkt);
             // no break!
+            [[fallthrough]];
+
         case 's':               /* step */
             if(!core->Flash->IsProgramLoaded()) {
                 gdb_send_hex_reply("O", "No program to simulate. Use 'load' to upload it.\n");

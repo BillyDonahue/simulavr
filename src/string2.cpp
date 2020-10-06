@@ -22,7 +22,6 @@
  *
  *  $Id$
  */
-
 #include <errno.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -40,10 +39,13 @@
 #undef STRING_TO_METHOD
 #undef STRING_TO_MAX
 #undef STRING_TO_MIN
+#undef STRING_TO_INTERMEDIATE_RESULT_TYPE
 #define STRING_TO_TYPE unsigned char
 #define STRING_TO_NAME StringToUnsignedChar
 #define STRING_TO_METHOD strtoul
 #define STRING_TO_MAX 255
+#define STRING_TO_INTERMEDIATE_RESULT_TYPE unsigned long long
+
 #include "string2_template.h"
 
 /*
@@ -54,11 +56,13 @@
 #undef STRING_TO_METHOD
 #undef STRING_TO_MAX
 #undef STRING_TO_MIN
+#undef STRING_TO_INTERMEDIATE_RESULT_TYPE
 #define STRING_TO_TYPE long int
 #define STRING_TO_NAME StringToLong
 #define STRING_TO_METHOD strtol
 #define STRING_TO_MIN LONG_MIN
 #define STRING_TO_MAX LONG_MAX
+#define STRING_TO_INTERMEDIATE_RESULT_TYPE long long
 #include "string2_template.h"
 
 /*
@@ -69,10 +73,12 @@
 #undef STRING_TO_METHOD
 #undef STRING_TO_MAX
 #undef STRING_TO_MIN
+#undef STRING_TO_INTERMEDIATE_RESULT_TYPE
 #define STRING_TO_TYPE unsigned long int
 #define STRING_TO_NAME StringToUnsignedLong
 #define STRING_TO_METHOD strtoul
 #define STRING_TO_MAX ULONG_MAX
+#define STRING_TO_INTERMEDIATE_RESULT_TYPE unsigned long long
 #include "string2_template.h"
 
 /*
@@ -83,11 +89,13 @@
 #undef STRING_TO_METHOD
 #undef STRING_TO_MAX
 #undef STRING_TO_MIN
+#undef STRING_TO_INTERMEDIATE_RESULT_TYPE
 #define STRING_TO_TYPE long long
 #define STRING_TO_NAME StringToLongLong
 #define STRING_TO_METHOD strtoll
 #define STRING_TO_MIN LLONG_MIN
 #define STRING_TO_MAX LLONG_MAX
+#define STRING_TO_INTERMEDIATE_RESULT_TYPE long long
 #include "string2_template.h"
 
 /*
@@ -98,9 +106,10 @@
 #undef STRING_TO_METHOD
 #undef STRING_TO_MAX
 #undef STRING_TO_MIN
+#undef STRING_TO_INTERMEDIATE_RESULT_TYPE
 #define STRING_TO_TYPE unsigned long long
 #define STRING_TO_NAME StringToUnsignedLongLong
 #define STRING_TO_METHOD strtoull
 #define STRING_TO_MAX ULLONG_MAX
+#define STRING_TO_INTERMEDIATE_RESULT_TYPE unsigned long long
 #include "string2_template.h"
-

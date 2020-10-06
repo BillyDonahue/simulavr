@@ -275,6 +275,18 @@ Pin Pin::operator+= (const Pin& p) {
     return *this;
 }
 
+Pin& Pin::operator=(const Pin& p)
+{
+    pinOfPort = 0; // don't take over HWPort connection!
+    connectedTo = NULL; // don't take over Net instance!
+    mask = 0;
+
+    outState = p.outState;
+    analogVal = p.analogVal;
+
+    return *this;
+}
+
 Pin Pin::operator+ (const Pin& p) {
     if(outState == SHORTED)
         return Pin(SHORTED);

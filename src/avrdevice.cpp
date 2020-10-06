@@ -134,6 +134,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     iRamSize(IRamSize),
     eRamSize(ERamSize),
     devSignature(std::numeric_limits<unsigned int>::max()),
+    PC_size(pcSize),
     abortOnInvalidAccess(false),
     coreTraceGroup(this),
     deferIrq(false),
@@ -150,8 +151,7 @@ AvrDevice::AvrDevice(unsigned int _ioSpaceSize,
     flagMOVWInstruction(true),
     flagTiny10(false),
     flagTiny1x(false),
-    flagXMega(false),
-    PC_size(pcSize)
+    flagXMega(false)
 {
     dumpManager = DumpManager::Instance();
     dumpManager->registerAvrDevice(this);

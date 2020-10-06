@@ -2109,6 +2109,8 @@ DecodedInstruction* lookup_opcode( word opcode, AvrDevice *core )
                              case 0x920C:
                                  if(!core->flagTiny1x)
                                      return new avr_op_ST_X(opcode, core);              /* 1001 001d dddd 1100 | ST */
+                                 else
+                                     return new avr_op_ILLEGAL(opcode, core);
                              case 0x920E:
                                  if(!core->flagTiny1x)
                                      return new avr_op_ST_X_decr(opcode, core);         /* 1001 001d dddd 1110 | ST */
