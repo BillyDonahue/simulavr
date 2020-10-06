@@ -38,8 +38,11 @@ HWPort::HWPort(AvrDevice *core, const std::string &name, bool portToggle, int si
     portToggleFeature(portToggle),
     port_reg(core, this, "PORT"+ name,
              this, &HWPort::GetPort, &HWPort::SetPort),
+
     pin_reg(core, this, "PIN"+ name,
-            this, &HWPort::GetPin, &HWPort::SetPin),
+            this, &HWPort::GetPin, &HWPort::SetPin,
+            &HWPort::GetPinBit, &HWPort::SetPinBit),
+
     ddr_reg(core, this, "DDR"+ name,
             this, &HWPort::GetDdr, &HWPort::SetDdr)
 {
@@ -116,6 +119,31 @@ void HWPort::SetPin(unsigned char val) {
         port_reg.hardwareChange(port);
     } else
         avr_warning("Writing of 'PORT%s.PIN' (with %d) is not supported.", myName.c_str(), val);
+}
+
+// TODO: Please check and improve ! Untested and only copied from different sources here..
+void HWPort::SetPinBit(bool val, unsigned int bitaddr) {
+    if(portToggleFeature) {
+        unsigned char tmpPin = pin;
+
+        unsigned char actualBit = 1 << bitaddr;
+        tmpPin &= ~actualBit;
+        port ^= actualBit;
+
+        // copied from CalcOutputs
+        bool regPort = (bool)(port & actualBit);
+        bool regDDR = (bool)(ddr & actualBit);
+
+        if(p[bitaddr].CalcPinOverride(regDDR, regPort, false)) {
+            tmpPin |= actualBit;
+            pin=tmpPin;
+        }
+        pintrace[bitaddr]->change(p[bitaddr].outState);
+
+        port_reg.hardwareChange(port);
+    } else {
+        avr_warning("Writing of 'PORT%s.PIN' (with %d) is not supported.", myName.c_str(), val);
+    }
 }
 
 /* EOF */

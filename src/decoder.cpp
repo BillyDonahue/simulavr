@@ -364,8 +364,8 @@ avr_op_CBI::avr_op_CBI(word opcode, AvrDevice *c):
 
 int avr_op_CBI::operator()() {
     int clks = (core->flagXMega || core->flagTiny10) ? 1 : 2;
-
-    core->SetIORegBit(ioreg, Kbit, false);
+  
+    core->ClearIORegBit(ioreg, Kbit);
     
     return clks;
 }
@@ -1337,7 +1337,7 @@ avr_op_SBI::avr_op_SBI(word opcode, AvrDevice *c):
 int avr_op_SBI::operator()() {
     int clks = (core->flagXMega || core->flagTiny10) ? 1 : 2;
     
-    core->SetIORegBit(ioreg, Kbit, true);
+    core->SetIORegBit(ioreg, Kbit);
     
     return clks;
 }

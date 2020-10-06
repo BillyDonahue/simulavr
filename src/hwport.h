@@ -69,9 +69,14 @@ class HWPort: public Hardware, public TraceValueRegister {
         void SetPort(unsigned char val) { port = val & portMask; CalcOutputs(); } //!< setter method for port register
         void SetDdr(unsigned char val) { ddr = val & portMask; CalcOutputs(); } //!< setter method for data direction register
         void SetPin(unsigned char val); //!< setter method for PIN register (for new devices with toggle port)
-        unsigned char GetPort(void) { return port; } //!< getter method for port register
-        unsigned char GetDdr(void) { return ddr; } //!< getter method for data direction register
-        unsigned char GetPin(void) { return pin; }  //!< getter method for PIN register
+        void SetPinBit( bool bit, unsigned int bitaddr);
+
+        unsigned char GetPort() { return port; } //!< getter method for port register
+        unsigned char GetDdr() { return ddr; } //!< getter method for data direction register
+        unsigned char GetPin() { return pin; }  //!< getter method for PIN register
+
+        // only as example if bit read did modify IO-hardware, here only as dummy
+        unsigned char GetPinBit(unsigned int bitaddr) { return pin&(1<<bitaddr);}
 
         friend class PinAtPort;
 

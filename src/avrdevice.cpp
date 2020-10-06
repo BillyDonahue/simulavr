@@ -476,14 +476,15 @@ bool AvrDevice::SetIOReg(unsigned addr, unsigned char val) {
     return true;
 }
 
-bool AvrDevice::SetIORegBit(unsigned addr, unsigned bitaddr, bool bval) {
+bool AvrDevice::SetIORegBit(unsigned addr, unsigned bitaddr) {
     assert(addr < 0x20);  // only first 32 IO registers are bit-settable
-    unsigned char val = *(rw[addr + registerSpaceSize]);
-    if(bval)
-      val |= 1 << bitaddr;
-    else
-      val &= ~(1 << bitaddr);
-    *(rw[addr + registerSpaceSize]) = val;
+    (rw[addr + registerSpaceSize])->set_bit( bitaddr );
+    return true;
+}
+
+bool AvrDevice::ClearIORegBit( unsigned addr, unsigned bitaddr ) {
+    assert(addr < 0x20);  // only first 32 IO registers are bit-settable
+    (rw[addr + registerSpaceSize])->clear_bit( bitaddr );
     return true;
 }
 
