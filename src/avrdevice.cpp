@@ -271,9 +271,9 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
     } else if(cpuCycles <= 0) {
 
             //check for enabled breakpoints here
-            if(BP.end() != find(BP.begin(), BP.end(), PC)) {
+            if(BP.end() != find(BP.begin(), BP.end(), PC<<1)) {
                 if(trace_on)
-                    traceOut << "Breakpoint found at 0x" << std::hex << PC << std::dec << std::endl;
+                    traceOut << "Breakpoint found at 0x" << std::hex << (PC<<1) << std::dec << std::endl;
                 if(nextStepIn_ns != nullptr)
                     *nextStepIn_ns = clockFreq;
                 untilCoreStepFinished = !(cpuCycles > 0);
@@ -281,7 +281,7 @@ int AvrDevice::Step(bool &untilCoreStepFinished, SystemClockOffset *nextStepIn_n
                 return BREAK_POINT;
             }
 
-            if(EP.end() != find(EP.begin(), EP.end(), PC)) {
+            if(EP.end() != find(EP.begin(), EP.end(), PC<<1)) {
                 avr_message("Simulation finished!");
                 SystemClock::Instance().Stop();
                 dumpManager->cycle();

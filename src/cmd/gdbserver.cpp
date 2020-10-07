@@ -348,12 +348,13 @@ void GdbServer::avr_core_flash_write_lo8(int addr, byte val) {
 }
 
 void GdbServer::avr_core_remove_breakpoint(dword pc) {
+    pc=pc<<1;
     Breakpoints::iterator ii;
     if ((ii= find(core->BP.begin(), core->BP.end(), pc)) != core->BP.end()) core->BP.erase(ii);
 }
 
 void GdbServer::avr_core_insert_breakpoint(dword pc) {
-    core->BP.push_back(pc);
+    core->BP.push_back(pc<<1);
 }
 
 int GdbServer::signal_has_occurred(int signo) {return 0;}
