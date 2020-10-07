@@ -84,7 +84,7 @@ class AvrDevice_atmega16: public AvrDevice_atmega16_32 {
     public:
         //! Creates the device for ATMega16, see AvrDevice_atmega16_32.
         AvrDevice_atmega16() : AvrDevice_atmega16_32(1024, 16 * 1024, 512, 0x1c00, true) {}
-
+#ifndef SWIG
         static constexpr const char* irqnames[]
         {
             "RESET",
@@ -109,6 +109,7 @@ class AvrDevice_atmega16: public AvrDevice_atmega16_32 {
                 "TIMER0_COMP",
                 "SPM_RDY"
         };
+#endif
 };
 
 //! AVR device class for ATMega32, see AvrDevice_atmega16_32.
@@ -116,7 +117,7 @@ class AvrDevice_atmega32: public AvrDevice_atmega16_32 {
     public:
         //! Creates the device for ATMega32, see AvrDevice_atmega16_32.
         AvrDevice_atmega32() : AvrDevice_atmega16_32(2 * 1024, 32 * 1024, 1024, 0x3800, false) {}
-
+#ifndef SWIG
         static constexpr const char* const irqnames[]
         {
             "RESET",
@@ -141,12 +142,17 @@ class AvrDevice_atmega32: public AvrDevice_atmega16_32 {
                 "TWI",
                 "SPM_RDY"
         };  
+#endif
+
+#ifndef SWIG
 
         void GetInterruptVectorNames(const char*const*& names, unsigned int& cnt) const override
         {
             names = irqnames;
             cnt = sizeof( irqnames )/sizeof(char*); 
         }
+
+#endif
 
 };
 

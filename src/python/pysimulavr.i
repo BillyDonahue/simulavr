@@ -1,6 +1,8 @@
 %module(directors="1") pysimulavr
+%include "stdint.i"
 
 %{
+
 
   #include "systemclocktypes.h"
   #include "avrdevice.h"

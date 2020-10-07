@@ -64,15 +64,18 @@ fi
 ####
 echo "INFO: following warnings about SWIG not found can be ignored, if at least a valid"
 echo "      installation with version > 1.3.18 is found!"
+AC_PROG_SWIG(4.0.0)
+if test "x$SWIG_LIB" = "x"; then
 AC_PROG_SWIG(3.0.0)
 if test "x$SWIG_LIB" = "x"; then
-  # fall back to SWIG version 2.x.y in case of SWIG 3.x.y not found!
-  AC_MSG_NOTICE([SWIG 3.x.y not available, try to find SWIG 2.x.y!])
-  AC_PROG_SWIG(2.0.0)
-  if test "x$SWIG_LIB" = "x"; then
-    # fall back to SWIG version 1.3.x in case of SWIG 2.x.y not found!
-    AC_MSG_NOTICE([SWIG 2.x.y or 3.x.y not available, try to find SWIG 1.3.x!])
-    AC_PROG_SWIG(1.3.18)
+    # fall back to SWIG version 2.x.y in case of SWIG 3.x.y not found!
+    AC_MSG_NOTICE([SWIG 3.x.y not available, try to find SWIG 2.x.y!])
+    AC_PROG_SWIG(2.0.0)
+    if test "x$SWIG_LIB" = "x"; then
+      # fall back to SWIG version 1.3.x in case of SWIG 2.x.y not found!
+      AC_MSG_NOTICE([SWIG 2.x.y or 3.x.y not available, try to find SWIG 1.3.x!])
+      AC_PROG_SWIG(1.3.18)
+    fi
   fi
 fi
 SWIG_ENABLE_CXX

@@ -28,7 +28,6 @@ This file should be removed or integrated somewhere in the near future
 Actually it is only put to make the compile possible because of 
 infinite recursion in header dependencies which I have not fixed until now
 */
-
 #include <cstdint>
 #include <iomanip>
 #include <limits>
@@ -39,7 +38,7 @@ using SystemClockOffset = uint64_t;
 static constexpr SystemClockOffset INVALID = std::numeric_limits<SystemClockOffset>::max();
 
 
-
+#ifndef SWIG
 inline constexpr SystemClockOffset operator ""_ns(unsigned long long int val) { return val; }
 inline constexpr SystemClockOffset operator ""_us(unsigned long long int val) { return val * 1E3; }
 inline constexpr SystemClockOffset operator ""_ms(unsigned long long int val) { return val * 1E6; }
@@ -49,6 +48,7 @@ inline constexpr SystemClockOffset operator ""_ns(long double val) { return val;
 inline constexpr SystemClockOffset operator ""_us(long double val) { return val * 1E3; }
 inline constexpr SystemClockOffset operator ""_ms(long double val) { return val * 1E6; }
 inline constexpr SystemClockOffset operator ""_s (long double val) { return val * 1E9; }
+#endif
 
 inline std::string FormattedTime( SystemClockOffset val )
 {
@@ -75,6 +75,5 @@ inline std::string FormattedTime( SystemClockOffset val )
 
     return os.str();
 }
-
 
 #endif

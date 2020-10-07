@@ -116,7 +116,7 @@ TCLHEADER = \
     ui/ui.h
 
 simulavr_wrap.cxx: simulavr.i $(pkginclude_HEADERS) $(TCLHEADER)
-	@SWIG@ -o $@ $(srcdir)/simulavr.i
+	@SWIG@ -tcl -o $@ $(srcdir)/simulavr.i
 
 simulavr_wrap.lo: simulavr_wrap.cxx
 	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(TCL_INCLUDE) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT $@ -MD -MP -MF .deps/simulavr_wrap.Tpo -c -o $@ $<

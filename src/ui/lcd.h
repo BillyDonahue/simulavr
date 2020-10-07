@@ -41,8 +41,9 @@
 class Lcd : public SimulationMember {
     private:
         void SetPort( unsigned char newValue );
-        void TriStatePort(); 
+        void TriStatePort();
 
+#ifndef SWIG
         static constexpr int lcdStartLine []={0, 0x40, 0x14, 0x20};
 
 
@@ -55,6 +56,7 @@ class Lcd : public SimulationMember {
         static constexpr SystemClockOffset powerUpTime = 15_ms;
         static constexpr SystemClockOffset clearDisplayTime = 2.16_ms;
         static constexpr SystemClockOffset standardDelayTime = 53_us;
+#endif
 
 
 
