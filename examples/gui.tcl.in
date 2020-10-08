@@ -387,6 +387,8 @@ class SerialRx {
                 default { $win.$objname.rx.text insert end $c }
             }
 
+            $win.$objname.rx.text see end
+
         }
     }
 
@@ -517,6 +519,82 @@ class Net {
             set inState $newValue
             $win.$objname.lin configure -text $inState
         }
+        # we can control the gui also from the outside.
+        # this will result in changing the value as it has changed from the gui itself
+        # needed to set default value and also do a remote control for the gui
+        method SetFromBackdoor { newValue } {
+            puts "$objname setze var nach $newValue"
+            global $objname.var
+            set $objname.var $newValue
+            ValueChangedFromGui $newValue
+        }
+
+    }
+}
+
+
+class NetButton {
+    protected {
+        variable outState
+        variable inState
+        variable objname
+        variable win
+        variable parent
+    }
+
+    public {
+        constructor { _parent _objname _win _releaseState _pressedState } {
+            set parent $_parent
+            set win $_win
+            set objname $_objname
+
+            #puts "Ich bin this: $this extern objname : $objname"
+
+            frame $win.$objname -borderwidth 2 -relief solid
+            pack $win.$objname -side left
+
+            label $win.$objname.l -text $objname
+            pack $win.$objname.l
+
+
+            set outState t ; #tritstate
+            set inState u  ; #unknown
+
+
+            button $win.$objname.bu 
+            pack $win.$objname.bu
+            bind $win.$objname.bu <ButtonRelease-1> "$this ValueChangedFromGui $_releaseState "
+            bind $win.$objname.bu <ButtonPress-1> "$this ValueChangedFromGui $_pressedState "
+
+            global $objname.var
+            set $objname.var $outState
+
+            label $win.$objname.lin -text $inState 
+            pack $win.$objname.lin
+        }
+
+        method ValueChangedFromGui { newValue } {
+            set outState $newValue
+            $win.$objname.bu configure -text $outState
+            #puts "Value from menu $this has changed"
+            #puts "$outState"
+            $parent SendToSimulator $objname $newValue
+        }
+
+        method ChangeValue { newValue } {
+            set inState $newValue
+            $win.$objname.lin configure -text $inState
+        }
+
+        # we can control the gui also from the outside.
+        # this will result in changing the value as it has changed from the gui itself
+        # needed to set default value and also do a remote control for the gui
+        method SetFromBackdoor { newValue } {
+            puts "$objname setze var nach $newValue"
+            global $objname.var
+            set $objname.var $newValue
+            ValueChangedFromGui $newValue
+        }
     }
 }
 
@@ -621,6 +699,9 @@ class Master {
                         puts -nonewline $sock "__ack X "
                     }
 
+                    setfrombackdoor {
+                        eval "[lindex $readList 1] SetFromBackdoor [lindex $readList 2]"
+                    }
 
                     default {
                         #puts ">$x<"
