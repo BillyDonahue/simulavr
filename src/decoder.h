@@ -661,7 +661,7 @@ class avr_op_ESPM: public DecodedInstruction
 {
     /*
      * Extended Store Program Memory.
-     * (In datasheet: "SPM #2– Store Program Memory")
+     * (In datasheet: "SPM #2 Store Program Memory")
      *
      * Opcode     : 1001 0101 1111 1000 
      * Usage      : ESPM  
