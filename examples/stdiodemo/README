@@ -4,11 +4,35 @@
 
 Author: Knut Schwichtenberg <kschwi@web.de>
 
-Build the example (after configuring and building in the main directory):
+How to use:
 
-  make
+first build with
 
-Run the example:
+> make
 
-  ../../src/simulavr -d atmega128 --file stdiodemo.elf
+run with
+
+> checkdebug.tcl
+
+What you can do:
+
+Go with mouse into the tx widget and type commands.
+Allowed commands are: "l", "u" and "q". After "l","u"
+command you can enter a word. The entered word
+will be send to the uart or to the lcd display.
+
+Example:
+
+l TextOnLcd
+
+will print "TextOnLcd" on the lcd.
+
+u example
+
+send the word "example" to the uart.
+
+
+All characters which the uart receives will also be transfered back.
+So you see your own typings.
+
 

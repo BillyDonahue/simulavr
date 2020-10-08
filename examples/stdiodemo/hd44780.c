@@ -153,12 +153,13 @@ hd44780_init(void)
      | HD44780_DATABITS;
    
    _delay_ms(15);                /* 40 ms needed for Vcc = 2.7 V */
-   hd44780_outnibble(HD44780_FNSET(1, 0, 0) >> 4, 0);
+   hd44780_outnibble(HD44780_FNSET(1, 0, 0) >> 4, 0);   // 0x3x 8 bit Mode
    _delay_ms(5.1);
-   hd44780_outnibble(HD44780_FNSET(1, 0, 0) >> 4, 0);
+   hd44780_outnibble(HD44780_FNSET(1, 0, 0) >> 4, 0);   // 0x3x 8 bit Mode
    _delay_ms(0.2);
-   hd44780_outnibble(HD44780_FNSET(1, 0, 0) >> 4, 0);
-   hd44780_outnibble(HD44780_FNSET(0, 1, 0) >> 4, 0);
+   hd44780_outnibble(HD44780_FNSET(1, 0, 0) >> 4, 0);   // 0x3x 8 bit Mode
+   _delay_us(53); // if we don't read the busy flag, we have to wait for ~53us
+   hd44780_outnibble(HD44780_FNSET(0, 1, 0) >> 4, 0);   // 0x2x 4 bit Mode
    hd44780_wait_ready();
    hd44780_outcmd(HD44780_FNSET(0, 1, 0));
    hd44780_wait_ready();

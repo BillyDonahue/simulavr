@@ -16,5 +16,5 @@
 
 
 /* UART baud rate */
-#define UART_BAUD  9600
+#define UART_BAUD 19200
 

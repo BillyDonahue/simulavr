@@ -70,7 +70,7 @@ class SerialRxBasic: public SimulationMember, public HasPinNotifyFunction {
  };
 
 
-/** This class is never instantiated or inherited. Delete? */
+/** class is used in examples to buffer io to screen */
 class SerialRxBuffered: public SerialRxBasic{
  	protected:
         std::vector<unsigned char> buffer;

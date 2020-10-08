@@ -25,23 +25,34 @@ puts "simulavr loaded"
 #now start external generic gui server
 exec @TCL_WISH@ ../gui.tcl &
 
-#start the trace output to given filename
-#StartTrace $traceFile
-
 #start the user interface client
 set ui [new_UserInterface 7777 ]
 
 #create new device
 set dev1 [new_AvrDevice_atmega128]
 
+## if you want to trace the program to a tracefile use:
+## old syntax without itcl:
+#SystemConsoleHandler_SetTraceFile $sysConHandler x
+
+## or use itcl syntax to set the filename. But you have to set trace flag on core also!
+#$sysConHandler SetTraceFile traceme
+
 #load elf file to the device
 AvrDevice_Load $dev1 "./stdiodemo.elf"
+
+## Set the trace flag for the device to enable it for tracingA
+## tcl syntax
+#SimulationMember_trace_on_set $dev1 1
+## or use itcl syntax
+#$dev1 configure -trace_on 1
 
 #set the clock cycle time [ns].  Here ~3.686400 MHz
 AvrDevice_SetClockFreq $dev1 271
 
 #systemclock must know that this device will be stepped from application
 set sc [GetSystemClock]
+$sc Add $dev1
 
 #also the gui updates after each cycle
 $sc AddAsyncMember $ui
@@ -56,9 +67,9 @@ ExtPin extrxD0 $Pin_PULLUP $ui "rxD0" ".x"
 
 #create a serial in and serial out component
 SerialRx mysrx $ui "serialRx0" ".x"
-SerialRxBasic_SetBaudRate mysrx 9600
+SerialRxBasic_SetBaudRate mysrx 19200
 SerialTx mystx $ui "serialTx0" ".x"
-SerialTxBuffered_SetBaudRate mystx 9600
+SerialTxBuffered_SetBaudRate mystx 19200
 
 # wire the serial display receiver
 ser_rxD0 Add [AvrDevice_GetPin $dev1 "E1"]
@@ -73,6 +84,8 @@ ser_txD0 Add [SerialTxBuffered_GetPin mystx "tx"]
 #create an LCD name mylcd
 Lcd mylcd $ui "lcd0" ".x"
 $sc AddAsyncMember  mylcd
+## you also can trace the lcd if you like
+#mylcd configure -trace_on 1
 
 #Create for the Pins d0 - d4, e, r, c a Net and
 #connect the LCD pins to the AVR pins
@@ -93,27 +106,27 @@ CD Add [Lcd_GetPin mylcd "c"]
 CD Add [AvrDevice_GetPin $dev1 "C5"]
 
 Net D3
-D3 Add [Lcd_GetPin mylcd "d3"]
+D3 Add [Lcd_GetPin mylcd "d7"]
 D3 Add [AvrDevice_GetPin $dev1 "C3"]
 
 Net D2
-D2 Add [Lcd_GetPin mylcd "d2"]
+D2 Add [Lcd_GetPin mylcd "d6"]
 D2 Add [AvrDevice_GetPin $dev1 "C2"]
 
 Net D1
-D1 Add [Lcd_GetPin mylcd "d1"]
+D1 Add [Lcd_GetPin mylcd "d5"]
 D1 Add [AvrDevice_GetPin $dev1 "C1"]
 
 Net D0
-D0 Add [Lcd_GetPin mylcd "d0"]
+D0 Add [Lcd_GetPin mylcd "d4"]
 D0 Add [AvrDevice_GetPin $dev1 "C0"]
 
 #exec xterm -e tail -f $traceFile &
 
 puts "Simulation runs endless, please press CTRL-C to abort"
 
-GdbServer gdb1 $dev1 1212 0
-$sc Add gdb1
+#GdbServer gdb1 $dev1 1212 0
+#$sc Add gdb1
 
 exec @DDD_WITH_ARGS@ avr-gdb --command @srcdir@/checkdebug.gdb &
 

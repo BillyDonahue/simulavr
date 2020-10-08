@@ -1,4 +1,5 @@
 %module simulavr
+%include "stdint.i"
 
 %include std_string.i
 
