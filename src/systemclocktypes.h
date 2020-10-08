@@ -34,7 +34,7 @@ infinite recursion in header dependencies which I have not fixed until now
 
 #ifndef SYSTEMCLOCKTYPES
 #define SYSTEMCLOCKTYPES
-using SystemClockOffset = uint64_t;
+using SystemClockOffset = int64_t;
 static constexpr SystemClockOffset INVALID = std::numeric_limits<SystemClockOffset>::max();
 
 
