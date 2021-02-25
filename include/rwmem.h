@@ -357,7 +357,7 @@ class IOReg: public RWMemoryMember {
         }
 
     protected:
-        unsigned char get() const {
+        unsigned char get() const override {
             if (getValueFuncPtr)
                 return (p->*getValueFuncPtr)();
             else if (tv) {
@@ -365,7 +365,7 @@ class IOReg: public RWMemoryMember {
             }
             return 0;
         }
-        void set(unsigned char val) {
+        void set(unsigned char val) override {
             if (setValueFuncPtr)
                 (p->*setValueFuncPtr)(val);
             else if (tv) {
