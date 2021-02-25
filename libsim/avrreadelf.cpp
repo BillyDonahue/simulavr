@@ -26,6 +26,7 @@
 #include <string>
 #include <map>
 #include <limits>
+#include <cinttypes>
 
 #include "elfio/elfio.hpp"
 
@@ -105,7 +106,7 @@ void ELFLoad(const AvrDevice * core) {
                 } else if(value >= 0x840000 && value < 0x840400) {
                     /* signature space starting from 0x840000, do nothing */;
                 } else
-                    avr_warning("Unknown symbol address range found! (symbol='%s', address=0x%lx)",
+                    avr_warning("Unknown symbol address range found! (symbol='%s', address=0x%" PRIx64 ")",
                                 name.c_str(),
                                 value);
 
@@ -148,7 +149,7 @@ void ELFLoad(const AvrDevice * core) {
             } else if(vma >= 0x840000 && vma < 0x840400) {
                 // read and check signature, if available, space from 0x840000 to 0x840400
                 if(filesize != 3)
-                    avr_error("wrong device signature size in elf file, expected=3, given=%lu",
+                    avr_error("wrong device signature size in elf file, expected=3, given=%" PRIu64 "",
                               filesize);
                 else {
                     unsigned int sig = (((data[2] << 8) + data[1]) << 8) + data[0];
@@ -190,7 +191,7 @@ unsigned int ELFGetSignature(const char *filename) {
             if(vma >= 0x840000 && vma < 0x840400) {
                 // read and check signature, if available, space from 0x840000 to 0x840400
                 if(filesize != 3)
-                    avr_error("wrong device signature size in elf file, expected=3, given=%lu",
+                    avr_error("wrong device signature size in elf file, expected=3, given=%" PRIu64 "",
                               filesize);
                 else {
                     const unsigned char* data = (const unsigned char*)pseg->get_data();
